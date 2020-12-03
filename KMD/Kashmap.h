@@ -533,11 +533,6 @@ INT8 hashmap_rehash_helper(struct hashmap_s* CONST m) {
 
     hashmap_destroy(m);
 
-    /*MM_COPY_ADDRESS new_hashCpy = { (PVOID)&new_hash };
-    SIZE_T bytes_transferred = 0;*/
-
-    /* put new hash into old hash structure by copying */
-    //MmCopyMemory((PVOID)m, new_hashCpy, sizeof(struct hashmap_s), MM_COPY_MEMORY_VIRTUAL, &bytes_transferred);
     Kmemcpy(m, &new_hash, sizeof(struct hashmap_s));
 
     return 0;
