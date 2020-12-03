@@ -69,7 +69,7 @@ VHD_Handle *VHD_create(
     _In_        DWORD                       physicalSectorSize,
     _Out_opt_   DWORD*                      outStatus)
 {
-    GUID uniqueId;
+    GUID uniqueId = { 0 };
     DWORD opStatus;
 
     if (RPC_S_OK != UuidCreate((UUID *)&uniqueId)) {
@@ -100,11 +100,14 @@ VHD_Handle *VHD_create(
     memset(&vhd_handle->parameters, 0, sizeof(vhd_handle->parameters));
     vhd_handle->parameters.Version = CREATE_VIRTUAL_DISK_VERSION_2;
     vhd_handle->parameters.Version2.UniqueId = uniqueId;
-    vhd_handle->parameters.Version2.MaximumSize = fileSize; // if parent is specified must be equals to zero
-    vhd_handle->parameters.Version2.BlockSizeInBytes = blockSize || CREATE_VIRTUAL_DISK_PARAMETERS_DEFAULT_BLOCK_SIZE;
+    vhd_handle->parameters.Version2.MaximumSize = fileSize;
+    vhd_handle->parameters.Version2.BlockSizeInBytes = blockSize;
     vhd_handle->parameters.Version2.SectorSizeInBytes = logicalSectorSize;
     vhd_handle->parameters.Version2.PhysicalSectorSizeInBytes = physicalSectorSize;
     vhd_handle->parameters.Version2.ParentPath = parentPath;
+
+    if (fileSize % 512 != 0)
+        printf("WARNING: fileSize is not a multiple of 512.\n");
 
     opStatus = CreateVirtualDisk(
         &vhd_handle->storageType,
