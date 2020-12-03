@@ -8,7 +8,6 @@
 #pragma warning(disable : 4668)
 #endif
 #include <ntddk.h>
-#include <wdf.h>
 
 #if (defined(_MSC_VER) && defined(__AVX__)) ||                                 \
     (!defined(_MSC_VER) && defined(__SSE4_2__))
