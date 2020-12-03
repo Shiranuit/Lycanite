@@ -30,9 +30,7 @@ VirtualDisk::VirtualDisk(
     _parameters.Version2.BlockSizeInBytes = blockSize;
     _parameters.Version2.SectorSizeInBytes = logicalSectorSize;
     _parameters.Version2.PhysicalSectorSizeInBytes = physicalSectorSize;
-    //_parameters.Version2.ParentPath = parentPath.empty() ? nullptr : parentPath.c_str();
-    _parameters.Version2.ParentPath = nullptr;
-
+    _parameters.Version2.ParentPath = parentPath.empty() ? nullptr : parentPath.c_str();
 
     if (fileSize % 512 != 0)
         throw std::runtime_error("fileSize is not a multiple of 512");
@@ -53,13 +51,9 @@ void VirtualDisk::create()
             &_handle
         );
 
-        if (opStatus != ERROR_SUCCESS || !_handle) {
-            std::cout << opStatus << " : " << std::endl;
-            printf("????1\n");
+        if (opStatus != ERROR_SUCCESS || !_handle)
             throw std::runtime_error("Error while creating virtual disk, code: " + opStatus);
-        }
     } else {
-        printf("????2\n");
         throw std::runtime_error("Disk already created.");
     }
 }
