@@ -5,6 +5,8 @@
 *  ======================================================*/
 
 PFLT_FILTER gFilterInstance = NULL;
+PFLT_PORT port = NULL;
+PFLT_PORT clientPort = NULL;
 
 const FLT_OPERATION_REGISTRATION Callbacks[] = {
     { IRP_MJ_CREATE, // Filter Action Name
@@ -68,6 +70,9 @@ DriverEntry(
     _In_ PUNICODE_STRING RegistryPath
 ) {
     NTSTATUS status;
+    PSECURITY_DESCRIPTOR securityDescriptor;
+    OBJECT_ATTRIBUTES objectAttributes = { 0 };
+    UNICODE_STRING name = RTL_CONSTANT_STRING(L"\\LycaniteFF");
 
     // Delete the warning for unused parameter
     UNREFERENCED_PARAMETER(RegistryPath);
@@ -81,16 +86,34 @@ DriverEntry(
         &gFilterInstance
     );
 
+    if (!NT_SUCCESS(status)) {
+        return status;
+    }
+
+
+    status = FltBuildDefaultSecurityDescriptor(&securityDescriptor, FLT_PORT_ALL_ACCESS);
+
     // If Success
     if (NT_SUCCESS(status)) {
 
-        //  Start filtering
-        status = FltStartFiltering(gFilterInstance);
+        InitializeObjectAttributes(&objectAttributes, &name, OBJ_KERNEL_HANDLE | OBJ_CASE_INSENSITIVE, NULL, &securityDescriptor);
+        status = FltCreateCommunicationPort(gFilterInstance, &port, &objectAttributes, NULL, comConnectNotifyCallback, comDisconnectNotifyCallback, comMessageNotifyCallback, 1);
+        FltFreeSecurityDescriptor(securityDescriptor);
+        
+        if (NT_SUCCESS(status)) {
+            status = FltStartFiltering(gFilterInstance);
 
-        if (!NT_SUCCESS(status)) {
-            FltUnregisterFilter(gFilterInstance);
+            if (NT_SUCCESS(status)) {
+                return status;
+            }
         }
+
+        FltCloseCommunicationPort(port);
+
     }
+
+    FltUnregisterFilter(gFilterInstance);
+    KdPrint(("[ERROR] FltBuildDefaultSecurityDescriptor FAILED. status = 0x%x\n", status));
 
     return status;
 }
@@ -103,6 +126,7 @@ NTSTATUS CgUnload(FLT_FILTER_UNLOAD_FLAGS Flags) {
     UNREFERENCED_PARAMETER(Flags);
 
     KdPrint(("%s", "Driver unload"));
+    FltCloseCommunicationPort(port);
     FltUnregisterFilter(gFilterInstance);
     return STATUS_SUCCESS;
 }
@@ -314,3 +338,64 @@ FLT_PREOP_CALLBACK_STATUS AvPreSetInformation(_Inout_ PFLT_CALLBACK_DATA Data, _
 
     return FLT_PREOP_SUCCESS_NO_CALLBACK;
 }
+
+
+/* ======================================================
+*                 Communication Callbacks
+*  ======================================================*/
+
+NTSTATUS
+comConnectNotifyCallback(
+    _In_ PFLT_PORT ClientPort,
+    _In_ PVOID ServerPortCookie,
+    _In_reads_bytes_(SizeOfContext) PVOID ConnectionContext,
+    _In_ ULONG SizeOfContext,
+    _Outptr_result_maybenull_ PVOID* ConnectionCookie
+) {
+
+    UNREFERENCED_PARAMETER(ServerPortCookie);
+    UNREFERENCED_PARAMETER(ConnectionContext);
+    UNREFERENCED_PARAMETER(SizeOfContext);
+    UNREFERENCED_PARAMETER(ConnectionCookie);
+
+    if (clientPort == NULL) {
+        clientPort = ClientPort;
+        KdPrint(("Com Connect\n"));
+        return STATUS_SUCCESS;
+    }
+    KdPrint(("Com Connection refused\n"));
+    return STATUS_ABANDONED;
+}
+
+VOID
+comDisconnectNotifyCallback(
+    _In_opt_ PVOID ConnectionCookie
+) {
+    UNREFERENCED_PARAMETER(ConnectionCookie);
+
+    if (clientPort != NULL) {
+        KdPrint(("Com Disconnect\n"));
+        FltCloseClientPort(gFilterInstance, &clientPort);
+    }
+}
+
+NTSTATUS
+comMessageNotifyCallback(
+    _In_ PVOID ConnectionCookie,
+    _In_reads_bytes_opt_(InputBufferSize) PVOID InputBuffer,
+    _In_ ULONG InputBufferSize,
+    _Out_writes_bytes_to_opt_(OutputBufferSize, *ReturnOutputBufferLength) PVOID OutputBuffer,
+    _In_ ULONG OutputBufferSize,
+    _Out_ PULONG ReturnOutputBufferLength
+) {
+
+    UNREFERENCED_PARAMETER(ConnectionCookie);
+    UNREFERENCED_PARAMETER(InputBuffer);
+    UNREFERENCED_PARAMETER(InputBufferSize);
+    UNREFERENCED_PARAMETER(OutputBuffer);
+    UNREFERENCED_PARAMETER(OutputBufferSize);
+    UNREFERENCED_PARAMETER(ReturnOutputBufferLength);
+
+    return STATUS_SUCCESS;
+}
+
