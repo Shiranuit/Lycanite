@@ -76,7 +76,7 @@ extern "C" {
     INT32 Kmemcmp(CONST PVOID pointer1, CONST PVOID pointer2, SIZE_T size);
 
     // override memset
-    PVOID Kmemset(PVOID pointer, INT32 value, SIZE_T count);
+    PVOID Kmemset(PVOID pointer, INT8 value, SIZE_T count);
 
     /// @brief Create a hashmap.
     /// @param initial_size The initial size of the hashmap. Must be a power of two.
@@ -219,9 +219,9 @@ INT32 Kmemcmp(CONST PVOID pointer1, CONST PVOID pointer2, SIZE_T size) {
 }
 
 // override memset
-PVOID Kmemset(PVOID pointer, INT32 value, SIZE_T count) {
+PVOID Kmemset(PVOID pointer, INT8 value, SIZE_T count) {
     for (SIZE_T i = 0; pointer != NULL && i < count; i++) {
-        ((PCHAR)pointer)[i] = (UCHAR)value;
+        ((PCHAR)pointer)[i] = value;
     }
     return (pointer);
 }
