@@ -19,16 +19,24 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Inf Include="KMDFLycanite.inf">
+    <Inf Include="KMDFLycaniteFileFilter.inf">
       <Filter>Driver Files</Filter>
     </Inf>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Driver.c">
+    <ClCompile Include="KMDFLycaniteFileFilter.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ResourceCompile Include="KMDFLycaniteFileFilter.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Driver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Kashmap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
