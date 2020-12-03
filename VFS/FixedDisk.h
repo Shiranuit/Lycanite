@@ -2,10 +2,10 @@
 
 #include "VirtualDisk.h"
 
-class DynamicDisk : public VirtualDisk {
+class FixedDisk : public VirtualDisk {
     public:
 
-    DynamicDisk(
+    FixedDisk(
         const std::wstring &virtualDiskPath,
         const std::wstring &parentPath,
         ULONGLONG          fileSize,
@@ -14,6 +14,5 @@ class DynamicDisk : public VirtualDisk {
         DWORD              physicalSectorSize
     );
 
-    ~DynamicDisk();
+    ~FixedDisk();
 };
-

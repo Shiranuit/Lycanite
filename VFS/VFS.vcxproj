@@ -202,20 +202,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="create_vhd.c" />
     <ClCompile Include="DereferencingDisk.cpp" />
-    <ClCompile Include="destroy_vhd.c" />
     <ClCompile Include="DynamicDisk.cpp" />
-    <ClCompile Include="get_vhd_info.c" />
-    <ClCompile Include="main.c" />
-    <ClCompile Include="StaticDisk.cpp" />
+    <ClCompile Include="FixedDisk.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="VirtualDisk.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DereferencingDisk.h" />
     <ClInclude Include="DynamicDisk.h" />
-    <ClInclude Include="StaticDisk.h" />
-    <ClInclude Include="vhd.h" />
+    <ClInclude Include="FixedDisk.h" />
     <ClInclude Include="VirtualDisk.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

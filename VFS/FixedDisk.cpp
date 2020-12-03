@@ -1,6 +1,6 @@
-#include "DynamicDisk.h"
+#include "FixedDisk.h"
 
-DynamicDisk::DynamicDisk(
+FixedDisk::FixedDisk(
     const std::wstring &virtualDiskPath,
     const std::wstring &parentPath,
     ULONGLONG          fileSize,
@@ -9,7 +9,7 @@ DynamicDisk::DynamicDisk(
     DWORD              physicalSectorSize
     ) : VirtualDisk(virtualDiskPath,
                     parentPath,
-                    CREATE_VIRTUAL_DISK_FLAG_NONE,
+                    CREATE_VIRTUAL_DISK_FLAG_FULL_PHYSICAL_ALLOCATION,
                     fileSize,
                     blockSize,
                     logicalSectorSize,
@@ -17,6 +17,6 @@ DynamicDisk::DynamicDisk(
 {
 }
 
-DynamicDisk::~DynamicDisk()
+FixedDisk::~FixedDisk()
 {
 }
