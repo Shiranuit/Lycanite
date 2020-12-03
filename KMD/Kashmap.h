@@ -44,8 +44,8 @@
 
 /* We need to keep keys and values. */
 struct hashmap_element_s {
-    CONST PCHAR key;
-    UINT8 key_len;
+    PCHAR key;
+    UINT32 key_len;
     INT in_use;
     PVOID data;
 };
@@ -53,8 +53,8 @@ struct hashmap_element_s {
 /* A hashmap has some maximum size and current size, as well as the data to
  * hold. */
 struct hashmap_s {
-    UINT8 table_size;
-    UINT8 size;
+    UINT32 table_size;
+    UINT32 size;
     struct hashmap_element_s* data;
 };
 
@@ -64,6 +64,21 @@ struct hashmap_s {
 extern "C" {
 #endif
 
+    // override calloc for kernel
+    PVOID calloc(SIZE_T elementCount, SIZE_T elementSize);
+    
+    // override free for kernel
+    VOID free(PVOID mem);
+
+    // override memcpy for kernel
+    PVOID Kmemcpy(PVOID destination, CONST PVOID source, SIZE_T size);
+
+    // override memcmp
+    INT32 Kmemcmp(CONST PVOID pointer1, CONST PVOID pointer2, SIZE_T size);
+
+    // override memset
+    PVOID Kmemset(PVOID pointer, INT32 value, SIZE_T count);
+
     /// @brief Create a hashmap.
     /// @param initial_size The initial size of the hashmap. Must be a power of two.
     /// @param out_hashmap The storage for the created hashmap.
@@ -71,7 +86,7 @@ extern "C" {
     ///
     /// Note that the initial size of the hashmap must be a power of two, and
     /// creation of the hashmap will fail if this is not the case.
-    static INT8 hashmap_create(CONST UINT8 initial_size,
+    static INT8 hashmap_create(CONST UINT32 initial_size,
         struct hashmap_s* CONST out_hashmap) HASHMAP_USED;
 
     /// @brief Put an element into the hashmap.
@@ -84,8 +99,8 @@ extern "C" {
     /// The key string slice is not copied when creating the hashmap entry, and thus
     /// must remain a valid pointer until the hashmap entry is removed or the
     /// hashmap is destroyed.
-    static INT8 hashmap_put(struct hashmap_s* CONST hashmap, CONST PCHAR CONST key,
-        CONST UINT8 len, PVOID CONST value) HASHMAP_USED;
+    static INT8 hashmap_put(struct hashmap_s* CONST hashmap, CONST PCHAR key,
+        CONST UINT32 len, PVOID CONST value) HASHMAP_USED;
 
     /// @brief Get an element from the hashmap.
     /// @param hashmap The hashmap to get from.
@@ -93,8 +108,8 @@ extern "C" {
     /// @param len The length of the string key.
     /// @return The previously set element, or NULL if none exists.
     static PVOID hashmap_get(CONST struct hashmap_s* CONST hashmap,
-        CONST PCHAR CONST key,
-        CONST UINT8 len) HASHMAP_USED;
+        CONST PCHAR key,
+        CONST UINT32 len) HASHMAP_USED;
 
     /// @brief Remove an element from the hashmap.
     /// @param hashmap The hashmap to remove from.
@@ -102,8 +117,8 @@ extern "C" {
     /// @param len The length of the string key.
     /// @return On success 0 is returned.
     static INT8 hashmap_remove(struct hashmap_s* CONST hashmap,
-        CONST PCHAR CONST key,
-        CONST UINT8 len) HASHMAP_USED;
+        CONST PCHAR key,
+        CONST UINT32 len) HASHMAP_USED;
 
     /// @brief Iterate over all the elements in a hashmap.
     /// @param hashmap The hashmap to iterate over.
@@ -112,7 +127,7 @@ extern "C" {
     /// @return If the entire hashmap was iterated then 0 is returned. Otherwise if
     /// the callback function f returned non-zero then non-zero is returned.
     static INT8 hashmap_iterate(CONST struct hashmap_s* CONST hashmap,
-        INT8(*f)(PVOID CONST context, PVOID CONST value),
+        INT8 (*f)(PVOID CONST context, PVOID CONST value),
         PVOID CONST context) HASHMAP_USED;
 
     /// @brief Iterate over all the elements in a hashmap.
@@ -124,31 +139,31 @@ extern "C" {
     /// value is returned.  If the callback function returns -1, the current item
     /// is removed and iteration continues.
     static INT8 hashmap_iterate_pairs(struct hashmap_s* CONST hashmap,
-        INT8(*f)(PVOID CONST, struct hashmap_element_s* CONST),
+        INT8 (*f)(PVOID CONST, struct hashmap_element_s* CONST),
         PVOID CONST context) HASHMAP_USED;
 
     /// @brief Get the size of the hashmap.
     /// @param hashmap The hashmap to get the size of.
     /// @return The size of the hashmap.
-    static UINT8
+    static UINT32
         hashmap_num_entries(CONST struct hashmap_s* CONST hashmap) HASHMAP_USED;
 
     /// @brief Destroy the hashmap.
     /// @param hashmap The hashmap to destroy.
     static void hashmap_destroy(struct hashmap_s* CONST hashmap) HASHMAP_USED;
 
-    static UINT8 hashmap_crc32_helper(CONST PCHAR CONST s,
-        CONST UINT8 len) HASHMAP_USED;
-    static UINT8
+    static UINT32 hashmap_crc32_helper(CONST PCHAR s,
+        CONST UINT32 len) HASHMAP_USED;
+    static UINT32
         hashmap_hash_helper_int_helper(CONST struct hashmap_s* CONST m,
-            CONST PCHAR CONST keystring,
-            CONST UINT8 len) HASHMAP_USED;
+            CONST PCHAR keystring,
+            CONST UINT32 len) HASHMAP_USED;
     static INT8 hashmap_match_helper(CONST struct hashmap_element_s* CONST element,
-        CONST PCHAR CONST key,
-        CONST UINT8 len) HASHMAP_USED;
+        CONST PCHAR key,
+        CONST UINT32 len) HASHMAP_USED;
     static INT8 hashmap_hash_helper(CONST struct hashmap_s* CONST m,
-        CONST PCHAR CONST key, CONST UINT8 len,
-        UINT8* CONST out_index) HASHMAP_USED;
+        CONST PCHAR key, CONST UINT32 len,
+        UINT32* CONST out_index) HASHMAP_USED;
     static INT8 hashmap_rehash_iterator(PVOID CONST new_hash,
         struct hashmap_element_s* CONST e) HASHMAP_USED;
     static INT8 hashmap_rehash_helper(struct hashmap_s* CONST m) HASHMAP_USED;
@@ -167,7 +182,52 @@ extern "C" {
 #define HASHMAP_NULL 0
 #endif
 
-INT8 hashmap_create(CONST UINT8 initial_size,
+PVOID calloc(SIZE_T elementCount, SIZE_T elementSize) {
+    SIZE_T total_size = elementCount * elementSize;
+    PCHAR mem = (PCHAR)ExAllocatePoolWithTag(NonPagedPoolNx, elementCount * elementSize, 'aloc');
+
+    // init data allocated with 0 like calloc
+    for (SIZE_T i = 0; mem != NULL && i < total_size; i++) {
+        mem[i] = 0;
+    }
+
+    return (PVOID)mem;
+}
+
+VOID free(PVOID mem) {
+    if (mem != NULL) {
+        ExFreePoolWithTag(mem, 'aloc');
+    }
+}
+
+PVOID Kmemcpy(PVOID destination, CONST PVOID source, SIZE_T size) {
+    for (SIZE_T i = 0; destination != NULL && i < size; i++) {
+        ((PCHAR)destination)[i] = ((PCHAR)source)[i];
+    }
+    
+    return destination;
+}
+
+// override memcmp
+INT32 Kmemcmp(CONST PVOID pointer1, CONST PVOID pointer2, SIZE_T size) {
+    if (pointer1 == pointer2) return 0;
+    for (SIZE_T i = 0; i < size; i++) {
+        if (((PCHAR)pointer1)[i] != ((PCHAR)pointer2)[i]) {
+            return (((PCHAR)pointer1)[i] - ((PCHAR)pointer2)[i]);
+        }
+    }
+    return 0;
+}
+
+// override memset
+PVOID Kmemset(PVOID pointer, INT32 value, SIZE_T count) {
+    for (SIZE_T i = 0; pointer != NULL && i < count; i++) {
+        ((PCHAR)pointer)[i] = (UCHAR)value;
+    }
+    return (pointer);
+}
+
+INT8 hashmap_create(CONST UINT32 initial_size,
     struct hashmap_s* CONST out_hashmap) {
     if (0 == initial_size || 0 != (initial_size & (initial_size - 1))) {
         return 1;
@@ -186,9 +246,9 @@ INT8 hashmap_create(CONST UINT8 initial_size,
     return 0;
 }
 
-INT8 hashmap_put(struct hashmap_s* CONST m, CONST PCHAR CONST key,
-    CONST UINT8 len, PVOID CONST value) {
-    UINT8 index;
+INT8 hashmap_put(struct hashmap_s * m, PCHAR CONST key,
+    CONST UINT32 len, PVOID CONST value) {
+    UINT32 index;
 
     /* Find a place to put our value. */
     while (!hashmap_hash_helper(m, key, len, &index)) {
@@ -207,10 +267,10 @@ INT8 hashmap_put(struct hashmap_s* CONST m, CONST PCHAR CONST key,
     return 0;
 }
 
-PVOID hashmap_get(CONST struct hashmap_s* CONST m, CONST PCHAR CONST key,
-    CONST UINT8 len) {
-    UINT8 curr;
-    UINT8 i;
+PVOID hashmap_get(CONST struct hashmap_s* CONST m, CONST PCHAR key,
+    CONST UINT32 len) {
+    UINT32 curr;
+    UINT32 i;
 
     /* Find data location */
     curr = hashmap_hash_helper_int_helper(m, key, len);
@@ -230,10 +290,10 @@ PVOID hashmap_get(CONST struct hashmap_s* CONST m, CONST PCHAR CONST key,
     return HASHMAP_NULL;
 }
 
-INT8 hashmap_remove(struct hashmap_s* CONST m, CONST PCHAR CONST key,
-    CONST UINT8 len) {
-    UINT8 i;
-    UINT8 curr;
+INT8 hashmap_remove(struct hashmap_s* CONST m, CONST PCHAR key,
+    CONST UINT32 len) {
+    UINT32 i;
+    UINT32 curr;
 
     /* Find key */
     curr = hashmap_hash_helper_int_helper(m, key, len);
@@ -243,7 +303,7 @@ INT8 hashmap_remove(struct hashmap_s* CONST m, CONST PCHAR CONST key,
         if (m->data[curr].in_use) {
             if (hashmap_match_helper(&m->data[curr], key, len)) {
                 /* Blank out the fields including in_use */
-                memset(&m->data[curr], 0, sizeof(struct hashmap_element_s));
+                Kmemset(&m->data[curr], 0, sizeof(struct hashmap_element_s));
 
                 /* Reduce the size */
                 m->size--;
@@ -257,8 +317,8 @@ INT8 hashmap_remove(struct hashmap_s* CONST m, CONST PCHAR CONST key,
 }
 
 INT8 hashmap_iterate(CONST struct hashmap_s* CONST m,
-    INT8(*f)(PVOID CONST, PVOID CONST), PVOID CONST context) {
-    UINT8 i;
+    INT8 (*f)(PVOID CONST, PVOID CONST), PVOID CONST context) {
+    UINT32 i;
 
     /* Linear probing */
     for (i = 0; i < m->table_size; i++) {
@@ -272,9 +332,9 @@ INT8 hashmap_iterate(CONST struct hashmap_s* CONST m,
 }
 
 INT8 hashmap_iterate_pairs(struct hashmap_s* CONST hashmap,
-    INT8(*f)(PVOID CONST, struct hashmap_element_s* CONST),
+    INT8 (*f)(PVOID CONST, struct hashmap_element_s* CONST),
     PVOID CONST context) {
-    UINT8 i;
+    UINT32 i;
     struct hashmap_element_s* p;
     INT8 r;
 
@@ -286,7 +346,7 @@ INT8 hashmap_iterate_pairs(struct hashmap_s* CONST hashmap,
             switch (r)
             {
             case -1: /* remove item */
-                memset(p, 0, sizeof(struct hashmap_element_s));
+                Kmemset(p, 0, sizeof(struct hashmap_element_s));
                 hashmap->size--;
                 break;
             case 0: /* continue iterating */
@@ -301,16 +361,16 @@ INT8 hashmap_iterate_pairs(struct hashmap_s* CONST hashmap,
 
 void hashmap_destroy(struct hashmap_s* CONST m) {
     free(m->data);
-    memset(m, 0, sizeof(struct hashmap_s));
+    Kmemset(m, 0, sizeof(struct hashmap_s));
 }
 
-UINT8 hashmap_num_entries(CONST struct hashmap_s* CONST m) {
+UINT32 hashmap_num_entries(CONST struct hashmap_s* CONST m) {
     return m->size;
 }
 
-UINT8 hashmap_crc32_helper(CONST PCHAR CONST s, CONST UINT8 len) {
-    UINT8 i;
-    UINT8 crc32val = 0;
+UINT32 hashmap_crc32_helper(CONST PCHAR s, CONST UINT32 len) {
+    UINT32 i;
+    UINT32 crc32val = 0;
 
 #if defined(HASHMAP_SSE42)
     for (i = 0; i < len; i++) {
@@ -320,7 +380,7 @@ UINT8 hashmap_crc32_helper(CONST PCHAR CONST s, CONST UINT8 len) {
     return crc32val;
 #else
     // Using polynomial 0x11EDC6F41 to match SSE 4.2's crc function.
-    static CONST UINT8 crc32_tab[] = {
+    static CONST UINT32 crc32_tab[] = {
         0x00000000U, 0xF26B8303U, 0xE13B70F7U, 0x1350F3F4U, 0xC79A971FU,
         0x35F1141CU, 0x26A1E7E8U, 0xD4CA64EBU, 0x8AD958CFU, 0x78B2DBCCU,
         0x6BE22838U, 0x9989AB3BU, 0x4D43CFD0U, 0xBF284CD3U, 0xAC78BF27U,
@@ -383,10 +443,10 @@ UINT8 hashmap_crc32_helper(CONST PCHAR CONST s, CONST UINT8 len) {
 #endif
 }
 
-UINT8 hashmap_hash_helper_int_helper(CONST struct hashmap_s* CONST m,
-    CONST PCHAR CONST keystring,
-    CONST UINT8 len) {
-    UINT8 key = hashmap_crc32_helper(keystring, len);
+UINT32 hashmap_hash_helper_int_helper(CONST struct hashmap_s* CONST m,
+    CONST PCHAR keystring,
+    CONST UINT32 len) {
+    UINT32 key = hashmap_crc32_helper(keystring, len);
 
     /* Robert Jenkins' 32 bit Mix Function */
     key += (key << 12);
@@ -405,14 +465,14 @@ UINT8 hashmap_hash_helper_int_helper(CONST struct hashmap_s* CONST m,
 }
 
 INT8 hashmap_match_helper(CONST struct hashmap_element_s* CONST element,
-    CONST PCHAR CONST key, CONST UINT8 len) {
-    return (element->key_len == len) && (0 == memcmp(element->key, key, len));
+    CONST PCHAR key, CONST UINT32 len) {
+    return (element->key_len == len) && (0 == Kmemcmp(element->key, key, len));
 }
 
-INT8 hashmap_hash_helper(CONST struct hashmap_s* CONST m, CONST PCHAR CONST key,
-    CONST UINT8 len, UINT8* CONST out_index) {
-    UINT8 curr;
-    UINT8 i;
+INT8 hashmap_hash_helper(CONST struct hashmap_s* CONST m, CONST PCHAR key,
+    CONST UINT32 len, UINT32* CONST out_index) {
+    UINT32 curr;
+    UINT32 i;
 
     /* If full, return immediately */
     if (m->size >= m->table_size) {
@@ -456,7 +516,7 @@ INT8 hashmap_rehash_iterator(PVOID CONST new_hash,
  */
 INT8 hashmap_rehash_helper(struct hashmap_s* CONST m) {
     /* If this multiplication overflows hashmap_create will fail. */
-    UINT8 new_size = 2 * m->table_size;
+    UINT32 new_size = 2 * m->table_size;
 
     struct hashmap_s new_hash;
 
@@ -473,12 +533,12 @@ INT8 hashmap_rehash_helper(struct hashmap_s* CONST m) {
 
     hashmap_destroy(m);
 
-    MM_COPY_ADDRESS new_hashCpy = { (PVOID)&new_hash };
-    SIZE_T bytes_transferred = 0;
+    /*MM_COPY_ADDRESS new_hashCpy = { (PVOID)&new_hash };
+    SIZE_T bytes_transferred = 0;*/
 
     /* put new hash into old hash structure by copying */
-    MmCopyMemory((PVOID)m, new_hashCpy, sizeof(struct hashmap_s), MM_COPY_MEMORY_VIRTUAL, &bytes_transferred);
-    //memcpy(m, &new_hash, sizeof(struct hashmap_s));
+    //MmCopyMemory((PVOID)m, new_hashCpy, sizeof(struct hashmap_s), MM_COPY_MEMORY_VIRTUAL, &bytes_transferred);
+    Kmemcpy(m, &new_hash, sizeof(struct hashmap_s));
 
     return 0;
 }
