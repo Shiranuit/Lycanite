@@ -182,6 +182,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>virtdisk.lib;shlwapi.lib;rpcrt4.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -201,7 +202,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="main.c" />
+    <ClCompile Include="DereferencingDisk.cpp" />
+    <ClCompile Include="DynamicDisk.cpp" />
+    <ClCompile Include="FixedDisk.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="VirtualDisk.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DereferencingDisk.h" />
+    <ClInclude Include="DynamicDisk.h" />
+    <ClInclude Include="FixedDisk.h" />
+    <ClInclude Include="VirtualDisk.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
