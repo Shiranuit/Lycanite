@@ -18,5 +18,19 @@
     <ClCompile Include="main.c">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
+    <ClCompile Include="create_vhd.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="destroy_vhd.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+    <ClCompile Include="get_vhd_info.c">
+      <Filter>Fichiers sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="vhd.h">
+      <Filter>Fichiers d%27en-tête</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
