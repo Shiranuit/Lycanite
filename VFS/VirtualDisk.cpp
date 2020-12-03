@@ -10,6 +10,7 @@ VirtualDisk::VirtualDisk(
     DWORD                           physicalSectorSize
     ) :
     _diskPath(virtualDiskPath),
+    _parentPath(parentPath),
     _flags(flags),
     _handle(nullptr)
 {
@@ -30,7 +31,7 @@ VirtualDisk::VirtualDisk(
     _parameters.Version2.BlockSizeInBytes = blockSize;
     _parameters.Version2.SectorSizeInBytes = logicalSectorSize;
     _parameters.Version2.PhysicalSectorSizeInBytes = physicalSectorSize;
-    _parameters.Version2.ParentPath = parentPath.empty() ? nullptr : parentPath.c_str();
+    _parameters.Version2.ParentPath = _parentPath.empty() ? nullptr : _parentPath.c_str();
 
     if (fileSize % 512 != 0)
         throw std::runtime_error("fileSize is not a multiple of 512");
