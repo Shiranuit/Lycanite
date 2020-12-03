@@ -35,24 +35,24 @@ const FLT_OPERATION_REGISTRATION Callbacks[] = {
 
 const FLT_REGISTRATION FilterRegistration = {
 
-    sizeof(FLT_REGISTRATION),         //  Size
+    sizeof(FLT_REGISTRATION),           //  Size
     FLT_REGISTRATION_VERSION,           //  Version
     0,                                  //  Flags
 
-    NULL,                //  Context
+    NULL,                               //  Context
     Callbacks,                          //  Operation callbacks
 
     CgUnload,                           //  MiniFilterUnload
 
-    NULL,                    //  InstanceSetup
-    NULL,            //  InstanceQueryTeardown
-    NULL,            //  InstanceTeardownStart
-    NULL,         //  InstanceTeardownComplete
+    NULL,                               //  InstanceSetup
+    NULL,                               //  InstanceQueryTeardown
+    NULL,                               //  InstanceTeardownStart
+    NULL,                               //  InstanceTeardownComplete
 
     NULL,                               //  GenerateFileName
     NULL,                               //  GenerateDestinationFileName
     NULL,                               //  NormalizeNameComponent
-    NULL           //  KTM notification callback
+    NULL                                //  KTM notification callback
 
 };
 
