@@ -93,9 +93,6 @@ void VirtualDisk::open(const std::wstring& diskPath, const VIRTUAL_DISK_ACCESS_M
         throw std::runtime_error("Error while opening virtual disk, code: " + opStatus);
 }
 
-// Mirroring is a form of disk backup in which anything that is written to a disk is simultaneously written to a second disk.
-// This creates fault tolerance in the critical storage systems.
-// If a physical hardware failure occurs in a disk system, the data is not lost, as the other hard disk contains an exact copy of that data.
 void VirtualDisk::mirror(const std::wstring& destinationPath)
 {
     MIRROR_VIRTUAL_DISK_PARAMETERS mirrorParameters;
