@@ -3,9 +3,11 @@
 #include "VirtualDisk.h"
 
 class DereferencingDisk : public VirtualDisk {
-    public:
+public:
 
-    DereferencingDisk(const std::wstring &virtualDiskPath, const std::wstring &parentPath);
+    DereferencingDisk();
+
+    void create(const std::wstring& virtualDiskPath, const std::wstring& parentPath);
 
     ~DereferencingDisk();
 };
