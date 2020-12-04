@@ -45,7 +45,7 @@ void VirtualDisk::create(
         if (fileSize % 512 != 0)
             throw std::runtime_error("fileSize is not a multiple of 512");
 
-        DWORD opStatus = CreateVirtualDisk(
+        opStatus = CreateVirtualDisk(
             &storageType,
             _diskPath.c_str(),
             VIRTUAL_DISK_ACCESS_NONE,
