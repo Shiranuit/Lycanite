@@ -32,29 +32,38 @@ namespace App
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+            String name = "";
 
             foreach (string file in files)
             {
                 if (File.Exists(file))
                 {
                     MessageBox.Show(file);
+                    name = file.Split('\\')[file.Split('\\').Length - 1];
                 }
             }
+            TabTemplate newTab = new TabTemplate();
+
+            TabPage tab = new TabPage();
+            tab.Controls.Add(newTab);
+            newTab.Dock = DockStyle.Fill;
+            tab.Text = name;
+            
+            metroSetTabControl1.Controls.Add(tab);
+
+            metroSetLabel1.Visible = false;
+            metroSetTabControl1.Visible = true;
         }
 
-        private void metroSetButton1_Click(object sender, EventArgs e)
+        private void metroSetTabControl1_Click(object sender, EventArgs e)
         {
+            MetroSet_UI.Controls.MetroSetTabControl obj = (MetroSet_UI.Controls.MetroSetTabControl)sender;
+            MouseEventArgs me = (MouseEventArgs)e;
+/*            obj.TabIndex
 
-        }
-
-        private void metroSetControlBox1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-
+            if (me.Button == MouseButtons.Right)
+                obj.TabPages.Remove(obj.TabPages.IndexOfKey );
+*/
         }
     }
 }

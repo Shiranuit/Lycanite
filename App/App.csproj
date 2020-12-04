@@ -39,6 +39,8 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Design" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Windows.Forms.DataVisualization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -58,6 +60,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TabTemplate.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TabTemplate.Designer.cs">
+      <DependentUpon>TabTemplate.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="LycaniteApplication.resx">
       <DependentUpon>LycaniteApplication.cs</DependentUpon>
     </EmbeddedResource>
@@ -70,6 +78,9 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="TabTemplate.resx">
+      <DependentUpon>TabTemplate.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
