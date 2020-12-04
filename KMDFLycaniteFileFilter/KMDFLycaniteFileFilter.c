@@ -96,7 +96,7 @@ DriverEntry(
     // If Success
     if (NT_SUCCESS(status)) {
 
-        InitializeObjectAttributes(&objectAttributes, &name, OBJ_KERNEL_HANDLE | OBJ_CASE_INSENSITIVE, NULL, &securityDescriptor);
+        InitializeObjectAttributes(&objectAttributes, &name, OBJ_KERNEL_HANDLE | OBJ_CASE_INSENSITIVE, NULL, securityDescriptor);
         status = FltCreateCommunicationPort(gFilterInstance, &port, &objectAttributes, NULL, comConnectNotifyCallback, comDisconnectNotifyCallback, comMessageNotifyCallback, 1);
         FltFreeSecurityDescriptor(securityDescriptor);
         
@@ -106,7 +106,9 @@ DriverEntry(
             if (NT_SUCCESS(status)) {
                 return status;
             }
+            KdPrint(("[ERROR] FltStartFiltering FAILED. status = 0x%x\n", status));
         }
+        KdPrint(("[ERROR] FltCreateCommunicationPort FAILED. status = 0x%x\n", status));
 
         FltCloseCommunicationPort(port);
 
