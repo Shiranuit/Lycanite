@@ -34,6 +34,9 @@ class VirtualDisk {
 
     void create();
 
+    PGET_VIRTUAL_DISK_INFO getDiskInfo();
+    // int setDiskInfo();
+
     protected:
         std::wstring _diskPath;
         std::wstring _parentPath;

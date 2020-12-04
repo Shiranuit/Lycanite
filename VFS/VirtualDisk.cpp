@@ -65,6 +65,104 @@ VirtualDisk::~VirtualDisk()
         CloseHandle(_handle);
 }
 
+PGET_VIRTUAL_DISK VirtualDisk::getDiskInfo()
+{
+    PGET_VIRTUAL_DISK_INFO diskInfo;
+    ULONG diskInfoSize;
+    DWORD opStatus;
+    GUID identifier;
+
+    diskInfo = NULL;
+    diskInfoSize = sizeof(GET_VIRTUAL_DISK_INFO);
+    diskInfo = (PGET_VIRTUAL_DISK_INFO)malloc(diskInfoSize);
+    if (diskInfo == NULL)
+        opStatus = ERROR_NOT_ENOUGH_MEMORY;
+
+    // Get the VHD/VHDX type.
+    diskInfo->Version = GET_VIRTUAL_DISK_INFO_PROVIDER_SUBTYPE;
+    opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        diskInfo,
+        NULL);
+    
+    // Get the VHD/VHDX format. 
+    diskInfo->Version = GET_VIRTUAL_DISK_INFO_VIRTUAL_STORAGE_TYPE;
+    opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        diskInfo,
+        NULL);
+
+    // Get the VHD/VHDX virtual disk size.
+    diskInfo->Version = GET_VIRTUAL_DISK_INFO_SIZE;
+    opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        diskInfo,
+        NULL);
+
+    // Get the VHD physical sector size.
+    diskInfo->Version = GET_VIRTUAL_DISK_INFO_VHD_PHYSICAL_SECTOR_SIZE;
+    opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        diskInfo,
+        NULL);
+
+    // Get the virtual disk ID.
+    diskInfo->Version = GET_VIRTUAL_DISK_INFO_IDENTIFIER;
+    opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        diskInfo,
+        NULL);
+
+    // Get the VHD parent path.
+    if (diskInfo->ProviderSubtype == 0x4)
+    {
+        // Get parent location
+        diskInfo->Version = GET_VIRTUAL_DISK_INFO_PARENT_LOCATION;
+        opStatus = GetVirtualDiskInformation(
+            _handle,
+            &diskInfoSize,
+            diskInfo,
+            NULL);
+
+        // Get parent ID.
+        diskInfo->Version = GET_VIRTUAL_DISK_INFO_PARENT_IDENTIFIER;
+        opStatus = GetVirtualDiskInformation(
+            _handle,
+            &diskInfoSize,
+            diskInfo,
+            NULL);
+    }
+    
+    // Get the VHD minimum internal size.
+    diskInfo->Version = GET_VIRTUAL_DISK_INFO_SMALLEST_SAFE_VIRTUAL_SIZE;
+    opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        diskInfo,
+        NULL);
+
+    // Get the VHD fragmentation percentage.
+    diskInfo->Version = GET_VIRTUAL_DISK_INFO_FRAGMENTATION;
+    opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        diskInfo,
+        NULL);
+
+    if (opStatus != ERROR_SUCCESS) {
+        throw std::runtime_error("opStatus: " + std::to_string(opStatus));
+        return nullptr;
+    } else {
+        return diskInfo;
+    }
+
+}
+
 const std::wstring &VirtualDisk::getDiskPath() const
 {
     return (_diskPath);
