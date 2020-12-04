@@ -120,14 +120,14 @@ const HANDLE VirtualDisk::getHandle() const
     return (_handle);
 }
 
-void VirtualDisk::setUserMetaData(const PVOID &data, const GUID &uniqueId, const ULONG& nbToWritte)
+void VirtualDisk::setUserMetaData(const PVOID &data, const GUID &uniqueId, const ULONG& nbToWrite)
 {
     DWORD status;
 
     status = SetVirtualDiskMetadata(
         _handle,
         &uniqueId,
-        nbToWritte,
+        nbToWrite,
         data);
 
     if (status != ERROR_SUCCESS) {
