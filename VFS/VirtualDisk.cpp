@@ -19,7 +19,7 @@ void VirtualDisk::create(
     DWORD                           physicalSectorSize)
 {
     if (!_handle) {
-        VIRTUAL_STORAGE_TYPE storageType;
+        VIRTUAL_STORAGE_TYPE storageType = { 0 };
         CREATE_VIRTUAL_DISK_PARAMETERS parameters;
         DWORD opStatus;
         GUID uniqueId = { 0 };
@@ -72,7 +72,7 @@ void VirtualDisk::open(const std::wstring& diskPath, const VIRTUAL_DISK_ACCESS_M
     close();
 
     OPEN_VIRTUAL_DISK_PARAMETERS openParameters;
-    VIRTUAL_STORAGE_TYPE storageType;
+    VIRTUAL_STORAGE_TYPE storageType = { 0 };
     DWORD opStatus;
 
     _diskPath = diskPath;
