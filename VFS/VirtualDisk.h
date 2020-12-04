@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 #include <new>
 #include <exception>
 #include <windows.h>
@@ -10,35 +11,33 @@
 #include <rpc.h>
 
 class VirtualDisk {
-    public:
+public:
 
-    VirtualDisk(
-        const std::wstring             &virtualDiskPath,
-        const std::wstring             &parentPath,
-        const CREATE_VIRTUAL_DISK_FLAG &flags,
-        ULONGLONG                      fileSize,
-        DWORD                          blockSize,
-        DWORD                          logicalSectorSize,
-        DWORD                          physicalSectorSize
-    );
+    VirtualDisk();
 
     ~VirtualDisk();
 
-    const std::wstring &getDiskPath() const;
-
-    const CREATE_VIRTUAL_DISK_PARAMETERS &getParameters() const;
-
-    const VIRTUAL_STORAGE_TYPE &getStorageType() const;
+    const std::wstring& getDiskPath() const;
 
     const HANDLE getHandle() const;
 
-    void create();
+    virtual void create(
+        const std::wstring&             virtualDiskPath,
+        const std::wstring&             parentPath,
+        const CREATE_VIRTUAL_DISK_FLAG& flags,
+        ULONGLONG                       fileSize,
+        DWORD                           blockSize,
+        DWORD                           logicalSectorSize,
+        DWORD                           physicalSectorSize);
 
-    protected:
-        std::wstring _diskPath;
-        std::wstring _parentPath;
-        CREATE_VIRTUAL_DISK_FLAG _flags;
-        CREATE_VIRTUAL_DISK_PARAMETERS _parameters;
-        VIRTUAL_STORAGE_TYPE _storageType;
-        HANDLE _handle;
+    void open(const std::wstring& diskPath, const VIRTUAL_DISK_ACCESS_MASK& access_mask = VIRTUAL_DISK_ACCESS_NONE, const OPEN_VIRTUAL_DISK_FLAG& open_flag = OPEN_VIRTUAL_DISK_FLAG_NONE);
+
+    bool close();
+
+    bool isOpen() const;
+
+protected:
+    std::wstring _diskPath;
+    std::wstring _parentPath;
+    HANDLE _handle;
 };
