@@ -11,7 +11,7 @@ VirtualDisk::~VirtualDisk()
 
 void VirtualDisk::create(
     const std::wstring&             virtualDiskPath,
-    std::wstring                    parentPath,
+    const std::wstring&             parentPath,
     const CREATE_VIRTUAL_DISK_FLAG& flags,
     ULONGLONG                       fileSize,
     DWORD                           blockSize,
@@ -25,7 +25,8 @@ void VirtualDisk::create(
         GUID uniqueId = { 0 };
 
         _diskPath = virtualDiskPath;
-        if (RPC_S_OK != UuidCreate(reinterpret_cast<UUID*>(&uniqueId)))
+        _parentPath = parentPath;
+        if (RPC_S_OK != UuidCreate(&uniqueId))
             throw std::bad_alloc();
 
         // Storage Type
@@ -40,7 +41,7 @@ void VirtualDisk::create(
         parameters.Version2.BlockSizeInBytes = blockSize;
         parameters.Version2.SectorSizeInBytes = logicalSectorSize;
         parameters.Version2.PhysicalSectorSizeInBytes = physicalSectorSize;
-        parameters.Version2.ParentPath = parentPath.empty() ? nullptr : parentPath.c_str();
+        parameters.Version2.ParentPath = _parentPath.empty() ? nullptr : _parentPath.c_str();
 
         if (fileSize % 512 != 0)
             throw std::runtime_error("fileSize is not a multiple of 512");

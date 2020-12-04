@@ -6,7 +6,7 @@ FixedDisk::FixedDisk() : VirtualDisk()
 
 void FixedDisk::create(
     const std::wstring& virtualDiskPath,
-    std::wstring        parentPath,
+    const std::wstring& parentPath,
     ULONGLONG           fileSize,
     DWORD               blockSize,
     DWORD               logicalSectorSize,

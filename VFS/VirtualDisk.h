@@ -23,7 +23,7 @@ public:
 
     virtual void create(
         const std::wstring&             virtualDiskPath,
-        std::wstring                    parentPath,
+        const std::wstring&             parentPath,
         const CREATE_VIRTUAL_DISK_FLAG& flags,
         ULONGLONG                       fileSize,
         DWORD                           blockSize,
@@ -38,5 +38,6 @@ public:
 
 protected:
     std::wstring _diskPath;
+    std::wstring _parentPath;
     HANDLE _handle;
 };
