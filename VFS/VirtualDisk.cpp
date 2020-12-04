@@ -65,7 +65,7 @@ VirtualDisk::~VirtualDisk()
         CloseHandle(_handle);
 }
 
-PGET_VIRTUAL_DISK VirtualDisk::getDiskInfo()
+PGET_VIRTUAL_DISK_INFO VirtualDisk::getDiskInfo()
 {
     PGET_VIRTUAL_DISK_INFO diskInfo;
     ULONG diskInfoSize;
@@ -155,7 +155,7 @@ PGET_VIRTUAL_DISK VirtualDisk::getDiskInfo()
         NULL);
 
     if (opStatus != ERROR_SUCCESS) {
-        throw std::runtime_error("opStatus: " + std::to_string(opStatus));
+       // throw std::runtime_error("opStatus: " + std::to_string(opStatus));
         return nullptr;
     } else {
         return diskInfo;
