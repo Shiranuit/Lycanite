@@ -398,6 +398,12 @@ comMessageNotifyCallback(
     UNREFERENCED_PARAMETER(OutputBufferSize);
     UNREFERENCED_PARAMETER(ReturnOutputBufferLength);
 
+    PCHAR Message[256] = { 0 };
+
+    RtlCopyMemory(Message, InputBuffer, InputBufferSize < 255 ? InputBufferSize : 255);
+
+    KdPrint(("%s\n", Message));
+
     return STATUS_SUCCESS;
 }
 
