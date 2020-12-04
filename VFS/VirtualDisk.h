@@ -36,6 +36,10 @@ public:
 
     bool isOpen() const;
 
+    void setUserMetaData(const PVOID &data, const GUID &uniqueId, const ULONG &nbToWritte);
+
+    std::shared_ptr<VOID> getUserMetaData(const GUID& uniqueId, ULONG &nBytesWritten) const;
+
 protected:
     std::wstring _diskPath;
     std::wstring _parentPath;
