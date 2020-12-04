@@ -30,11 +30,13 @@ public:
         DWORD                           logicalSectorSize,
         DWORD                           physicalSectorSize);
 
-    void open(const std::wstring& diskPath, const VIRTUAL_DISK_ACCESS_MASK& access_mask = VIRTUAL_DISK_ACCESS_NONE, const OPEN_VIRTUAL_DISK_FLAG& open_flag = OPEN_VIRTUAL_DISK_FLAG_NONE);
+    void open(const std::wstring& diskPath, const VIRTUAL_DISK_ACCESS_MASK& accessMask = VIRTUAL_DISK_ACCESS_NONE, const OPEN_VIRTUAL_DISK_FLAG& openFlag = OPEN_VIRTUAL_DISK_FLAG_NONE);
 
     bool close();
 
     bool isOpen() const;
+
+    void mirror(const std::wstring& destinationPath);
 
 protected:
     std::wstring _diskPath;
