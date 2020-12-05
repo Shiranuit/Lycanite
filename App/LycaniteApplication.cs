@@ -33,16 +33,37 @@ namespace App
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
             String name = "";
+            String path = "";
 
+            
             foreach (string file in files)
             {
                 if (File.Exists(file))
                 {
                     MessageBox.Show(file);
                     name = file.Split('\\')[file.Split('\\').Length - 1];
+                    int i = file.Length - 1;
+                    for (; file[i].CompareTo('\\') != 0; i--);
+                    path = file.Substring(0, i);
                 }
             }
+            String[] allFiles = Directory.GetFiles(path);
+            String[] allDir = (Directory.GetDirectories(path));
+            List<String> filename = new List<String>();
+            foreach (string dir in allDir)
+            {
+                String dir_tmp = dir.Split('\\')[dir.Split('\\').Length - 1];
+                filename.Add(dir_tmp);
+            }
+            foreach (string file in allFiles)
+            {
+                String file_tmp = file.Split('\\')[file.Split('\\').Length - 1];
+                filename.Add(file_tmp);
+            }
+
             TabTemplate newTab = new TabTemplate();
+
+            newTab.addDirList(filename.ToArray());
 
             TabPage tab = new TabPage();
             tab.Controls.Add(newTab);

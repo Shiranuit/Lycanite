@@ -33,6 +33,11 @@ namespace App
             InitializeComponent();
         }
 
+        public void addDirList(String[] filename)
+        {
+            metroSetListBox1.AddItems(filename);
+        }
+
         private void chart1_Click(object sender, EventArgs e)
         {
 
