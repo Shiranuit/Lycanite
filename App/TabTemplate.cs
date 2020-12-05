@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,6 +16,7 @@ namespace App
 {
     public partial class TabTemplate : UserControl, IMetroSetControl
     {
+        private String _actual_path = "";
         public TabTemplate()
         {
             InitializeComponent();
@@ -35,7 +37,14 @@ namespace App
 
         public void addDirList(String[] filename)
         {
+            metroSetListBox1.ForeColor = Color.White;
+            metroSetListBox1.Clear();
             metroSetListBox1.AddItems(filename);
+        }
+
+        public void addPath(String path)
+        {
+            _actual_path = path;
         }
 
         private void chart1_Click(object sender, EventArgs e)
@@ -50,7 +59,11 @@ namespace App
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            
+            int i = _actual_path.Length - 1;
+            for (; _actual_path[i].CompareTo('\\') != 0; i--) ;
+            _actual_path = _actual_path.Substring(0, i);
+
+            addDirList(getAllFileAndDirFromPath(_actual_path));
         }
 
         private void pictureBox1_MouseEnter(object sender, EventArgs e)
@@ -100,6 +113,41 @@ namespace App
             } else
             {
                 metroSetLabel2.ForeColor = Color.FromArgb(170, 170, 170);
+            }
+        }
+
+        private String[] getAllFileAndDirFromPath(String path)
+        {
+            String[] allFiles = Directory.GetFiles(path);
+            String[] allDir = (Directory.GetDirectories(path));
+            List<String> allFileAndDir = new List<String>();
+
+            foreach (string filepath in allDir)
+            {
+                String file_tmp = filepath.Split('\\')[filepath.Split('\\').Length - 1];
+                allFileAndDir.Add(file_tmp);
+            }
+            foreach (string filepath in allFiles)
+            {
+                String file_tmp = filepath.Split('\\')[filepath.Split('\\').Length - 1];
+                allFileAndDir.Add(file_tmp);
+            }
+
+            _actual_path = path;
+
+            return allFileAndDir.ToArray();
+        }
+
+        private void metroSetListBox1_DoubleClick(object sender, EventArgs e)
+        {
+            MetroSet_UI.Controls.MetroSetListBox listBox = (MetroSet_UI.Controls.MetroSetListBox)sender;
+
+            String name = listBox.Items[listBox.SelectedIndex].ToString();
+            System.Diagnostics.Debug.WriteLine(_actual_path + "\\" + name + " Is ?");
+            if (Directory.Exists(_actual_path + "\\" + name))
+            {
+                System.Diagnostics.Debug.WriteLine("YEPPP");
+                addDirList(getAllFileAndDirFromPath(_actual_path + "\\" + name));
             }
         }
     }
