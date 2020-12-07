@@ -34,7 +34,7 @@ class VirtualDisk {
 
     void create();
 
-    PGET_VIRTUAL_DISK_INFO getDiskInfo();
+    const GET_VIRTUAL_DISK_INFO &getDiskInfo();
     // int setDiskInfo();
 
     protected:
@@ -43,5 +43,6 @@ class VirtualDisk {
         CREATE_VIRTUAL_DISK_FLAG _flags;
         CREATE_VIRTUAL_DISK_PARAMETERS _parameters;
         VIRTUAL_STORAGE_TYPE _storageType;
+        GET_VIRTUAL_DISK_INFO _diskInfo;
         HANDLE _handle;
 };
