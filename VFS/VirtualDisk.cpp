@@ -51,7 +51,7 @@ void VirtualDisk::create(
         parameters.Version2.ParentPath = _parentPath.empty() ? nullptr : _parentPath.c_str();
 
         if (fileSize % 512 != 0)
-            throw std::runtime_error("fileSize is not a multiple of 512");
+            throw std::runtime_error("Error while creating the virtual disk: fileSize is not a multiple of 512");
 
         opStatus = CreateVirtualDisk(
             &storageType,
@@ -67,7 +67,7 @@ void VirtualDisk::create(
 
         if (opStatus != ERROR_SUCCESS || !_handle)
             throw std::runtime_error("Error while creating virtual disk, code: " + opStatus);
-    } else {
+   } else {
         throw std::runtime_error("Disk already created.");
     }
 }
@@ -199,6 +199,9 @@ bool VirtualDisk::resize(ULONGLONG newFileSize)
         std::memset(&resizeParameters, 0, sizeof(resizeParameters));
         resizeParameters.Version = RESIZE_VIRTUAL_DISK_VERSION_1;
         resizeParameters.Version1.NewSize = newFileSize;
+
+        if (newFileSize % 512 != 0)
+            throw std::runtime_error("Error while resizing the virtual disk : newFileSize is not multiple of 512.");
 
         opStatus = ResizeVirtualDisk(
             _handle,
