@@ -42,36 +42,36 @@ namespace App
                 {
                     name = Path.GetFileName(file);
                     path = Path.GetDirectoryName(file);
+                    String[] allFiles = Directory.GetFiles(path);
+                    String[] allDir = Directory.GetDirectories(path);
+                    List<String> filenames = new List<String>();
+                    foreach (string dir in allDir)
+                    {
+                        String dir_tmp = Path.GetFileName(dir);
+                        filenames.Add(dir_tmp);
+                    }
+                    foreach (string fileDir in allFiles)
+                    {
+                        String file_tmp = Path.GetFileName(fileDir);
+                        filenames.Add(file_tmp);
+                    }
+
+                    TabTemplate newTab = new TabTemplate();
+
+                    newTab.addDirList(filenames.ToArray());
+                    newTab.addPath(path);
+
+                    TabPage tab = new TabPage();
+                    tab.Controls.Add(newTab);
+                    newTab.Dock = DockStyle.Fill;
+                    tab.Text = name;
+            
+                    metroSetTabControl1.Controls.Add(tab);
+
+                    metroSetLabel1.Visible = false;
+                    metroSetTabControl1.Visible = true;
                 }
             }
-            String[] allFiles = Directory.GetFiles(path);
-            String[] allDir = Directory.GetDirectories(path);
-            List<String> filenames = new List<String>();
-            foreach (string dir in allDir)
-            {
-                String dir_tmp = Path.GetFileName(dir);
-                filenames.Add(dir_tmp);
-            }
-            foreach (string file in allFiles)
-            {
-                String file_tmp = Path.GetFileName(file);
-                filenames.Add(file_tmp);
-            }
-
-            TabTemplate newTab = new TabTemplate();
-
-            newTab.addDirList(filenames.ToArray());
-            newTab.addPath(path);
-
-            TabPage tab = new TabPage();
-            tab.Controls.Add(newTab);
-            newTab.Dock = DockStyle.Fill;
-            tab.Text = name;
-            
-            metroSetTabControl1.Controls.Add(tab);
-
-            metroSetLabel1.Visible = false;
-            metroSetTabControl1.Visible = true;
         }
     }
 }
