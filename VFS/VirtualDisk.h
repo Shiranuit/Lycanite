@@ -78,6 +78,15 @@ public:
     */
     void mirror(const std::wstring& destinationPath);
 
+    /**
+    * GetOperationStatusDisk
+    * @param handle vhd handle
+    * @param overlapped contains information for asynchronous IO
+    * @param progress contains progress information
+    * @return the operation status of the specified vhd handle
+    */
+    DWORD getOperationStatusDisk(const HANDLE handle, OVERLAPPED& overlapped, VIRTUAL_DISK_PROGRESS& progress) const;
+
 private:
     using WaiterDiskHandler = std::function<bool(const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress)>;
 
@@ -86,13 +95,13 @@ private:
     * @param handle virtual disk handle
     * @param overlapped contains information for asynchronous IO
     * @param progressHandler handler to know when the task is finished. If the handler return true task is completed else return false.
-    * @param secondWaits seconds to wait after each loop of waiting
+    * @param msWaits milliseconds to wait after each loop of waiting
     */
     void waitDiskOperation(
         const HANDLE             handle,
         OVERLAPPED&              overlapped,
         const WaiterDiskHandler& progressHandler,
-        int                      secondWaits = 1) const;
+        int                      msWaits = 1000) const;
 
 protected:
     std::wstring _diskPath;

@@ -97,7 +97,7 @@ void VirtualDisk::waitDiskOperation(
     const HANDLE             handle,
     OVERLAPPED&              overlapped,
     const WaiterDiskHandler& progressHandler,
-    int                      secondWaits) const
+    int                      msWaits) const
 {
     VIRTUAL_DISK_PROGRESS progress = { 0 };
     DWORD opStatus;
@@ -112,8 +112,13 @@ void VirtualDisk::waitDiskOperation(
             throw std::runtime_error("Error while mirroring the virtual disk, code: " + opStatus);
         if (progressHandler(opStatus, progress))
             break;
-        std::this_thread::sleep_for(std::chrono::seconds(secondWaits));
+        std::this_thread::sleep_for(std::chrono::milliseconds(msWaits));
     }
+}
+
+DWORD VirtualDisk::getOperationStatusDisk(const HANDLE handle, OVERLAPPED& overlapped, VIRTUAL_DISK_PROGRESS &progress) const
+{
+    return (GetVirtualDiskOperationProgress(handle, &overlapped, &progress));
 }
 
 void VirtualDisk::mirror(const std::wstring& destinationPath)
