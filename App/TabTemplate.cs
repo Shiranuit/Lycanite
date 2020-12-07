@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using MetroSet_UI.Components;
 using MetroSet_UI.Enums;
 using MetroSet_UI.Interfaces;
+using System.Diagnostics;
 
 namespace App
 {
@@ -37,9 +38,24 @@ namespace App
 
         public void addDirList(String[] filename)
         {
-            metroSetListBox1.ForeColor = Color.White;
-            metroSetListBox1.Clear();
-            metroSetListBox1.AddItems(filename);
+            listView1.ForeColor = Color.White;
+            listView1.Clear();
+
+            listView1.View = View.Details;
+            listView1.HeaderStyle = ColumnHeaderStyle.None;
+            ColumnHeader h = new ColumnHeader();
+            h.Width = listView1.ClientSize.Width - SystemInformation.VerticalScrollBarWidth;
+            listView1.Columns.Add(h);
+
+            foreach (String file in filename)
+            {
+                ListViewItem tmp_item = new ListViewItem(file);
+                if (Directory.Exists(_actual_path + "\\" + file))
+                    tmp_item.ImageIndex = 0;
+                else
+                    tmp_item.ImageIndex = 1;
+                listView1.Items.Add(tmp_item);
+            }
         }
 
         public void addPath(String path)
@@ -138,15 +154,19 @@ namespace App
             return allFileAndDir.ToArray();
         }
 
-        private void metroSetListBox1_DoubleClick(object sender, EventArgs e)
+        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            MetroSet_UI.Controls.MetroSetListBox listBox = (MetroSet_UI.Controls.MetroSetListBox)sender;
 
-            String name = listBox.Items[listBox.SelectedIndex].ToString();
-            System.Diagnostics.Debug.WriteLine(_actual_path + "\\" + name + " Is ?");
+        }
+
+        private void listView1_DoubleClick(object sender, EventArgs e)
+        {
+            ListView listview = (ListView)sender;
+
+            String name = listview.Items[listview.SelectedIndices[0]].Text;
+
             if (Directory.Exists(_actual_path + "\\" + name))
             {
-                System.Diagnostics.Debug.WriteLine("YEPPP");
                 addDirList(getAllFileAndDirFromPath(_actual_path + "\\" + name));
             }
         }

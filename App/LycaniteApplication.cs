@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using MetroSet_UI.Forms;
 using System.IO;
+using System.Diagnostics;
 
 namespace App
 {
@@ -63,8 +64,8 @@ namespace App
 
             TabTemplate newTab = new TabTemplate();
 
-            newTab.addDirList(filename.ToArray());
             newTab.addPath(path);
+            newTab.addDirList(filename.ToArray());
 
             TabPage tab = new TabPage();
             tab.Controls.Add(newTab);

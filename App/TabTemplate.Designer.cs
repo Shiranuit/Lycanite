@@ -29,9 +29,10 @@ namespace App
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TabTemplate));
             this.metroSetTabControl1 = new MetroSet_UI.Controls.MetroSetTabControl();
             this.metroSetSetTabPage1 = new MetroSet_UI.Child.MetroSetSetTabPage();
@@ -41,10 +42,11 @@ namespace App
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.metroSetSetTabPage3 = new MetroSet_UI.Child.MetroSetSetTabPage();
             this.metroSetSetTabPage4 = new MetroSet_UI.Child.MetroSetSetTabPage();
+            this.listView1 = new System.Windows.Forms.ListView();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.metroSetLabel2 = new MetroSet_UI.Controls.MetroSetLabel();
             this.metroSetSwitch1 = new MetroSet_UI.Controls.MetroSetSwitch();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.metroSetListBox1 = new MetroSet_UI.Controls.MetroSetListBox();
             this.metroSetSetTabPage5 = new MetroSet_UI.Child.MetroSetSetTabPage();
             this.metroSetTabControl1.SuspendLayout();
             this.metroSetSetTabPage1.SuspendLayout();
@@ -156,29 +158,29 @@ namespace App
             // 
             this.chart1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
             this.chart1.BorderlineColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
-            chartArea1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(125)))), ((int)(((byte)(125)))));
-            chartArea1.BorderColor = System.Drawing.Color.White;
-            chartArea1.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea1);
-            legend1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(100)))));
-            legend1.ForeColor = System.Drawing.Color.White;
-            legend1.HeaderSeparatorColor = System.Drawing.Color.White;
-            legend1.ItemColumnSeparatorColor = System.Drawing.Color.White;
-            legend1.Name = "Legend1";
-            legend1.TitleForeColor = System.Drawing.Color.White;
-            legend1.TitleSeparatorColor = System.Drawing.Color.White;
-            this.chart1.Legends.Add(legend1);
+            chartArea2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(125)))), ((int)(((byte)(125)))));
+            chartArea2.BorderColor = System.Drawing.Color.White;
+            chartArea2.Name = "ChartArea1";
+            this.chart1.ChartAreas.Add(chartArea2);
+            legend2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(100)))));
+            legend2.ForeColor = System.Drawing.Color.White;
+            legend2.HeaderSeparatorColor = System.Drawing.Color.White;
+            legend2.ItemColumnSeparatorColor = System.Drawing.Color.White;
+            legend2.Name = "Legend1";
+            legend2.TitleForeColor = System.Drawing.Color.White;
+            legend2.TitleSeparatorColor = System.Drawing.Color.White;
+            this.chart1.Legends.Add(legend2);
             this.chart1.Location = new System.Drawing.Point(240, 15);
             this.chart1.Name = "chart1";
-            series1.ChartArea = "ChartArea1";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series1.Color = System.Drawing.Color.DeepSkyBlue;
-            series1.LabelBackColor = System.Drawing.Color.White;
-            series1.LabelForeColor = System.Drawing.Color.White;
-            series1.Legend = "Legend1";
-            series1.MarkerColor = System.Drawing.Color.White;
-            series1.Name = "Series1";
-            this.chart1.Series.Add(series1);
+            series2.ChartArea = "ChartArea1";
+            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
+            series2.Color = System.Drawing.Color.DeepSkyBlue;
+            series2.LabelBackColor = System.Drawing.Color.White;
+            series2.LabelForeColor = System.Drawing.Color.White;
+            series2.Legend = "Legend1";
+            series2.MarkerColor = System.Drawing.Color.White;
+            series2.Name = "Series1";
+            this.chart1.Series.Add(series2);
             this.chart1.Size = new System.Drawing.Size(404, 256);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
@@ -205,10 +207,10 @@ namespace App
             // metroSetSetTabPage4
             // 
             this.metroSetSetTabPage4.BaseColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.metroSetSetTabPage4.Controls.Add(this.listView1);
             this.metroSetSetTabPage4.Controls.Add(this.metroSetLabel2);
             this.metroSetSetTabPage4.Controls.Add(this.metroSetSwitch1);
             this.metroSetSetTabPage4.Controls.Add(this.pictureBox1);
-            this.metroSetSetTabPage4.Controls.Add(this.metroSetListBox1);
             this.metroSetSetTabPage4.Font = null;
             this.metroSetSetTabPage4.ImageIndex = 0;
             this.metroSetSetTabPage4.ImageKey = null;
@@ -223,6 +225,28 @@ namespace App
             this.metroSetSetTabPage4.ThemeAuthor = "Narwin";
             this.metroSetSetTabPage4.ThemeName = "MetroLite";
             this.metroSetSetTabPage4.ToolTipText = null;
+            // 
+            // listView1
+            // 
+            this.listView1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.listView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.listView1.LargeImageList = this.imageList1;
+            this.listView1.Location = new System.Drawing.Point(3, 34);
+            this.listView1.Name = "listView1";
+            this.listView1.Size = new System.Drawing.Size(790, 237);
+            this.listView1.SmallImageList = this.imageList1;
+            this.listView1.TabIndex = 5;
+            this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listView1.View = System.Windows.Forms.View.List;
+            this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
+            this.listView1.DoubleClick += new System.EventHandler(this.listView1_DoubleClick);
+            // 
+            // imageList1
+            // 
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "directory.png");
+            this.imageList1.Images.SetKeyName(1, "document.png");
             // 
             // metroSetLabel2
             // 
@@ -281,36 +305,6 @@ namespace App
             this.pictureBox1.MouseHover += new System.EventHandler(this.pictureBox1_MouseHover);
             this.pictureBox1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseUp);
             // 
-            // metroSetListBox1
-            // 
-            this.metroSetListBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.metroSetListBox1.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.metroSetListBox1.DisabledBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
-            this.metroSetListBox1.DisabledForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
-            this.metroSetListBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.metroSetListBox1.HoveredItemBackColor = System.Drawing.Color.LightGray;
-            this.metroSetListBox1.HoveredItemColor = System.Drawing.Color.DimGray;
-            this.metroSetListBox1.IsDerivedStyle = false;
-            this.metroSetListBox1.ItemHeight = 30;
-            this.metroSetListBox1.Location = new System.Drawing.Point(0, 34);
-            this.metroSetListBox1.MultiSelect = false;
-            this.metroSetListBox1.Name = "metroSetListBox1";
-            this.metroSetListBox1.SelectedIndex = -1;
-            this.metroSetListBox1.SelectedItem = null;
-            this.metroSetListBox1.SelectedItemBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
-            this.metroSetListBox1.SelectedItemColor = System.Drawing.Color.White;
-            this.metroSetListBox1.SelectedText = null;
-            this.metroSetListBox1.SelectedValue = null;
-            this.metroSetListBox1.ShowBorder = false;
-            this.metroSetListBox1.ShowScrollBar = false;
-            this.metroSetListBox1.Size = new System.Drawing.Size(752, 237);
-            this.metroSetListBox1.Style = MetroSet_UI.Enums.Style.Dark;
-            this.metroSetListBox1.StyleManager = null;
-            this.metroSetListBox1.TabIndex = 1;
-            this.metroSetListBox1.ThemeAuthor = "Narwin";
-            this.metroSetListBox1.ThemeName = "MetroDark";
-            this.metroSetListBox1.DoubleClick += new System.EventHandler(this.metroSetListBox1_DoubleClick);
-            // 
             // metroSetSetTabPage5
             // 
             this.metroSetSetTabPage5.BaseColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
@@ -356,11 +350,12 @@ namespace App
         private MetroSet_UI.Child.MetroSetSetTabPage metroSetSetTabPage4;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
         private System.Windows.Forms.PictureBox pictureBox1;
-        private MetroSet_UI.Controls.MetroSetListBox metroSetListBox1;
         private MetroSet_UI.Child.MetroSetSetTabPage metroSetSetTabPage5;
         private MetroSet_UI.Controls.MetroSetDivider metroSetDivider1;
         private MetroSet_UI.Controls.MetroSetLabel metroSetLabel1;
         private MetroSet_UI.Controls.MetroSetLabel metroSetLabel2;
         private MetroSet_UI.Controls.MetroSetSwitch metroSetSwitch1;
+        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.ImageList imageList1;
     }
 }
