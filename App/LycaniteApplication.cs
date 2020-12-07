@@ -14,6 +14,10 @@ namespace App
 {
     public partial class LycaniteApplication : MetroSetForm
     {
+        Point _imageLocation = new Point(20, 4);
+        Point _imgHitArea = new Point(20, 4);
+        Image closeImage;
+
         public LycaniteApplication()
         {
             InitializeComponent();
@@ -21,7 +25,8 @@ namespace App
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            closeImage = Properties.Resources.close;
+            metroSetTabControl1.Padding = new Point(20, 4);
         }
 
         private void Form1_DragEnter(object sender, DragEventArgs e)
@@ -38,7 +43,6 @@ namespace App
             {
                 if (File.Exists(file))
                 {
-                    MessageBox.Show(file);
                     name = file.Split('\\')[file.Split('\\').Length - 1];
                 }
             }
@@ -53,17 +57,6 @@ namespace App
 
             metroSetLabel1.Visible = false;
             metroSetTabControl1.Visible = true;
-        }
-
-        private void metroSetTabControl1_Click(object sender, EventArgs e)
-        {
-            MetroSet_UI.Controls.MetroSetTabControl obj = (MetroSet_UI.Controls.MetroSetTabControl)sender;
-            MouseEventArgs me = (MouseEventArgs)e;
-/*            obj.TabIndex
-
-            if (me.Button == MouseButtons.Right)
-                obj.TabPages.Remove(obj.TabPages.IndexOfKey );
-*/
         }
     }
 }

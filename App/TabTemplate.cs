@@ -97,5 +97,10 @@ namespace App
                 metroSetLabel2.ForeColor = Color.FromArgb(170, 170, 170);
             }
         }
+
+        private void Close_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

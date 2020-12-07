@@ -30,7 +30,7 @@ namespace App
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LycaniteApplication));
-            this.metroSetTabControl1 = new MetroSet_UI.Controls.MetroSetTabControl();
+            this.metroSetTabControl1 = new MetroSet_UI.Controls.TabController();
             this.metroSetControlBox1 = new MetroSet_UI.Controls.MetroSetControlBox();
             this.metroSetLabel1 = new MetroSet_UI.Controls.MetroSetLabel();
             this.SuspendLayout();
@@ -68,7 +68,7 @@ namespace App
             this.metroSetControlBox1.CloseNormalForeColor = System.Drawing.Color.Gray;
             this.metroSetControlBox1.DisabledForeColor = System.Drawing.Color.DimGray;
             this.metroSetControlBox1.IsDerivedStyle = true;
-            this.metroSetControlBox1.Location = new System.Drawing.Point(688, 7);
+            this.metroSetControlBox1.Location = new System.Drawing.Point(685, 3);
             this.metroSetControlBox1.MaximizeBox = true;
             this.metroSetControlBox1.MaximizeHoverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(238)))), ((int)(((byte)(238)))));
             this.metroSetControlBox1.MaximizeHoverForeColor = System.Drawing.Color.Gray;
@@ -103,19 +103,15 @@ namespace App
             // LycaniteApplication
             // 
             this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(13F, 26F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.BorderColor = System.Drawing.Color.Navy;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.metroSetLabel1);
             this.Controls.Add(this.metroSetControlBox1);
             this.Controls.Add(this.metroSetTabControl1);
-            this.HeaderColor = System.Drawing.Color.Navy;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "LycaniteApplication";
-            this.SmallLineColor1 = System.Drawing.Color.Navy;
-            this.SmallLineColor2 = System.Drawing.Color.Navy;
             this.Style = MetroSet_UI.Enums.Style.Dark;
             this.Text = "Lycanite";
             this.TextColor = System.Drawing.Color.White;
@@ -129,7 +125,7 @@ namespace App
 
         #endregion
 
-        private MetroSet_UI.Controls.MetroSetTabControl metroSetTabControl1;
+        private MetroSet_UI.Controls.TabController metroSetTabControl1;
         private MetroSet_UI.Controls.MetroSetControlBox metroSetControlBox1;
         private MetroSet_UI.Controls.MetroSetLabel metroSetLabel1;
     }
