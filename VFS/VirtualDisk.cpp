@@ -135,5 +135,5 @@ std::unique_ptr<std::vector<GUID>> VirtualDisk::enumerateUserMetaData() const
     if (status != ERROR_SUCCESS && status != ERROR_MORE_DATA) {
         throw std::runtime_error("error in enumerateUserMetaData. code = " + status);
     }
-    return (guids);
+    return (std::move(guids));
 }

@@ -37,6 +37,9 @@ public:
 
     bool isOpen() const;
 
+    /// <summary>Enumerate the available metadata items of the opened vhdx file.
+    /// <para>Warning, this method is heavy due to a vector instantiation. Do not use it without thinking</para>
+    /// </summary>
     std::unique_ptr<std::vector<GUID>> enumerateUserMetaData() const;
 
 protected:
