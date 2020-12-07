@@ -36,6 +36,8 @@ public:
 
     bool isOpen() const;
 
+    void deleteUserMetaData(const GUID& uniqueId);
+
 protected:
     std::wstring _diskPath;
     std::wstring _parentPath;
