@@ -15,10 +15,6 @@ class VirtualDisk {
         VirtualDisk();
         ~VirtualDisk();
 
-        const std::wstring& getDiskPath() const;
-        const HANDLE getHandle() const;
-        const GET_VIRTUAL_DISK_INFO &getDiskInfo();
-
         virtual void create(
             const std::wstring&             virtualDiskPath,
             const std::wstring&             parentPath,
@@ -32,6 +28,13 @@ class VirtualDisk {
                   const OPEN_VIRTUAL_DISK_FLAG& open_flag = OPEN_VIRTUAL_DISK_FLAG_NONE);
         bool close();
         bool isOpen() const;
+
+        const std::wstring& getDiskPath() const;
+        const HANDLE getHandle() const;
+        const GET_VIRTUAL_DISK_INFO &getDiskInfo();
+
+        void setDiskInfo(SET_VIRTUAL_DISK_INFO diskInfo);
+        void setDiskInfo(std::wstring parentPath, DWORD physicalSectorSize);
 
     protected:
         std::wstring _diskPath;

@@ -94,6 +94,34 @@ void VirtualDisk::open(const std::wstring& diskPath, const VIRTUAL_DISK_ACCESS_M
         throw std::runtime_error("Error while opening virtual disk, code: " + opStatus);
 }
 
+
+bool VirtualDisk::isOpen() const
+{
+    return (_handle && _handle != INVALID_HANDLE_VALUE);
+}
+
+bool VirtualDisk::close()
+{
+    bool closed = false;
+
+    if (isOpen()) {
+        closed = CloseHandle(_handle);
+        _handle = nullptr;
+        return (closed);
+    }
+    return (closed);
+}
+
+const std::wstring& VirtualDisk::getDiskPath() const
+{
+    return (_diskPath);
+}
+
+const HANDLE VirtualDisk::getHandle() const
+{
+    return (_handle);
+}
+
 const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo()
 {
     ULONG diskInfoSize = sizeof(GET_VIRTUAL_DISK_INFO);
@@ -177,30 +205,39 @@ const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo()
         NULL);
 
     if (opStatus != ERROR_SUCCESS) {
-        throw std::runtime_error("opStatus: " + opStatus);
+        throw std::runtime_error("Error getInfos: " + opStatus);
     } else {
         return _diskInfo;
     }
 }
 
-bool VirtualDisk::close()
+void VirtualDisk::setDiskInfo(SET_VIRTUAL_DISK_INFO diskInfo)
 {
-    bool closed = false;
+    DWORD opStatus = SetVirtualDiskInformation(_handle, &diskInfo);
 
-    if (isOpen()) {
-        closed = CloseHandle(_handle);
-        _handle = nullptr;
-        return (closed);
-    }
-    return (closed);
+    if (opStatus != ERROR_SUCCESS)
+        throw std::runtime_error("Error setInfos: " + opStatus);
 }
 
-const std::wstring& VirtualDisk::getDiskPath() const
+void VirtualDisk::setDiskInfo(std::wstring parentPath, DWORD physicalSectorSize)
 {
-    return (_diskPath);
-}
+    SET_VIRTUAL_DISK_INFO diskInfo;
 
-const HANDLE VirtualDisk::getHandle() const
-{
-    return (_handle);
+    diskInfo.Version = SET_VIRTUAL_DISK_INFO_PARENT_PATH_WITH_DEPTH;
+    diskInfo.ParentPathWithDepthInfo.ChildDepth = 1;
+    diskInfo.ParentPathWithDepthInfo.ParentFilePath = parentPath.c_str();
+
+    DWORD opStatus = SetVirtualDiskInformation(_handle, &diskInfo);
+    
+    if (opStatus != ERROR_SUCCESS)
+        throw std::runtime_error("Error setInfos: " + opStatus);
+
+
+    diskInfo.Version = SET_VIRTUAL_DISK_INFO_PHYSICAL_SECTOR_SIZE;
+    diskInfo.VhdPhysicalSectorSize = physicalSectorSize;
+
+    opStatus = SetVirtualDiskInformation(_handle, &diskInfo);
+
+    if (opStatus != ERROR_SUCCESS)
+        throw std::runtime_error("Error setInfos: " + opStatus);
 }
