@@ -2,7 +2,9 @@
 
 #include <iostream>
 #include <string>
-#include <new>
+#include <thread>
+#include <chrono>
+#include <functional>
 #include <exception>
 #include <windows.h>
 #include <initguid.h>
@@ -75,6 +77,22 @@ public:
     * @param destinationPath vhd(x) destination path (ex: c:\\mirror.vhd)
     */
     void mirror(const std::wstring& destinationPath);
+
+private:
+    using WaiterDiskHandler = std::function<bool(const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress)>;
+
+    /**
+    * Wait a disk operation (for asynchronous tasks)
+    * @param handle virtual disk handle
+    * @param overlapped contains information for asynchronous IO
+    * @param progressHandler handler to know when the task is finished. If the handler return true task is completed else return false.
+    * @param secondWaits seconds to wait after each loop of waiting
+    */
+    void waitDiskOperation(
+        const HANDLE             handle,
+        OVERLAPPED&              overlapped,
+        const WaiterDiskHandler& progressHandler,
+        int                      secondWaits = 1) const;
 
 protected:
     std::wstring _diskPath;

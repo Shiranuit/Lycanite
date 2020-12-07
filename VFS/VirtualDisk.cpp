@@ -93,6 +93,29 @@ void VirtualDisk::open(const std::wstring& diskPath, const VIRTUAL_DISK_ACCESS_M
         throw std::runtime_error("Error while opening virtual disk, code: " + opStatus);
 }
 
+void VirtualDisk::waitDiskOperation(
+    const HANDLE             handle,
+    OVERLAPPED&              overlapped,
+    const WaiterDiskHandler& progressHandler,
+    int                      secondWaits) const
+{
+    VIRTUAL_DISK_PROGRESS progress = { 0 };
+    DWORD opStatus;
+
+    while (true) {
+        std::memset(&progress, 0, sizeof(progress));
+        opStatus = GetVirtualDiskOperationProgress(handle, &overlapped, &progress);
+        if (opStatus != ERROR_SUCCESS)
+            throw std::runtime_error("Error while mirroring the virtual disk, code: " + opStatus);
+        opStatus = progress.OperationStatus;
+        if (opStatus != ERROR_IO_PENDING && opStatus != ERROR_SUCCESS)
+            throw std::runtime_error("Error while mirroring the virtual disk, code: " + opStatus);
+        if (progressHandler(opStatus, progress))
+            break;
+        std::this_thread::sleep_for(std::chrono::seconds(secondWaits));
+    }
+}
+
 void VirtualDisk::mirror(const std::wstring& destinationPath)
 {
     MIRROR_VIRTUAL_DISK_PARAMETERS mirrorParameters;
@@ -107,8 +130,9 @@ void VirtualDisk::mirror(const std::wstring& destinationPath)
 
     std::memset(&mirrorParameters, 0, sizeof(MIRROR_VIRTUAL_DISK_PARAMETERS));
     mirrorParameters.Version = MIRROR_VIRTUAL_DISK_VERSION_1;
-    mirrorParameters.Version1.MirrorVirtualDiskPath = destinationPath.c_str(); // memory leak if destinationPath is deleted
+    mirrorParameters.Version1.MirrorVirtualDiskPath = destinationPath.c_str();
 
+    // async task
     opStatus = MirrorVirtualDisk(
         _handle,
         MIRROR_VIRTUAL_DISK_FLAG_NONE,
@@ -116,42 +140,32 @@ void VirtualDisk::mirror(const std::wstring& destinationPath)
         &overlapped
     );
 
-    if ((opStatus == ERROR_SUCCESS) || (opStatus == ERROR_IO_PENDING)) {
-        while (true) {
-            std::memset(&progress, 0, sizeof(progress));
-            opStatus = GetVirtualDiskOperationProgress(_handle, &overlapped, &progress);
-            if (opStatus != ERROR_SUCCESS)
-                throw std::runtime_error("Error while mirroring the virtual disk, code: " + opStatus);
-            opStatus = progress.OperationStatus;
-            if (opStatus == ERROR_IO_PENDING) {
+    // wait to finish
+    if (opStatus == ERROR_SUCCESS || opStatus == ERROR_IO_PENDING) {
+        waitDiskOperation(_handle, overlapped, [](const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress) -> bool {
+            if (status == ERROR_IO_PENDING)
                 if (progress.CurrentValue == progress.CompletionValue)
-                    break;
-            } else
-                throw std::runtime_error("Error while mirroring the virtual disk, code: " + opStatus);
-            Sleep(1000);
-        }
-    } else
+                    return (true);
+            return (false);
+            });
+    }
+    else
         throw std::runtime_error("Error while mirroring the virtual disk, code: " + opStatus);
 
     // Break the mirror.  Breaking the mirror will activate the new target and cause it to be
     // utilized in place of the original VHD/VHDX.
-    opStatus = BreakMirrorVirtualDisk(_handle); 
+    // async task
+    opStatus = BreakMirrorVirtualDisk(_handle);
 
+    // wait to finish
     if (opStatus != ERROR_SUCCESS)
         throw std::runtime_error("Error while breaking mirror of the virtual disk, code: " + opStatus);
     else {
-        while (true) {
-            std::memset(&progress, 0, sizeof(progress));
-            opStatus = GetVirtualDiskOperationProgress(_handle, &overlapped, &progress);
-            if (opStatus != ERROR_SUCCESS)
-                throw std::runtime_error("Error while breaking mirror of the virtual disk, code: " + opStatus);
-            opStatus = progress.OperationStatus;
-            if (opStatus == ERROR_SUCCESS)
-                break;
-            else if (opStatus != ERROR_IO_PENDING)
-                throw std::runtime_error("Error while breaking mirror of the virtual disk, code: " + opStatus);
-            Sleep(1000);
-        }
+        waitDiskOperation(_handle, overlapped, [](const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress) -> bool {
+            if (status == ERROR_SUCCESS)
+                return (true);
+            return (false);
+            });
     }
 }
 
