@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 #include <new>
 #include <exception>
 #include <windows.h>
@@ -11,38 +12,30 @@
 
 class VirtualDisk {
     public:
+        VirtualDisk();
+        ~VirtualDisk();
 
-    VirtualDisk(
-        const std::wstring             &virtualDiskPath,
-        const std::wstring             &parentPath,
-        const CREATE_VIRTUAL_DISK_FLAG &flags,
-        ULONGLONG                      fileSize,
-        DWORD                          blockSize,
-        DWORD                          logicalSectorSize,
-        DWORD                          physicalSectorSize
-    );
+        const std::wstring& getDiskPath() const;
+        const HANDLE getHandle() const;
+        const GET_VIRTUAL_DISK_INFO &getDiskInfo();
 
-    ~VirtualDisk();
-
-    const std::wstring &getDiskPath() const;
-
-    const CREATE_VIRTUAL_DISK_PARAMETERS &getParameters() const;
-
-    const VIRTUAL_STORAGE_TYPE &getStorageType() const;
-
-    const HANDLE getHandle() const;
-
-    void create();
-
-    const GET_VIRTUAL_DISK_INFO &getDiskInfo();
-    // int setDiskInfo();
+        virtual void create(
+            const std::wstring&             virtualDiskPath,
+            const std::wstring&             parentPath,
+            const CREATE_VIRTUAL_DISK_FLAG& flags,
+            ULONGLONG                       fileSize,
+            DWORD                           blockSize,
+            DWORD                           logicalSectorSize,
+            DWORD                           physicalSectorSize);
+        void open(const std::wstring& diskPath, 
+                  const VIRTUAL_DISK_ACCESS_MASK& access_mask = VIRTUAL_DISK_ACCESS_NONE,
+                  const OPEN_VIRTUAL_DISK_FLAG& open_flag = OPEN_VIRTUAL_DISK_FLAG_NONE);
+        bool close();
+        bool isOpen() const;
 
     protected:
         std::wstring _diskPath;
         std::wstring _parentPath;
-        CREATE_VIRTUAL_DISK_FLAG _flags;
-        CREATE_VIRTUAL_DISK_PARAMETERS _parameters;
-        VIRTUAL_STORAGE_TYPE _storageType;
         GET_VIRTUAL_DISK_INFO _diskInfo;
         HANDLE _handle;
 };
