@@ -1,6 +1,6 @@
 #include "FixedDisk.h"
 
-FixedDisk::FixedDisk() : VirtualDisk()
+FixedDisk::FixedDisk() : VirtualDisk(VIRTUAL_DISK_TYPE::FIXED, false)
 {
 }
 

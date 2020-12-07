@@ -1,6 +1,13 @@
 #include "VirtualDisk.h"
 
-VirtualDisk::VirtualDisk() : _handle(nullptr)
+VirtualDisk::VirtualDisk(VIRTUAL_DISK_TYPE type, bool resizable)
+    : _handle(nullptr),
+      _type(type),
+      _resizable(resizable)
+{
+}
+
+VirtualDisk::VirtualDisk(bool resizable) : VirtualDisk(VIRTUAL_DISK_TYPE::DEFAULT, resizable)
 {
 }
 
@@ -170,6 +177,40 @@ void VirtualDisk::mirror(const std::wstring& destinationPath)
                 return (true);
             return (false);
         });
+    }
+}
+
+bool VirtualDisk::isResizable() const
+{
+    return (_resizable);
+}
+
+const VirtualDisk::VIRTUAL_DISK_TYPE& VirtualDisk::getType() const
+{
+    return (_type);
+}
+
+bool VirtualDisk::resize(ULONGLONG newFileSize)
+{
+    if (_resizable) {
+        RESIZE_VIRTUAL_DISK_PARAMETERS resizeParameters;
+        DWORD opStatus;
+
+        std::memset(&resizeParameters, 0, sizeof(resizeParameters));
+        resizeParameters.Version = RESIZE_VIRTUAL_DISK_VERSION_1;
+        resizeParameters.Version1.NewSize = newFileSize;
+
+        opStatus = ResizeVirtualDisk(
+            _handle,
+            RESIZE_VIRTUAL_DISK_FLAG_NONE,
+            &resizeParameters,
+            nullptr);
+
+        if (opStatus != ERROR_SUCCESS)
+            throw std::runtime_error("Error while resizing the virtual disk, code: " + opStatus);
+        return (true);
+    } else {
+        return (false);
     }
 }
 

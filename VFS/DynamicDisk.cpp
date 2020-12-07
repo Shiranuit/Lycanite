@@ -1,6 +1,6 @@
 #include "DynamicDisk.h"
 
-DynamicDisk::DynamicDisk() : VirtualDisk()
+DynamicDisk::DynamicDisk() : VirtualDisk(VIRTUAL_DISK_TYPE::DYNAMIC, true)
 {
 }
 

@@ -1,6 +1,6 @@
 #include "DereferencingDisk.h"
 
-DereferencingDisk::DereferencingDisk() : VirtualDisk()
+DereferencingDisk::DereferencingDisk() : VirtualDisk(VIRTUAL_DISK_TYPE::DEREFERENCING, true)
 {
 }
 
@@ -17,10 +17,6 @@ void DereferencingDisk::create(const std::wstring& virtualDiskPath, const std::w
     );
 }
 
-//
-// DO NOT attempt to perform a live merge of a leaf (a)VHD or (a)VHDX of a VM as the
-// operation will not update the virtual machine configuration file.
-//
 void DereferencingDisk::mergeToParent() const
 {
     MERGE_VIRTUAL_DISK_PARAMETERS mergeParameters;

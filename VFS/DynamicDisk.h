@@ -15,7 +15,5 @@ public:
         DWORD               physicalSectorSize);
 
     ~DynamicDisk();
-
-    void mergeToParent() const;
 };
 
