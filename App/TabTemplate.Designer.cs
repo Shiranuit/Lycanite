@@ -290,17 +290,8 @@ namespace App
             this.metroSetListBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.metroSetListBox1.HoveredItemBackColor = System.Drawing.Color.LightGray;
             this.metroSetListBox1.HoveredItemColor = System.Drawing.Color.DimGray;
-            this.metroSetListBox1.IsDerivedStyle = true;
+            this.metroSetListBox1.IsDerivedStyle = false;
             this.metroSetListBox1.ItemHeight = 30;
-            this.metroSetListBox1.Items.Add("Dir 1");
-            this.metroSetListBox1.Items.Add("Dir 2");
-            this.metroSetListBox1.Items.Add("Dir 3");
-            this.metroSetListBox1.Items.Add("Dir 4");
-            this.metroSetListBox1.Items.Add("File 1");
-            this.metroSetListBox1.Items.Add("File 2");
-            this.metroSetListBox1.Items.Add("File 3");
-            this.metroSetListBox1.Items.Add("File 4");
-            this.metroSetListBox1.Items.Add("File 5");
             this.metroSetListBox1.Location = new System.Drawing.Point(0, 34);
             this.metroSetListBox1.MultiSelect = false;
             this.metroSetListBox1.Name = "metroSetListBox1";
@@ -312,12 +303,13 @@ namespace App
             this.metroSetListBox1.SelectedValue = null;
             this.metroSetListBox1.ShowBorder = false;
             this.metroSetListBox1.ShowScrollBar = false;
-            this.metroSetListBox1.Size = new System.Drawing.Size(752, 224);
+            this.metroSetListBox1.Size = new System.Drawing.Size(752, 237);
             this.metroSetListBox1.Style = MetroSet_UI.Enums.Style.Dark;
             this.metroSetListBox1.StyleManager = null;
             this.metroSetListBox1.TabIndex = 1;
             this.metroSetListBox1.ThemeAuthor = "Narwin";
             this.metroSetListBox1.ThemeName = "MetroDark";
+            this.metroSetListBox1.DoubleClick += new System.EventHandler(this.metroSetListBox1_DoubleClick);
             // 
             // metroSetSetTabPage5
             // 
