@@ -60,8 +60,7 @@ void VirtualDisk::create(
 
         if (opStatus != ERROR_SUCCESS || !_handle)
             throw std::runtime_error("Error while creating virtual disk, code: " + opStatus);
-    }
-    else {
+    } else {
         throw std::runtime_error("Disk already created.");
     }
 }
