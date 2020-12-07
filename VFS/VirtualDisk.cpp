@@ -199,3 +199,12 @@ const HANDLE VirtualDisk::getHandle() const
 {
     return (_handle);
 }
+
+void VirtualDisk::deleteUserMetaData(const GUID &uniqueId)
+{
+    DWORD status;
+    status = DeleteVirtualDiskMetadata(_handle, &uniqueId);
+    if (status != ERROR_SUCCESS) {
+        throw std::runtime_error("error in deleteUserMetaData. code = " + status);
+    }
+}
