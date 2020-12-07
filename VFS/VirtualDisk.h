@@ -36,6 +36,8 @@ public:
 
     bool isOpen() const;
 
+    std::unique_ptr<GUID[]> enumerateUserMetaData() const;
+
 protected:
     std::wstring _diskPath;
     std::wstring _parentPath;

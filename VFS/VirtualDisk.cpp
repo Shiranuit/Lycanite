@@ -120,25 +120,21 @@ const HANDLE VirtualDisk::getHandle() const
     return (_handle);
 }
 
-const std::unique_ptr<GUID> VirtualDisk::enumerateUserMetaData() const
+std::unique_ptr<GUID[]> VirtualDisk::enumerateUserMetaData() const
 {
-    std::unique_ptr<GUID> guids;
-    DWORD status;
-    ULONG numberOfItems;
+    std::unique_ptr<GUID[]> guids;
 
-    status = EnumerateVirtualDiskMetadata(_handle, &numberOfItems, NULL);
-    if (status != ERROR_SUCCESS) {
-        throw std::runtime_error("error = " + status);
+    try {
+        DWORD status;
+        ULONG numberOfItems = 0;
+        status = EnumerateVirtualDiskMetadata(_handle, &numberOfItems, NULL);
+        guids = std::make_unique<GUID[]>(numberOfItems);
+        status = EnumerateVirtualDiskMetadata(_handle, &numberOfItems, guids.get());
+        return (guids);
     }
-
-    guids = std::make_unique<GUID>(numberOfItems * sizeof(GUID));
-    if (guids == nullptr) {
-        throw std::bad_alloc();
+    catch (std::exception e) {
+        std::cout << e.what() << std::endl;
+        guids = std::make_unique<GUID[]>(0);
+        return guids;
     }
-
-    status = EnumerateVirtualDiskMetadata(_handle, &numberOfItems, guids.get());
-    if (status != ERROR_SUCCESS) {
-        throw std::runtime_error("error = " + status);
-    }
-    return (guids);
 }
