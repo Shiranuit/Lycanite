@@ -34,7 +34,6 @@ namespace MetroSet_UI.Controls
         private void DrawTab(int i, Graphics g)
         {
             Rectangle tabRect = GetTabRect(i);
-            tabRect.Offset(2, 2);
             Brush TitleBrush = new SolidBrush(Color.White);
             g.DrawString("x", Font, TitleBrush, new Point(tabRect.X + (tabRect.Width - 16), 16));
         }
@@ -80,8 +79,9 @@ namespace MetroSet_UI.Controls
 
                     if (rect.Contains(e.Location))
                     {
-                        TabPage tabPage = sTabPages[i];
+                        TabPage tabPage = TabPages[i];
                         TabPages.Remove(tabPage);
+                        break;
                     }
                 }
             }

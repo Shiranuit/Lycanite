@@ -40,29 +40,27 @@ namespace App
             {
                 if (File.Exists(file))
                 {
-                    name = file.Split('\\')[file.Split('\\').Length - 1];
-                    int i = file.Length - 1;
-                    for (; file[i].CompareTo('\\') != 0; i--);
-                    path = file.Substring(0, i);
+                    name = Path.GetFileName(file);
+                    path = Path.GetDirectoryName(file);
                 }
             }
             String[] allFiles = Directory.GetFiles(path);
-            String[] allDir = (Directory.GetDirectories(path));
-            List<String> filename = new List<String>();
+            String[] allDir = Directory.GetDirectories(path);
+            List<String> filenames = new List<String>();
             foreach (string dir in allDir)
             {
-                String dir_tmp = dir.Split('\\')[dir.Split('\\').Length - 1];
-                filename.Add(dir_tmp);
+                String dir_tmp = Path.GetFileName(dir);
+                filenames.Add(dir_tmp);
             }
             foreach (string file in allFiles)
             {
-                String file_tmp = file.Split('\\')[file.Split('\\').Length - 1];
-                filename.Add(file_tmp);
+                String file_tmp = Path.GetFileName(file);
+                filenames.Add(file_tmp);
             }
 
             TabTemplate newTab = new TabTemplate();
 
-            newTab.addDirList(filename.ToArray());
+            newTab.addDirList(filenames.ToArray());
             newTab.addPath(path);
 
             TabPage tab = new TabPage();

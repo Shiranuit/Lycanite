@@ -59,9 +59,7 @@ namespace App
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            int i = _actual_path.Length - 1;
-            for (; _actual_path[i].CompareTo('\\') != 0; i--) ;
-            _actual_path = _actual_path.Substring(0, i);
+            _actual_path = Path.GetDirectoryName(_actual_path);
 
             addDirList(getAllFileAndDirFromPath(_actual_path));
         }
@@ -122,12 +120,12 @@ namespace App
 
             foreach (string filepath in allDir)
             {
-                String file_tmp = filepath.Split('\\')[filepath.Split('\\').Length - 1];
+                String file_tmp = Path.GetFileName(filepath);
                 allFileAndDir.Add(file_tmp);
             }
             foreach (string filepath in allFiles)
             {
-                String file_tmp = filepath.Split('\\')[filepath.Split('\\').Length - 1];
+                String file_tmp = Path.GetFileName(filepath);
                 allFileAndDir.Add(file_tmp);
             }
 
