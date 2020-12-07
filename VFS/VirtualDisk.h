@@ -38,7 +38,7 @@ public:
 
     void setUserMetaData(const PVOID &data, const GUID &uniqueId, const ULONG &nbToWrite);
 
-    std::shared_ptr<VOID> getUserMetaData(const GUID& uniqueId, ULONG &metaDataSize) const;
+    void getUserMetaData(const GUID& uniqueId, ULONG& metaDataSize, const std::shared_ptr<VOID>& data) const;
 
 protected:
     std::wstring _diskPath;

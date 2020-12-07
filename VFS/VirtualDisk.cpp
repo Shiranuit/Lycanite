@@ -135,11 +135,9 @@ void VirtualDisk::setUserMetaData(const PVOID &data, const GUID &uniqueId, const
     }
 }
 
-std::shared_ptr<VOID> VirtualDisk::getUserMetaData(const GUID &uniqueId, ULONG &metaDataSize) const
+void VirtualDisk::getUserMetaData(const GUID &uniqueId, ULONG &metaDataSize, const std::shared_ptr<VOID> &data) const
 {
     DWORD status;
-    
-    std::shared_ptr<VOID> data(new CHAR[metaDataSize]);
 
     status = GetVirtualDiskMetadata(
         _handle,
@@ -149,7 +147,5 @@ std::shared_ptr<VOID> VirtualDisk::getUserMetaData(const GUID &uniqueId, ULONG &
 
     if (status != ERROR_SUCCESS) {
         throw std::runtime_error("error = " + status);
-    } else {
-        return (data);
     }
 }
