@@ -127,12 +127,12 @@ std::unique_ptr<GUID[]> VirtualDisk::enumerateUserMetaData() const
     try {
         DWORD status;
         ULONG numberOfItems = 0;
-        status = EnumerateVirtualDiskMetadata(_handle, &numberOfItems, NULL);
+        status = EnumerateVirtualDiskMetadata(_handle, &numberOfItems, nullptr);
         guids = std::make_unique<GUID[]>(numberOfItems);
         status = EnumerateVirtualDiskMetadata(_handle, &numberOfItems, guids.get());
         return (guids);
     }
-    catch (std::exception e) {
+    catch (const std::exception &e) {
         std::cout << e.what() << std::endl;
         guids = std::make_unique<GUID[]>(0);
         return guids;
