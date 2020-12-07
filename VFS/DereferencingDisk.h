@@ -9,5 +9,7 @@ public:
 
     void create(const std::wstring& virtualDiskPath, const std::wstring& parentPath);
 
+    void mergeToParent() const;
+
     ~DereferencingDisk();
 };
