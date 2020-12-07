@@ -14,10 +14,6 @@ namespace App
 {
     public partial class LycaniteApplication : MetroSetForm
     {
-        Point _imageLocation = new Point(20, 4);
-        Point _imgHitArea = new Point(20, 4);
-        Image closeImage;
-
         public LycaniteApplication()
         {
             InitializeComponent();
@@ -25,7 +21,6 @@ namespace App
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            closeImage = Properties.Resources.close;
             metroSetTabControl1.Padding = new Point(20, 4);
         }
 

@@ -105,9 +105,7 @@ namespace App
         {
             MetroSet_UI.Controls.MetroSetSwitch switch_obj = (MetroSet_UI.Controls.MetroSetSwitch)sender;
 
-            System.Diagnostics.Debug.WriteLine(switch_obj.CheckState.ToString());
-
-            if (switch_obj.CheckState.ToString().CompareTo("Checked") == 0)
+            if (switch_obj.CheckState == MetroSet_UI.Enums.CheckState.Checked)
             {
                 metroSetLabel2.ForeColor = Color.FromArgb(210, 210, 210);
             } else
@@ -119,7 +117,7 @@ namespace App
         private String[] getAllFileAndDirFromPath(String path)
         {
             String[] allFiles = Directory.GetFiles(path);
-            String[] allDir = (Directory.GetDirectories(path));
+            String[] allDir = Directory.GetDirectories(path);
             List<String> allFileAndDir = new List<String>();
 
             foreach (string filepath in allDir)
@@ -143,11 +141,9 @@ namespace App
             MetroSet_UI.Controls.MetroSetListBox listBox = (MetroSet_UI.Controls.MetroSetListBox)sender;
 
             String name = listBox.Items[listBox.SelectedIndex].ToString();
-            System.Diagnostics.Debug.WriteLine(_actual_path + "\\" + name + " Is ?");
-            if (Directory.Exists(_actual_path + "\\" + name))
+            if (Directory.Exists(Path.Combine(_actual_path, name)))
             {
-                System.Diagnostics.Debug.WriteLine("YEPPP");
-                addDirList(getAllFileAndDirFromPath(_actual_path + "\\" + name));
+                addDirList(getAllFileAndDirFromPath(Path.Combine(_actual_path, name)));
             }
         }
     }

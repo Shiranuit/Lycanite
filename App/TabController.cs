@@ -33,18 +33,18 @@ namespace MetroSet_UI.Controls
 
         private void DrawTab(int i, Graphics g)
         {
-            Rectangle r = GetTabRect(i);
-            r.Offset(2, 2);
+            Rectangle tabRect = GetTabRect(i);
+            tabRect.Offset(2, 2);
             Brush TitleBrush = new SolidBrush(Color.White);
-            g.DrawString("x", Font, TitleBrush, new Point(r.X + (r.Width - 16), 16));
+            g.DrawString("x", Font, TitleBrush, new Point(tabRect.X + (tabRect.Width - 16), 16));
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            var g = e.Graphics;
+            var graphics = e.Graphics;
 
-            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
             switch (TabStyle)
             {
@@ -52,13 +52,13 @@ namespace MetroSet_UI.Controls
 
                     for (var i = 0; i <= TabCount - 1; i++)
                     {
-                        DrawTab(i, g);
+                        DrawTab(i, graphics);
                     }
                     break;
                 case TabStyle.Style2:
                     for (var i = 0; i <= TabCount - 1; i++)
                     {
-                        DrawTab(i, g);
+                        DrawTab(i, graphics);
                     }
                     break;
             }
@@ -80,7 +80,7 @@ namespace MetroSet_UI.Controls
 
                     if (rect.Contains(e.Location))
                     {
-                        TabPage tabPage = TabPages[i];
+                        TabPage tabPage = sTabPages[i];
                         TabPages.Remove(tabPage);
                     }
                 }
