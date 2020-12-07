@@ -10,8 +10,8 @@ VirtualDisk::~VirtualDisk()
 }
 
 void VirtualDisk::create(
-    const std::wstring& virtualDiskPath,
-    const std::wstring& parentPath,
+    const std::wstring&             virtualDiskPath,
+    const std::wstring&             parentPath,
     const CREATE_VIRTUAL_DISK_FLAG& flags,
     ULONGLONG                       fileSize,
     DWORD                           blockSize,
@@ -147,7 +147,7 @@ void VirtualDisk::mirror(const std::wstring& destinationPath)
                 if (progress.CurrentValue == progress.CompletionValue)
                     return (true);
             return (false);
-            });
+        });
     }
     else
         throw std::runtime_error("Error while mirroring the virtual disk, code: " + opStatus);
@@ -165,7 +165,7 @@ void VirtualDisk::mirror(const std::wstring& destinationPath)
             if (status == ERROR_SUCCESS)
                 return (true);
             return (false);
-            });
+        });
     }
 }
 
