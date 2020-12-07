@@ -9,6 +9,7 @@
 #include <virtdisk.h>
 #include <rpcdce.h>
 #include <rpc.h>
+#include <vector>
 
 class VirtualDisk {
 public:
@@ -36,7 +37,7 @@ public:
 
     bool isOpen() const;
 
-    std::unique_ptr<GUID[]> enumerateUserMetaData() const;
+    std::unique_ptr<std::vector<GUID>> enumerateUserMetaData() const;
 
 protected:
     std::wstring _diskPath;
