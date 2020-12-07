@@ -183,11 +183,6 @@ const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo()
     }
 }
 
-const std::wstring &VirtualDisk::getDiskPath() const
-{
-    return (_handle && _handle != INVALID_HANDLE_VALUE);
-}
-
 bool VirtualDisk::close()
 {
     bool closed = false;
