@@ -203,19 +203,18 @@ const HANDLE VirtualDisk::getHandle() const
 void VirtualDisk::attachDisk(bool readOnly)
 {
     ATTACH_VIRTUAL_DISK_PARAMETERS attachParameters;
-    TTACH_VIRTUAL_DISK_FLAG attachFlags;
+    ATTACH_VIRTUAL_DISK_FLAG attachFlags;
     PSECURITY_DESCRIPTOR sd = NULL;
     LPCTSTR extension;
     DWORD opStatus;
 
-    extension = ::PathFindExtension(VirtualDiskPath);
+    extension = ::PathFindExtension(_diskPath.c_str());
 
     if ((extension != NULL && _wcsicmp(extension, L".iso") == 0) && (readOnly != true))
             throw std::runtime_error("Error: Not supported");
 
     if (!::ConvertStringSecurityDescriptorToSecurityDescriptor(L"O:BAG:BAD:(A;;GA;;;WD)",SDDL_REVISION_1,&sd, NULL))
-        if (opStatus != ERROR_SUCCESS)
-            throw std::runtime_error("Error convert string: " + opStatus);
+            throw std::runtime_error("Error convert string");
 
     memset(&attachParameters, 0, sizeof(attachParameters));
     attachParameters.Version = ATTACH_VIRTUAL_DISK_VERSION_1;
@@ -228,4 +227,5 @@ void VirtualDisk::attachDisk(bool readOnly)
 
     if (opStatus != ERROR_SUCCESS)
         throw std::runtime_error("Error attach disk: " + opStatus);
+
 }

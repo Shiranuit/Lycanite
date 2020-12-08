@@ -11,6 +11,8 @@
 #include <virtdisk.h>
 #include <rpcdce.h>
 #include <rpc.h>
+#include <sddl.h>
+#include <Shlwapi.h>
 
 class VirtualDisk {
 public:
