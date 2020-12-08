@@ -35,7 +35,6 @@ namespace App
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
             String name = "";
             TabTemplate newTab = new TabTemplate();
-
             
             foreach (string file in files)
             {
@@ -46,8 +45,6 @@ namespace App
                     newTab.addPath(file);
                 }
             }
-            TabTemplate newTab = new TabTemplate();
-
             TabPage tab = new TabPage();
             tab.Controls.Add(newTab);
             newTab.Dock = DockStyle.Fill;
