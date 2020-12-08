@@ -20,7 +20,7 @@ void VirtualDisk::create(
     const std::wstring&             virtualDiskPath,
     const std::wstring&             parentPath,
     const CREATE_VIRTUAL_DISK_FLAG& flags,
-    ULONGLONG                       fileSize,
+    ULONGLONG                       diskSize,
     DWORD                           blockSize,
     DWORD                           logicalSectorSize,
     DWORD                           physicalSectorSize)
@@ -44,14 +44,14 @@ void VirtualDisk::create(
         std::memset(&parameters, 0, sizeof(parameters));
         parameters.Version = CREATE_VIRTUAL_DISK_VERSION_2;
         parameters.Version2.UniqueId = uniqueId;
-        parameters.Version2.MaximumSize = fileSize;
+        parameters.Version2.MaximumSize = diskSize;
         parameters.Version2.BlockSizeInBytes = blockSize;
         parameters.Version2.SectorSizeInBytes = logicalSectorSize;
         parameters.Version2.PhysicalSectorSizeInBytes = physicalSectorSize;
         parameters.Version2.ParentPath = _parentPath.empty() ? nullptr : _parentPath.c_str();
 
-        if (fileSize % 512 != 0)
-            throw std::runtime_error("Error while creating the virtual disk: fileSize is not a multiple of 512");
+        if (diskSize % 512 != 0)
+            throw std::runtime_error("Error while creating the virtual disk: diskSize is not a multiple of 512");
 
         opStatus = CreateVirtualDisk(
             &storageType,
@@ -69,7 +69,7 @@ void VirtualDisk::create(
             throw std::runtime_error("Error while creating virtual disk, code: " + opStatus);
    } else {
         throw std::runtime_error("Disk already created.");
-    }
+   }
 }
 
 void VirtualDisk::open(const std::wstring& diskPath, const VIRTUAL_DISK_ACCESS_MASK& accessMask, const OPEN_VIRTUAL_DISK_FLAG& openFlag)
@@ -190,7 +190,7 @@ const VirtualDisk::VIRTUAL_DISK_TYPE& VirtualDisk::getType() const
     return (_type);
 }
 
-bool VirtualDisk::resize(ULONGLONG newFileSize)
+bool VirtualDisk::resize(ULONGLONG newDiskSize)
 {
     if (_resizable) {
         RESIZE_VIRTUAL_DISK_PARAMETERS resizeParameters;
@@ -198,10 +198,10 @@ bool VirtualDisk::resize(ULONGLONG newFileSize)
 
         std::memset(&resizeParameters, 0, sizeof(resizeParameters));
         resizeParameters.Version = RESIZE_VIRTUAL_DISK_VERSION_1;
-        resizeParameters.Version1.NewSize = newFileSize;
+        resizeParameters.Version1.NewSize = newDiskSize;
 
-        if (newFileSize % 512 != 0)
-            throw std::runtime_error("Error while resizing the virtual disk : newFileSize is not multiple of 512.");
+        if (newDiskSize % 512 != 0)
+            throw std::runtime_error("Error while resizing the virtual disk : newDiskSize is not multiple of 512.");
 
         opStatus = ResizeVirtualDisk(
             _handle,

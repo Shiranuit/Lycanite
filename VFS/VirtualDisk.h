@@ -48,7 +48,7 @@ public:
     * @param virtualDiskPath: path where the disk will be created
     * @param parentPath: path of the parent disk. If the string is empty disk will not have parent
     * @param flags: disk creation flags
-    * @param fileSize: actual disk size in bytes
+    * @param diskSize: actual disk size in bytes, , must be multiple of 512
     * @param blockSize
     * @param logicalSectorSize
     * @param physicalSectorSize
@@ -58,7 +58,7 @@ public:
         const std::wstring&             virtualDiskPath,
         const std::wstring&             parentPath,
         const CREATE_VIRTUAL_DISK_FLAG& flags,
-        ULONGLONG                       fileSize,
+        ULONGLONG                       diskSize,
         DWORD                           blockSize,
         DWORD                           logicalSectorSize,
         DWORD                           physicalSectorSize
@@ -103,10 +103,10 @@ public:
 
     /**
     * Resize the virtual disk
-    * @param newFileSize new size of the virtual disk
+    * @param newDiskSize new size of the virtual disk in bytes, must be multiple of 512
     * @return true is resized else false
     */
-    virtual bool resize(ULONGLONG newFileSize);
+    virtual bool resize(ULONGLONG newDiskSize);
 
     /**
     * Check if virtual disk is resizable

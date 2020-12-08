@@ -6,7 +6,7 @@ FixedDisk::FixedDisk() : VirtualDisk(VIRTUAL_DISK_TYPE::FIXED, false)
 
 void FixedDisk::create(
     const std::wstring& virtualDiskPath,
-    ULONGLONG           fileSize,
+    ULONGLONG           diskSize,
     DWORD               blockSize,
     DWORD               logicalSectorSize,
     DWORD               physicalSectorSize)
@@ -15,7 +15,7 @@ void FixedDisk::create(
         virtualDiskPath,
         L"",
         CREATE_VIRTUAL_DISK_FLAG_FULL_PHYSICAL_ALLOCATION,
-        fileSize,
+        diskSize,
         blockSize,
         logicalSectorSize,
         physicalSectorSize

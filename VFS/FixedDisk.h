@@ -9,7 +9,7 @@ public:
 
     void create(
         const std::wstring& virtualDiskPath,
-        ULONGLONG           fileSize,
+        ULONGLONG           diskSize,
         DWORD               blockSize,
         DWORD               logicalSectorSize,
         DWORD               physicalSectorSize);

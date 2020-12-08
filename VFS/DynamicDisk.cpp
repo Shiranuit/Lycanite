@@ -6,7 +6,7 @@ DynamicDisk::DynamicDisk() : VirtualDisk(VIRTUAL_DISK_TYPE::DYNAMIC, true)
 
 void DynamicDisk::create(
     const std::wstring& virtualDiskPath,
-    ULONGLONG           fileSize,
+    ULONGLONG           diskSize,
     DWORD               blockSize,
     DWORD               logicalSectorSize,
     DWORD               physicalSectorSize)
@@ -15,7 +15,7 @@ void DynamicDisk::create(
         virtualDiskPath,
         L"",
         CREATE_VIRTUAL_DISK_FLAG_NONE,
-        fileSize,
+        diskSize,
         blockSize,
         logicalSectorSize,
         physicalSectorSize
