@@ -4,6 +4,7 @@
 #include <string>
 #include <thread>
 #include <chrono>
+#include <vector>
 #include <functional>
 #include <exception>
 #include <windows.h>
@@ -86,6 +87,11 @@ public:
     * @return the operation status of the specified vhd handle
     */
     DWORD getOperationStatusDisk(const HANDLE handle, OVERLAPPED& overlapped, VIRTUAL_DISK_PROGRESS& progress) const;
+
+    /**
+    * Query storage dependency information
+    */
+    void getStorageDependencyInfo() const;
 
 private:
     using WaiterDiskHandler = std::function<bool(const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress)>;
