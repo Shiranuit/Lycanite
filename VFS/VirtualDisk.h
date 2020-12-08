@@ -88,17 +88,19 @@ public:
     */
     DWORD getOperationStatusDisk(const HANDLE handle, OVERLAPPED& overlapped, VIRTUAL_DISK_PROGRESS& progress) const;
 
+    using uniquePtrStorage = std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*>;
+
     /**
     * Query storage dependency information
     */
-    std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*> getStorageDependencyInfo() const;
+    uniquePtrStorage getStorageDependencyInfo() const;
 
     /**
     * Query storage dependency information
     * @param diskLetter letter or number of virtual disk (can be 0-9 A-Z)
     * @return unique_ptr pointing to a valid STORAGE_DEPENDENCY_INFO structure
     */
-    static std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*> getStorageDependencyInfo(WCHAR diskLetter);
+    static uniquePtrStorage getStorageDependencyInfo(WCHAR diskLetter);
 
 private:
     using WaiterDiskHandler = std::function<bool(const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress)>;
@@ -129,11 +131,11 @@ private:
     * @return unique_ptr pointing to a STORAGE_DEPENDENCY_INFO structure (can be non valid)
     */
     static DWORD simpleGetStorageDependency(
-        std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*>& pInfo,
-        DWORD                                                           infoSize,
-        DWORD&                                                          cbSize,
-        const HANDLE                                                    driveHandle,
-        GET_STORAGE_DEPENDENCY_FLAG                                     flags);
+        uniquePtrStorage&           pInfo,
+        DWORD                       infoSize,
+        DWORD&                      cbSize,
+        const HANDLE                driveHandle,
+        GET_STORAGE_DEPENDENCY_FLAG flags);
 
 protected:
     std::wstring _diskPath;

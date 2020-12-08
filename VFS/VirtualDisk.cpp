@@ -178,11 +178,11 @@ bool VirtualDisk::isOpen() const
 }
 
 DWORD VirtualDisk::simpleGetStorageDependency(
-    std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*>& pInfo,
-    DWORD                                                           infoSize,
-    DWORD&                                                          cbSize,
-    const HANDLE                                                    driveHandle,
-    GET_STORAGE_DEPENDENCY_FLAG                                     flags)
+    uniquePtrStorage&           pInfo,
+    DWORD                       infoSize,
+    DWORD&                      cbSize,
+    const HANDLE                driveHandle,
+    GET_STORAGE_DEPENDENCY_FLAG flags)
 {
     DWORD opStatus;
 
@@ -204,9 +204,9 @@ DWORD VirtualDisk::simpleGetStorageDependency(
     return (opStatus);
 }
 
-std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*> VirtualDisk::getStorageDependencyInfo(WCHAR diskLetter)
+VirtualDisk::uniquePtrStorage VirtualDisk::getStorageDependencyInfo(WCHAR diskLetter)
 {
-    std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*> pInfo{ nullptr, std::free };
+    uniquePtrStorage pInfo{ nullptr, std::free }; // care! allocate every call
     DWORD infoSize = sizeof(STORAGE_DEPENDENCY_INFO);
     DWORD cbSize = 0;
     HANDLE driveHandle = INVALID_HANDLE_VALUE;
@@ -252,9 +252,11 @@ std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*> VirtualDisk::getS
     return (std::move(pInfo));
 }
 
-std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*> VirtualDisk::getStorageDependencyInfo() const
+VirtualDisk::uniquePtrStorage VirtualDisk::getStorageDependencyInfo() const
 {
-    return (std::move(VirtualDisk::getStorageDependencyInfo(L'E')));
+    if (_handle)
+        return (std::move(VirtualDisk::getStorageDependencyInfo(L'E'))); // here I need to know if disk is attached and I need to pass its associated disk letter
+    throw std::runtime_error("Can't call getStorageDependencyInfo if virtual disk not created/opened.");
 }
 
 bool VirtualDisk::close()
