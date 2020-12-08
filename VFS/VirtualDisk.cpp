@@ -180,8 +180,8 @@ bool VirtualDisk::isOpen() const
 
 void VirtualDisk::getStorageDependencyInfo() const
 {
-    PSTORAGE_DEPENDENCY_INFO pInfo = { 0 }; // should a vector
-    DWORD infoSize;
+    std::unique_ptr<STORAGE_DEPENDENCY_INFO> pInfo = nullptr;
+    DWORD infoSize = sizeof(STORAGE_DEPENDENCY_INFO);
     DWORD cbSize;
     HANDLE driveHandle = nullptr;
     GET_STORAGE_DEPENDENCY_FLAG flags;
@@ -195,27 +195,24 @@ void VirtualDisk::getStorageDependencyInfo() const
 
     if (Disk[0] >= L'0' && Disk[0] <= L'9') {
         // Assume the user is specifying a disk between 0 and 9
-        isDisk = TRUE;
+        isDisk = true;
         szDisk[17] = Disk[0];
         flags = GET_STORAGE_DEPENDENCY_FLAG_PARENTS | GET_STORAGE_DEPENDENCY_FLAG_DISK_HANDLE;
     } else {
         // Assume the user is specifying a drive letter between A: and Z:
-        isDisk = FALSE;
+        isDisk = false;
         szVolume[4] = Disk[0];
         flags = GET_STORAGE_DEPENDENCY_FLAG_PARENTS;
     }
 
     driveHandle = INVALID_HANDLE_VALUE;
-    pInfo = nullptr;
 
     // Allocate enough memory for most basic case.
-    infoSize = sizeof(STORAGE_DEPENDENCY_INFO);
-
-    pInfo = (PSTORAGE_DEPENDENCY_INFO)std::malloc(infoSize);
+    pInfo = std::make_unique<STORAGE_DEPENDENCY_INFO>();
     if (pInfo == nullptr)
         throw std::bad_alloc();
 
-    std::memset(pInfo, 0, infoSize);
+    std::memset(pInfo.get(), 0, infoSize);
 
     // Open the drive
     driveHandle = CreateFile(
@@ -237,19 +234,18 @@ void VirtualDisk::getStorageDependencyInfo() const
         driveHandle,
         flags,
         infoSize,
-        pInfo,
+        pInfo.get(),
         &cbSize
     );
 
     if (opStatus == ERROR_INSUFFICIENT_BUFFER) {
-        // Allocate a large enough buffer.
-        free(pInfo);
+        pInfo.reset();
         infoSize = cbSize;
-        pInfo = (PSTORAGE_DEPENDENCY_INFO)std::malloc(infoSize);
+        pInfo = std::make_unique<STORAGE_DEPENDENCY_INFO>();
         if (pInfo == nullptr)
             throw std::bad_alloc();
 
-        std::memset(pInfo, 0, infoSize);
+        std::memset(pInfo.get(), 0, infoSize);
 
         // Retry with large enough buffer.
         pInfo->Version = STORAGE_DEPENDENCY_INFO_VERSION_2;
@@ -259,7 +255,7 @@ void VirtualDisk::getStorageDependencyInfo() const
             driveHandle,
             GET_STORAGE_DEPENDENCY_FLAG_PARENTS,
             infoSize,
-            pInfo,
+            pInfo.get(),
             &cbSize
         );
     }
