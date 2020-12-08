@@ -12,4 +12,6 @@ public:
     void mergeToParent() const;
 
     ~DereferencingDisk();
+
+    void addVirtualDiskParent(const std::wstring& parentPath);
 };

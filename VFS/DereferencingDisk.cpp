@@ -48,3 +48,21 @@ void DereferencingDisk::mergeToParent() const
 DereferencingDisk::~DereferencingDisk()
 {
 }
+
+void DereferencingDisk::addVirtualDiskParent(const std::wstring& parentPath)
+{
+    DWORD status;
+
+    const std::wstring &diskPath = this->getDiskPath();
+
+    this->close();
+    this->open(diskPath, VIRTUAL_DISK_ACCESS_NONE, OPEN_VIRTUAL_DISK_FLAG_CUSTOM_DIFF_CHAIN);
+
+    status = AddVirtualDiskParent(_handle, parentPath.c_str());
+    if (status != ERROR_SUCCESS) {
+        throw std::runtime_error("error in addVirtualDiskParent. code = " + status);
+    }
+
+    this->close();
+    this->open(diskPath);
+}
