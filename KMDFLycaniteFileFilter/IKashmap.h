@@ -5,7 +5,7 @@
 
 #ifndef __HASHMAP_H__
 
-#include "kashmap.h"
+#include "Kashmap.h"
 
 #define __HASHMAP_H__
 
@@ -62,7 +62,7 @@ extern "C" {
     /*
      * Hashing function for an integer
      */
-    static UINT32 ihashmap_hash_int(hashmap_map* m, UINT32 key);
+    static UINT32 ihashmap_hash_int(hashmap_map* map, UINT32 key);
 
     /*
      * Return the integer of the location in data
@@ -116,26 +116,26 @@ extern "C" {
  * Return an empty hashmap, or NULL on failure.
  */
 map_t ihashmap_new() {
-    hashmap_map* m = (hashmap_map*)malloc(sizeof(hashmap_map));
-    if (!m) goto err;
+    hashmap_map* map = (hashmap_map*)malloc(sizeof(hashmap_map));
+    if (!map) goto err;
 
-    m->data = (hashmap_element*)calloc(INITIAL_SIZE, sizeof(hashmap_element));
-    if (!m->data) goto err;
+    map->data = (hashmap_element*)calloc(INITIAL_SIZE, sizeof(hashmap_element));
+    if (!map->data) goto err;
 
-    m->table_size = INITIAL_SIZE;
-    m->size = 0;
+    map->table_size = INITIAL_SIZE;
+    map->size = 0;
 
-    return m;
+    return map;
 err:
-    if (m)
-        ihashmap_free(m);
+    if (map)
+        ihashmap_free(map);
     return NULL;
 }
 
 /*
  * Hashing function for an integer
  */
-UINT32 ihashmap_hash_int(hashmap_map* m, UINT32 key) {
+UINT32 ihashmap_hash_int(hashmap_map* map, UINT32 key) {
     /* Robert Jenkins' 32 bit Mix Function */
     key += (key << 12);
     key ^= (key >> 22);
@@ -149,7 +149,7 @@ UINT32 ihashmap_hash_int(hashmap_map* m, UINT32 key) {
     /* Knuth's Multiplicative Method */
     key = (key >> 3) * 2654435761;
 
-    return key % m->table_size;
+    return key % map->table_size;
 }
 
 /*
@@ -161,23 +161,23 @@ INT ihashmap_hash(map_t in, INT key) {
     INT i;
 
     /* Cast the hashmap */
-    hashmap_map* m = (hashmap_map*)in;
+    hashmap_map* map = (hashmap_map*)in;
 
     /* If full, return immediately */
-    if (m->size == m->table_size) return MAP_FULL;
+    if (map->size == map->table_size) return MAP_FULL;
 
     /* Find the best index */
-    curr = ihashmap_hash_int(m, key);
+    curr = ihashmap_hash_int(map, key);
 
     /* Linear probling */
-    for (i = 0; i < m->table_size; i++) {
-        if (m->data[curr].in_use == 0)
+    for (i = 0; i < map->table_size; i++) {
+        if (map->data[curr].in_use == 0)
             return curr;
 
-        if (m->data[curr].key == key && m->data[curr].in_use == 1)
+        if (map->data[curr].key == key && map->data[curr].in_use == 1)
             return curr;
 
-        curr = (curr + 1) % m->table_size;
+        curr = (curr + 1) % map->table_size;
     }
 
     return MAP_FULL;
@@ -192,23 +192,23 @@ INT ihashmap_rehash(map_t in) {
     hashmap_element* curr;
 
     /* Setup the new elements */
-    hashmap_map* m = (hashmap_map*)in;
+    hashmap_map* map = (hashmap_map*)in;
     hashmap_element* temp = (hashmap_element*)
-        calloc(2 * m->table_size, sizeof(hashmap_element));
+        calloc(2 * map->table_size, sizeof(hashmap_element));
     if (!temp) return MAP_OMEM;
 
     /* Update the array */
-    curr = m->data;
-    m->data = temp;
+    curr = map->data;
+    map->data = temp;
 
     /* Update the size */
-    old_size = m->table_size;
-    m->table_size = 2 * m->table_size;
-    m->size = 0;
+    old_size = map->table_size;
+    map->table_size = 2 * map->table_size;
+    map->size = 0;
 
     /* Rehash the elements */
     for (i = 0; i < old_size; i++) {
-        INT status = ihashmap_put(m, curr[i].key, curr[i].data);
+        INT status = ihashmap_put(map, curr[i].key, curr[i].data);
         if (status != MAP_OK)
             return status;
     }
@@ -223,10 +223,10 @@ INT ihashmap_rehash(map_t in) {
  */
 INT ihashmap_put(map_t in, INT key, any_t value) {
     INT index;
-    hashmap_map* m;
+    hashmap_map* map;
 
     /* Cast the hashmap */
-    m = (hashmap_map*)in;
+    map = (hashmap_map*)in;
 
     /* Find a place to put our value */
     index = ihashmap_hash(in, key);
@@ -238,10 +238,10 @@ INT ihashmap_put(map_t in, INT key, any_t value) {
     }
 
     /* Set the data */
-    m->data[index].data = value;
-    m->data[index].key = key;
-    m->data[index].in_use = 1;
-    m->size++;
+    map->data[index].data = value;
+    map->data[index].key = key;
+    map->data[index].in_use = 1;
+    map->size++;
 
     return MAP_OK;
 }
@@ -252,23 +252,23 @@ INT ihashmap_put(map_t in, INT key, any_t value) {
 INT ihashmap_get(map_t in, INT key, any_t* arg) {
     INT curr;
     INT i;
-    hashmap_map* m;
+    hashmap_map* map;
 
     /* Cast the hashmap */
-    m = (hashmap_map*)in;
+    map = (hashmap_map*)in;
 
     /* Find data location */
-    curr = ihashmap_hash_int(m, key);
+    curr = ihashmap_hash_int(map, key);
 
     /* Linear probing, if necessary */
-    for (i = 0; i < m->table_size; i++) {
+    for (i = 0; i < map->table_size; i++) {
 
-        if (m->data[curr].key == key && m->data[curr].in_use == 1) {
-            *arg = (PINT32)(m->data[curr].data);
+        if (map->data[curr].key == key && map->data[curr].in_use == 1) {
+            *arg = (PINT32)(map->data[curr].data);
             return MAP_OK;
         }
 
-        curr = (curr + 1) % m->table_size;
+        curr = (curr + 1) % map->table_size;
     }
 
     *arg = NULL;
@@ -282,22 +282,22 @@ INT ihashmap_get(map_t in, INT key, any_t* arg) {
  */
 INT ihashmap_get_one(map_t in, any_t* arg, INT remove) {
     INT i;
-    hashmap_map* m;
+    hashmap_map* map;
 
     /* Cast the hashmap */
-    m = (hashmap_map*)in;
+    map = (hashmap_map*)in;
 
     /* On empty hashmap return immediately */
-    if (ihashmap_length(m) <= 0)
+    if (ihashmap_length(map) <= 0)
         return MAP_MISSING;
 
     /* Linear probing */
-    for (i = 0; i < m->table_size; i++)
-        if (m->data[i].in_use != 0) {
-            *arg = (any_t)(m->data[i].data);
+    for (i = 0; i < map->table_size; i++)
+        if (map->data[i].in_use != 0) {
+            *arg = (any_t)(map->data[i].data);
             if (remove) {
-                m->data[i].in_use = 0;
-                m->size--;
+                map->data[i].in_use = 0;
+                map->size--;
             }
             return MAP_OK;
         }
@@ -314,16 +314,16 @@ INT ihashmap_iterate(map_t in, PFany f, any_t item) {
     INT i;
 
     /* Cast the hashmap */
-    hashmap_map* m = (hashmap_map*)in;
+    hashmap_map* map = (hashmap_map*)in;
 
     /* On empty hashmap, return immediately */
-    if (ihashmap_length(m) <= 0)
+    if (ihashmap_length(map) <= 0)
         return MAP_MISSING;
 
     /* Linear probing */
-    for (i = 0; i < m->table_size; i++)
-        if (m->data[i].in_use != 0) {
-            any_t data = (any_t)(m->data[i].data);
+    for (i = 0; i < map->table_size; i++)
+        if (map->data[i].in_use != 0) {
+            any_t data = (any_t)(map->data[i].data);
             INT status = f(item, data);
             if (status != MAP_OK) {
                 return status;
@@ -339,27 +339,27 @@ INT ihashmap_iterate(map_t in, PFany f, any_t item) {
 INT ihashmap_remove(map_t in, INT key) {
     INT i;
     INT curr;
-    hashmap_map* m;
+    hashmap_map* map;
 
     /* Cast the hashmap */
-    m = (hashmap_map*)in;
+    map = (hashmap_map*)in;
 
     /* Find key */
-    curr = ihashmap_hash_int(m, key);
+    curr = ihashmap_hash_int(map, key);
 
     /* Linear probing, if necessary */
-    for (i = 0; i < m->table_size; i++) {
-        if (m->data[curr].key == key && m->data[curr].in_use == 1) {
+    for (i = 0; i < map->table_size; i++) {
+        if (map->data[curr].key == key && map->data[curr].in_use == 1) {
             /* Blank out the fields */
-            m->data[curr].in_use = 0;
-            m->data[curr].data = NULL;
-            m->data[curr].key = 0;
+            map->data[curr].in_use = 0;
+            map->data[curr].data = NULL;
+            map->data[curr].key = 0;
 
             /* Reduce the size */
-            m->size--;
+            map->size--;
             return MAP_OK;
         }
-        curr = (curr + 1) % m->table_size;
+        curr = (curr + 1) % map->table_size;
     }
 
     /* Data not found */
@@ -368,15 +368,15 @@ INT ihashmap_remove(map_t in, INT key) {
 
 /* Deallocate the hashmap */
 VOID ihashmap_free(map_t in) {
-    hashmap_map* m = (hashmap_map*)in;
-    free(m->data);
-    free(m);
+    hashmap_map* map = (hashmap_map*)in;
+    free(map->data);
+    free(map);
 }
 
 /* Return the length of the hashmap */
 INT ihashmap_length(map_t in) {
-    hashmap_map* m = (hashmap_map*)in;
-    if (m != NULL) return m->size;
+    hashmap_map* map = (hashmap_map*)in;
+    if (map != NULL) return map->size;
     else return 0;
 }
 
