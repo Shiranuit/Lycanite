@@ -93,6 +93,9 @@ public:
 
     void getUserMetaData(const GUID& uniqueId, ULONG& metaDataSize, const std::shared_ptr<VOID>& data) const;
 
+    void getAllVirtualDisk(std::shared_ptr<LPWSTR> &data);
+
+
 private:
     using WaiterDiskHandler = std::function<bool(const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress)>;
 

@@ -239,3 +239,13 @@ void VirtualDisk::deleteUserMetaData(const GUID &uniqueId)
         throw std::runtime_error("error in deleteUserMetaData. code = " + status);
     }
 }
+void VirtualDisk::getAllVirtualDisk(std::shared_ptr<LPWSTR> &data) {
+    LPWSTR pathList = nullptr;
+    ULONG pathSize = 0;
+    DWORD status = 0;
+
+    if ((status = GetAllAttachedVirtualDiskPhysicalPaths(&pathSize, pathList)) != ERROR_SUCCESS) {
+        throw std::runtime_error("error in getAllVirtualDisk");
+    }
+    data.reset(pathList);
+}
