@@ -181,6 +181,10 @@ extern "C" {
 #define HASHMAP_NULL 0
 #endif
 
+PVOID malloc(SIZE_T memory_size) {
+    return ExAllocatePoolWithTag(NonPagedPoolNx, memory_size, 'aloc');
+}
+
 PVOID calloc(SIZE_T elementCount, SIZE_T elementSize) {
     SIZE_T total_size = elementCount * elementSize;
     PCHAR mem = (PCHAR)ExAllocatePoolWithTag(NonPagedPoolNx, elementCount * elementSize, 'aloc');
