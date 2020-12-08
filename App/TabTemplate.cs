@@ -119,7 +119,7 @@ namespace App
         {
             MetroSet_UI.Controls.MetroSetSwitch switch_obj = (MetroSet_UI.Controls.MetroSetSwitch)sender;
 
-            if (switch_obj.CheckState.ToString().CompareTo("Checked") == 0)
+            if (switch_obj.CheckState == MetroSet_UI.Enums.CheckState.Checked)
             {
                 metroSetLabel2.ForeColor = Color.FromArgb(210, 210, 210);
             } else
@@ -131,17 +131,17 @@ namespace App
         private String[] getAllFileAndDirFromPath(String path)
         {
             String[] allFiles = Directory.GetFiles(path);
-            String[] allDir = (Directory.GetDirectories(path));
+            String[] allDir = Directory.GetDirectories(path);
             List<String> allFileAndDir = new List<String>();
 
             foreach (string filepath in allDir)
             {
-                String file_tmp = filepath.Split('\\')[filepath.Split('\\').Length - 1];
+                String file_tmp = Path.GetFileName(filepath);
                 allFileAndDir.Add(file_tmp);
             }
             foreach (string filepath in allFiles)
             {
-                String file_tmp = filepath.Split('\\')[filepath.Split('\\').Length - 1];
+                String file_tmp = Path.GetFileName(filepath);
                 allFileAndDir.Add(file_tmp);
             }
 

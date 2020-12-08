@@ -22,7 +22,7 @@ namespace App
 
         private void Form1_Load(object sender, EventArgs e)
         {
-
+            metroSetTabControl1.Padding = new Point(20, 4);
         }
 
         private void Form1_DragEnter(object sender, DragEventArgs e)
@@ -36,6 +36,7 @@ namespace App
             String name = "";
             TabTemplate newTab = new TabTemplate();
 
+            
             foreach (string file in files)
             {
                 if (File.Exists(file))
@@ -45,14 +46,13 @@ namespace App
                     newTab.addPath(file);
                 }
             }
-
-            
+            TabTemplate newTab = new TabTemplate();
 
             TabPage tab = new TabPage();
             tab.Controls.Add(newTab);
             newTab.Dock = DockStyle.Fill;
             tab.Text = name;
-            
+    
             metroSetTabControl1.Controls.Add(tab);
 
             metroSetLabel1.Visible = false;

@@ -69,13 +69,13 @@ namespace App
             this.metroSetTabControl1.Controls.Add(this.metroSetSetTabPage3);
             this.metroSetTabControl1.Controls.Add(this.metroSetSetTabPage4);
             this.metroSetTabControl1.Controls.Add(this.metroSetSetTabPage5);
-            this.metroSetTabControl1.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.metroSetTabControl1.Cursor = System.Windows.Forms.Cursors.Default;
             this.metroSetTabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.metroSetTabControl1.IsDerivedStyle = true;
             this.metroSetTabControl1.ItemSize = new System.Drawing.Size(100, 38);
             this.metroSetTabControl1.Location = new System.Drawing.Point(0, 0);
             this.metroSetTabControl1.Name = "metroSetTabControl1";
-            this.metroSetTabControl1.SelectedIndex = 3;
+            this.metroSetTabControl1.SelectedIndex = 0;
             this.metroSetTabControl1.SelectedTextColor = System.Drawing.Color.White;
             this.metroSetTabControl1.Size = new System.Drawing.Size(766, 320);
             this.metroSetTabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
@@ -107,6 +107,35 @@ namespace App
             this.metroSetSetTabPage1.ThemeAuthor = "Narwin";
             this.metroSetSetTabPage1.ThemeName = "MetroLite";
             this.metroSetSetTabPage1.ToolTipText = null;
+            // 
+            // metroSetDivider1
+            // 
+            this.metroSetDivider1.IsDerivedStyle = true;
+            this.metroSetDivider1.Location = new System.Drawing.Point(30, 131);
+            this.metroSetDivider1.Name = "metroSetDivider1";
+            this.metroSetDivider1.Orientation = MetroSet_UI.Enums.DividerStyle.Horizontal;
+            this.metroSetDivider1.Size = new System.Drawing.Size(685, 4);
+            this.metroSetDivider1.Style = MetroSet_UI.Enums.Style.Dark;
+            this.metroSetDivider1.StyleManager = null;
+            this.metroSetDivider1.TabIndex = 1;
+            this.metroSetDivider1.Text = "metroSetDivider1";
+            this.metroSetDivider1.ThemeAuthor = "Narwin";
+            this.metroSetDivider1.ThemeName = "MetroDark";
+            this.metroSetDivider1.Thickness = 1;
+            // 
+            // metroSetLabel1
+            // 
+            this.metroSetLabel1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.metroSetLabel1.IsDerivedStyle = true;
+            this.metroSetLabel1.Location = new System.Drawing.Point(281, 9);
+            this.metroSetLabel1.Name = "metroSetLabel1";
+            this.metroSetLabel1.Size = new System.Drawing.Size(174, 36);
+            this.metroSetLabel1.Style = MetroSet_UI.Enums.Style.Dark;
+            this.metroSetLabel1.StyleManager = null;
+            this.metroSetLabel1.TabIndex = 0;
+            this.metroSetLabel1.Text = "Authorization";
+            this.metroSetLabel1.ThemeAuthor = "Narwin";
+            this.metroSetLabel1.ThemeName = "MetroDark";
             // 
             // metroSetDivider1
             // 
