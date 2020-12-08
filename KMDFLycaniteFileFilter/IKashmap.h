@@ -7,6 +7,10 @@
 
 #include "Kashmap.h"
 
+/*
+* hashmap need to handle all mem access
+*/
+
 #define __HASHMAP_H__
 
 #define MAP_MISSING -3  /* No such element */
