@@ -6,6 +6,7 @@
 #include <chrono>
 #include <functional>
 #include <exception>
+#include <vector>
 #include <windows.h>
 #include <initguid.h>
 #include <virtdisk.h>
@@ -92,6 +93,11 @@ public:
     void setUserMetaData(const PVOID &data, const GUID &uniqueId, const ULONG &nbToWrite);
 
     void getUserMetaData(const GUID& uniqueId, ULONG& metaDataSize, const std::shared_ptr<VOID>& data) const;
+  
+    /// <summary>Enumerate the available metadata items of the opened vhdx file.
+    /// <para>Warning, this method is heavy due to a vector instantiation. Do not use it without thinking</para>
+    /// </summary>
+    std::unique_ptr<std::vector<GUID>> enumerateUserMetaData() const;
 
 private:
     using WaiterDiskHandler = std::function<bool(const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress)>;
