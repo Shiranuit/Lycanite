@@ -88,6 +88,10 @@ public:
     * @return the operation status of the specified vhd handle
     */
     DWORD getOperationStatusDisk(const HANDLE handle, OVERLAPPED& overlapped, VIRTUAL_DISK_PROGRESS& progress) const;
+    
+    void setUserMetaData(const PVOID &data, const GUID &uniqueId, const ULONG &nbToWrite);
+
+    void getUserMetaData(const GUID& uniqueId, ULONG& metaDataSize, const std::shared_ptr<VOID>& data) const;
 
 private:
     using WaiterDiskHandler = std::function<bool(const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress)>;

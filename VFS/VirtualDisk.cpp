@@ -200,6 +200,37 @@ const HANDLE VirtualDisk::getHandle() const
     return (_handle);
 }
 
+
+void VirtualDisk::setUserMetaData(const PVOID &data, const GUID &uniqueId, const ULONG& nbToWrite)
+{
+    DWORD status;
+
+    status = SetVirtualDiskMetadata(
+        _handle,
+        &uniqueId,
+        nbToWrite,
+        data);
+
+    if (status != ERROR_SUCCESS) {
+        throw std::runtime_error("error = " + status);
+    }
+}
+
+void VirtualDisk::getUserMetaData(const GUID &uniqueId, ULONG &metaDataSize, const std::shared_ptr<VOID> &data) const
+{
+    DWORD status;
+
+    status = GetVirtualDiskMetadata(
+        _handle,
+        &uniqueId,
+        &metaDataSize,
+        data.get());
+
+    if (status != ERROR_SUCCESS) {
+        throw std::runtime_error("error = " + status);
+    }
+}
+
 void VirtualDisk::deleteUserMetaData(const GUID &uniqueId)
 {
     DWORD status;
