@@ -91,7 +91,14 @@ public:
     /**
     * Query storage dependency information
     */
-    void getStorageDependencyInfo() const;
+    std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*> getStorageDependencyInfo() const;
+
+    /**
+    * Query storage dependency information
+    * @param diskLetter letter or number of virtual disk (can be 0-9 A-Z)
+    * @return unique_ptr pointing to a valid STORAGE_DEPENDENCY_INFO structure
+    */
+    static std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*> getStorageDependencyInfo(WCHAR diskLetter);
 
 private:
     using WaiterDiskHandler = std::function<bool(const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress)>;
@@ -108,6 +115,25 @@ private:
         OVERLAPPED&              overlapped,
         const WaiterDiskHandler& progressHandler,
         int                      msWaits = 1000) const;
+
+    /**
+    * Simple get storage dependency
+    * Returns the relationships between virtual hard disks (VHDs) or CD or DVD image file (ISO)
+    * or the volumes contained within those disks and their parent disk or volume.
+    * @param pInfo: a reference from a unique_ptr (custom free because it must allocate with malloc) poiting to a
+    * (maybe) non valid STORAGE_DEPENDENCY_INFO structure, the unique_ptr will be allocate in the function
+    * @param infoSize: size to allocate in the unique_ptr
+    * @param cbSize: a size that receives the size used.
+    * @param driveHandle: a handle to a volume or root directory (opened by CreateFile)
+    * @param flags: flags
+    * @return unique_ptr pointing to a STORAGE_DEPENDENCY_INFO structure (can be non valid)
+    */
+    static DWORD simpleGetStorageDependency(
+        std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*>& pInfo,
+        DWORD                                                           infoSize,
+        DWORD&                                                          cbSize,
+        const HANDLE                                                    driveHandle,
+        GET_STORAGE_DEPENDENCY_FLAG                                     flags);
 
 protected:
     std::wstring _diskPath;

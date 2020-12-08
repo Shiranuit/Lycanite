@@ -152,8 +152,7 @@ void VirtualDisk::mirror(const std::wstring& destinationPath)
                     return (true);
             return (false);
         });
-    }
-    else
+    } else
         throw std::runtime_error("Error while mirroring the virtual disk, code: " + opStatus);
 
     // Break the mirror.  Breaking the mirror will activate the new target and cause it to be
@@ -178,41 +177,55 @@ bool VirtualDisk::isOpen() const
     return (_handle && _handle != INVALID_HANDLE_VALUE);
 }
 
-void VirtualDisk::getStorageDependencyInfo() const
+DWORD VirtualDisk::simpleGetStorageDependency(
+    std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*>& pInfo,
+    DWORD                                                           infoSize,
+    DWORD&                                                          cbSize,
+    const HANDLE                                                    driveHandle,
+    GET_STORAGE_DEPENDENCY_FLAG                                     flags)
 {
-    std::unique_ptr<STORAGE_DEPENDENCY_INFO> pInfo = nullptr;
-    DWORD infoSize = sizeof(STORAGE_DEPENDENCY_INFO);
-    DWORD cbSize;
-    HANDLE driveHandle = nullptr;
-    GET_STORAGE_DEPENDENCY_FLAG flags;
-    BOOL isDisk;
     DWORD opStatus;
-    DWORD entry;
-    TCHAR szVolume[8] = L"\\\\.\\C:\\";
-    TCHAR szDisk[19] = L"\\\\.\\PhysicalDrive0";
 
-    std::wstring Disk(L"...");
-
-    if (Disk[0] >= L'0' && Disk[0] <= L'9') {
-        // Assume the user is specifying a disk between 0 and 9
-        isDisk = true;
-        szDisk[17] = Disk[0];
-        flags = GET_STORAGE_DEPENDENCY_FLAG_PARENTS | GET_STORAGE_DEPENDENCY_FLAG_DISK_HANDLE;
-    } else {
-        // Assume the user is specifying a drive letter between A: and Z:
-        isDisk = false;
-        szVolume[4] = Disk[0];
-        flags = GET_STORAGE_DEPENDENCY_FLAG_PARENTS;
-    }
-
-    driveHandle = INVALID_HANDLE_VALUE;
-
-    // Allocate enough memory for most basic case.
-    pInfo = std::make_unique<STORAGE_DEPENDENCY_INFO>();
+    pInfo.reset(static_cast<PSTORAGE_DEPENDENCY_INFO>(std::malloc(infoSize)));
     if (pInfo == nullptr)
         throw std::bad_alloc();
 
     std::memset(pInfo.get(), 0, infoSize);
+
+    pInfo->Version = STORAGE_DEPENDENCY_INFO_VERSION_2;
+    cbSize = 0;
+    opStatus = GetStorageDependencyInformation(
+        driveHandle,
+        flags,
+        infoSize,
+        pInfo.get(),
+        &cbSize
+    );
+    return (opStatus);
+}
+
+std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*> VirtualDisk::getStorageDependencyInfo(WCHAR diskLetter)
+{
+    std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*> pInfo{ nullptr, std::free };
+    DWORD infoSize = sizeof(STORAGE_DEPENDENCY_INFO);
+    DWORD cbSize = 0;
+    HANDLE driveHandle = INVALID_HANDLE_VALUE;
+    GET_STORAGE_DEPENDENCY_FLAG flags;
+    BOOL isDisk = false;
+    DWORD opStatus;
+    // prepend with \\?\ to the path to extend the limit to 32,767 characters
+    TCHAR szVolume[8] = L"\\\\.\\C:\\";
+    TCHAR szDisk[19] = L"\\\\.\\PhysicalDrive0";
+
+    if (diskLetter >= L'0' && diskLetter <= L'9') {
+        isDisk = true;
+        szDisk[17] = diskLetter;
+        flags = GET_STORAGE_DEPENDENCY_FLAG_PARENTS | GET_STORAGE_DEPENDENCY_FLAG_DISK_HANDLE;
+    } else {
+        isDisk = false;
+        szVolume[4] = diskLetter;
+        flags = GET_STORAGE_DEPENDENCY_FLAG_PARENTS;
+    }
 
     // Open the drive
     driveHandle = CreateFile(
@@ -227,51 +240,21 @@ void VirtualDisk::getStorageDependencyInfo() const
     if (driveHandle == INVALID_HANDLE_VALUE)
         throw std::runtime_error("Error while getting storage dependency information, code: " + GetLastError());
 
-    // Determine the size actually required.
-    pInfo->Version = STORAGE_DEPENDENCY_INFO_VERSION_2;
-    cbSize = 0;
-    opStatus = GetStorageDependencyInformation(
-        driveHandle,
-        flags,
-        infoSize,
-        pInfo.get(),
-        &cbSize
-    );
-
+    infoSize = sizeof(STORAGE_DEPENDENCY_INFO);
+    opStatus = simpleGetStorageDependency(pInfo, infoSize, cbSize, driveHandle, flags);
     if (opStatus == ERROR_INSUFFICIENT_BUFFER) {
-        pInfo.reset();
         infoSize = cbSize;
-        pInfo = std::make_unique<STORAGE_DEPENDENCY_INFO>();
-        if (pInfo == nullptr)
-            throw std::bad_alloc();
-
-        std::memset(pInfo.get(), 0, infoSize);
-
-        // Retry with large enough buffer.
-        pInfo->Version = STORAGE_DEPENDENCY_INFO_VERSION_2;
-        cbSize = 0;
-
-        opStatus = GetStorageDependencyInformation(
-            driveHandle,
-            GET_STORAGE_DEPENDENCY_FLAG_PARENTS,
-            infoSize,
-            pInfo.get(),
-            &cbSize
-        );
+        opStatus = simpleGetStorageDependency(pInfo, infoSize, cbSize, driveHandle, GET_STORAGE_DEPENDENCY_FLAG_PARENTS);
     }
 
     if (opStatus != ERROR_SUCCESS)
         throw std::runtime_error("Error while getting storage dependency information. It is most likely due that disk is not mounted.");
+    return (std::move(pInfo));
+}
 
-    // Display the relationship between the specified volume and the underlying disks.
-    for (DWORD entry = 0; entry < pInfo->NumberEntries; entry++) {
-        wprintf(L"%u:\n", entry);
-        wprintf(L"   %u\n", pInfo->Version2Entries[entry].AncestorLevel);
-        wprintf(L"   %s\n", pInfo->Version2Entries[entry].DependencyDeviceName);
-        wprintf(L"   %s\n", pInfo->Version2Entries[entry].HostVolumeName);
-        wprintf(L"   %s\n", pInfo->Version2Entries[entry].DependentVolumeName);
-        wprintf(L"   %s\n", pInfo->Version2Entries[entry].DependentVolumeRelativePath);
-    }
+std::unique_ptr<STORAGE_DEPENDENCY_INFO, decltype(std::free)*> VirtualDisk::getStorageDependencyInfo() const
+{
+    return (std::move(VirtualDisk::getStorageDependencyInfo(L'E')));
 }
 
 bool VirtualDisk::close()
