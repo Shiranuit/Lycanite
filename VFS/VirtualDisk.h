@@ -6,6 +6,7 @@
 #include <chrono>
 #include <functional>
 #include <exception>
+#include <vector>
 #include <windows.h>
 #include <initguid.h>
 #include <virtdisk.h>
