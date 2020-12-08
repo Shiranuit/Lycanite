@@ -41,7 +41,8 @@ namespace App
                 if (File.Exists(file))
                 {
                     MessageBox.Show(file);
-                    name = file.Split('\\')[file.Split('\\').Length - 1];
+                    name = Path.GetFileName(file);
+
                     newTab.addPath(file);
                 }
             }
