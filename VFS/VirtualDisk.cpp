@@ -16,7 +16,8 @@ void VirtualDisk::create(
     ULONGLONG                       fileSize,
     DWORD                           blockSize,
     DWORD                           logicalSectorSize,
-    DWORD                           physicalSectorSize)
+    DWORD                           physicalSectorSize,
+    const OPEN_VIRTUAL_DISK_FLAG& openFlags)
 {
     if (!_handle) {
         VIRTUAL_STORAGE_TYPE storageType = { 0 };
@@ -42,6 +43,7 @@ void VirtualDisk::create(
         parameters.Version2.SectorSizeInBytes = logicalSectorSize;
         parameters.Version2.PhysicalSectorSizeInBytes = physicalSectorSize;
         parameters.Version2.ParentPath = _parentPath.empty() ? nullptr : _parentPath.c_str();
+        parameters.Version2.OpenFlags = openFlags;
 
         if (fileSize % 512 != 0)
             throw std::runtime_error("fileSize is not a multiple of 512");

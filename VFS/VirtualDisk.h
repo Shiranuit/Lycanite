@@ -48,7 +48,8 @@ public:
         ULONGLONG                       fileSize,
         DWORD                           blockSize,
         DWORD                           logicalSectorSize,
-        DWORD                           physicalSectorSize);
+        DWORD                           physicalSectorSize,
+        const OPEN_VIRTUAL_DISK_FLAG& openFlags);
 
     /**
     * Open the virtual disk

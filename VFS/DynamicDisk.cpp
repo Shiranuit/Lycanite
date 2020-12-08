@@ -18,7 +18,8 @@ void DynamicDisk::create(
         fileSize,
         blockSize,
         logicalSectorSize,
-        physicalSectorSize
+        physicalSectorSize,
+        OPEN_VIRTUAL_DISK_FLAG_NONE
     );
 }
 
