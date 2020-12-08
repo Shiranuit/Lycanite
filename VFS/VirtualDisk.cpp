@@ -1,8 +1,7 @@
 #include "VirtualDisk.h"
 
-VirtualDisk::VirtualDisk() : _handle(nullptr)
+VirtualDisk::VirtualDisk() : _handle(nullptr), _diskInfo()
 {
-    _diskInfo = GET_VIRTUAL_DISK_INFO();
 }
 
 VirtualDisk::~VirtualDisk()
@@ -265,6 +264,14 @@ const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo()
             &diskInfoSize,
             &_diskInfo,
             NULL);
+
+        // Get parent timestamp.
+        _diskInfo.Version = GET_VIRTUAL_DISK_INFO_PARENT_TIMESTAMP;
+        opStatus = GetVirtualDiskInformation(
+            _handle,
+            &diskInfoSize,
+            &_diskInfo,
+            NULL);
     }
     
     // Get the VHD minimum internal size.
@@ -277,6 +284,46 @@ const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo()
 
     // Get the VHD fragmentation percentage.
     _diskInfo.Version = GET_VIRTUAL_DISK_INFO_FRAGMENTATION;
+    opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        &_diskInfo,
+        NULL);
+
+    // Get the VHD alignement.
+    _diskInfo.Version = GET_VIRTUAL_DISK_INFO_IS_4K_ALIGNED;
+    opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        &_diskInfo,
+        NULL);
+
+    // Get the VHD physical disk.
+    _diskInfo.Version = GET_VIRTUAL_DISK_INFO_PHYSICAL_DISK;
+    opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        &_diskInfo,
+        NULL);
+
+    // Get the VHD loaded state.
+    _diskInfo.Version = GET_VIRTUAL_DISK_INFO_IS_LOADED;
+    opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        &_diskInfo,
+        NULL);
+
+    // get virtual disk id
+    _diskInfo.Version = GET_VIRTUAL_DISK_INFO_VIRTUAL_DISK_ID;
+    opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        &_diskInfo,
+        NULL);
+
+    // get tracking state
+    _diskInfo.Version = GET_VIRTUAL_DISK_INFO_CHANGE_TRACKING_STATE;
     opStatus = GetVirtualDiskInformation(
         _handle,
         &diskInfoSize,
