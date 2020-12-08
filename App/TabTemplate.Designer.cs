@@ -42,6 +42,9 @@ namespace App
             this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.metroSetSetTabPage3 = new MetroSet_UI.Child.MetroSetSetTabPage();
             this.metroSetSetTabPage4 = new MetroSet_UI.Child.MetroSetSetTabPage();
+            this.ButtonFile = new MetroSet_UI.Controls.MetroSetButton();
+            this.ButtonDirectory = new MetroSet_UI.Controls.MetroSetButton();
+            this.metroSetPanel1 = new MetroSet_UI.Controls.MetroSetPanel();
             this.listView1 = new System.Windows.Forms.ListView();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.metroSetLabel2 = new MetroSet_UI.Controls.MetroSetLabel();
@@ -207,6 +210,9 @@ namespace App
             // metroSetSetTabPage4
             // 
             this.metroSetSetTabPage4.BaseColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.metroSetSetTabPage4.Controls.Add(this.ButtonFile);
+            this.metroSetSetTabPage4.Controls.Add(this.ButtonDirectory);
+            this.metroSetSetTabPage4.Controls.Add(this.metroSetPanel1);
             this.metroSetSetTabPage4.Controls.Add(this.listView1);
             this.metroSetSetTabPage4.Controls.Add(this.metroSetLabel2);
             this.metroSetSetTabPage4.Controls.Add(this.metroSetSwitch1);
@@ -226,14 +232,84 @@ namespace App
             this.metroSetSetTabPage4.ThemeName = "MetroLite";
             this.metroSetSetTabPage4.ToolTipText = null;
             // 
+            // ButtonFile
+            // 
+            this.ButtonFile.DisabledBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
+            this.ButtonFile.DisabledBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
+            this.ButtonFile.DisabledForeColor = System.Drawing.Color.Gray;
+            this.ButtonFile.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.ButtonFile.HoverBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(207)))), ((int)(((byte)(255)))));
+            this.ButtonFile.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(207)))), ((int)(((byte)(255)))));
+            this.ButtonFile.HoverTextColor = System.Drawing.Color.White;
+            this.ButtonFile.IsDerivedStyle = true;
+            this.ButtonFile.Location = new System.Drawing.Point(548, 172);
+            this.ButtonFile.Name = "ButtonFile";
+            this.ButtonFile.NormalBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
+            this.ButtonFile.NormalColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
+            this.ButtonFile.NormalTextColor = System.Drawing.Color.White;
+            this.ButtonFile.PressBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(147)))), ((int)(((byte)(195)))));
+            this.ButtonFile.PressColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(147)))), ((int)(((byte)(195)))));
+            this.ButtonFile.PressTextColor = System.Drawing.Color.White;
+            this.ButtonFile.Size = new System.Drawing.Size(140, 40);
+            this.ButtonFile.Style = MetroSet_UI.Enums.Style.Light;
+            this.ButtonFile.StyleManager = null;
+            this.ButtonFile.TabIndex = 8;
+            this.ButtonFile.Text = "Add Simple File";
+            this.ButtonFile.ThemeAuthor = "Narwin";
+            this.ButtonFile.ThemeName = "MetroLite";
+            this.ButtonFile.Click += new System.EventHandler(this.buttonFile_Click);
+            // 
+            // ButtonDirectory
+            // 
+            this.ButtonDirectory.DisabledBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
+            this.ButtonDirectory.DisabledBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
+            this.ButtonDirectory.DisabledForeColor = System.Drawing.Color.Gray;
+            this.ButtonDirectory.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.ButtonDirectory.HoverBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(207)))), ((int)(((byte)(255)))));
+            this.ButtonDirectory.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(207)))), ((int)(((byte)(255)))));
+            this.ButtonDirectory.HoverTextColor = System.Drawing.Color.White;
+            this.ButtonDirectory.IsDerivedStyle = true;
+            this.ButtonDirectory.Location = new System.Drawing.Point(548, 75);
+            this.ButtonDirectory.Name = "ButtonDirectory";
+            this.ButtonDirectory.NormalBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
+            this.ButtonDirectory.NormalColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
+            this.ButtonDirectory.NormalTextColor = System.Drawing.Color.White;
+            this.ButtonDirectory.PressBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(147)))), ((int)(((byte)(195)))));
+            this.ButtonDirectory.PressColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(147)))), ((int)(((byte)(195)))));
+            this.ButtonDirectory.PressTextColor = System.Drawing.Color.White;
+            this.ButtonDirectory.Size = new System.Drawing.Size(140, 40);
+            this.ButtonDirectory.Style = MetroSet_UI.Enums.Style.Light;
+            this.ButtonDirectory.StyleManager = null;
+            this.ButtonDirectory.TabIndex = 7;
+            this.ButtonDirectory.Text = "Add Directory";
+            this.ButtonDirectory.ThemeAuthor = "Narwin";
+            this.ButtonDirectory.ThemeName = "MetroLite";
+            this.ButtonDirectory.Click += new System.EventHandler(this.buttonDirectory_Click);
+            // 
+            // metroSetPanel1
+            // 
+            this.metroSetPanel1.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.metroSetPanel1.BorderColor = System.Drawing.Color.Transparent;
+            this.metroSetPanel1.BorderThickness = 0;
+            this.metroSetPanel1.IsDerivedStyle = false;
+            this.metroSetPanel1.Location = new System.Drawing.Point(442, 34);
+            this.metroSetPanel1.Name = "metroSetPanel1";
+            this.metroSetPanel1.Size = new System.Drawing.Size(33, 237);
+            this.metroSetPanel1.Style = MetroSet_UI.Enums.Style.Dark;
+            this.metroSetPanel1.StyleManager = null;
+            this.metroSetPanel1.TabIndex = 6;
+            this.metroSetPanel1.ThemeAuthor = "Narwin";
+            this.metroSetPanel1.ThemeName = "MetroDark";
+            // 
             // listView1
             // 
             this.listView1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.listView1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.listView1.HideSelection = false;
             this.listView1.LargeImageList = this.imageList1;
             this.listView1.Location = new System.Drawing.Point(3, 34);
             this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(790, 237);
+            this.listView1.Size = new System.Drawing.Size(472, 237);
             this.listView1.SmallImageList = this.imageList1;
             this.listView1.TabIndex = 5;
             this.listView1.UseCompatibleStateImageBehavior = false;
@@ -294,8 +370,8 @@ namespace App
             this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
             this.pictureBox1.Location = new System.Drawing.Point(3, 3);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(46, 25);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.Size = new System.Drawing.Size(70, 25);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 2;
             this.pictureBox1.TabStop = false;
             this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
@@ -357,5 +433,8 @@ namespace App
         private MetroSet_UI.Controls.MetroSetSwitch metroSetSwitch1;
         private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.ImageList imageList1;
+        private MetroSet_UI.Controls.MetroSetButton ButtonDirectory;
+        private MetroSet_UI.Controls.MetroSetPanel metroSetPanel1;
+        private MetroSet_UI.Controls.MetroSetButton ButtonFile;
     }
 }

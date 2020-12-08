@@ -65,7 +65,7 @@ namespace App
             TabTemplate newTab = new TabTemplate();
 
             newTab.addPath(path);
-            newTab.addDirList(filename.ToArray());
+            // newTab.addDirList(filename.ToArray());
 
             TabPage tab = new TabPage();
             tab.Controls.Add(newTab);

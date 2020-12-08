@@ -18,6 +18,8 @@ namespace App
     public partial class TabTemplate : UserControl, IMetroSetControl
     {
         private String _actual_path = "";
+        private String _selectedFileName = "";
+        private Dictionary<String, String> _fileListAuthorize = new Dictionary<String, String>();
         public TabTemplate()
         {
             InitializeComponent();
@@ -36,10 +38,9 @@ namespace App
             InitializeComponent();
         }
 
-        public void addDirList(String[] filename)
+        public void addDirList(String filename)
         {
             listView1.ForeColor = Color.White;
-            listView1.Clear();
 
             listView1.View = View.Details;
             listView1.HeaderStyle = ColumnHeaderStyle.None;
@@ -47,15 +48,12 @@ namespace App
             h.Width = listView1.ClientSize.Width - SystemInformation.VerticalScrollBarWidth;
             listView1.Columns.Add(h);
 
-            foreach (String file in filename)
-            {
-                ListViewItem tmp_item = new ListViewItem(file);
-                if (Directory.Exists(_actual_path + "\\" + file))
-                    tmp_item.ImageIndex = 0;
-                else
-                    tmp_item.ImageIndex = 1;
-                listView1.Items.Add(tmp_item);
-            }
+            ListViewItem tmp_item = new ListViewItem(Path.GetFileName(filename));
+            if (Directory.Exists(filename))
+                tmp_item.ImageIndex = 0;
+            else
+                tmp_item.ImageIndex = 1;
+            listView1.Items.Add(tmp_item);
         }
 
         public void addPath(String path)
@@ -75,11 +73,23 @@ namespace App
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            int i = _actual_path.Length - 1;
-            for (; _actual_path[i].CompareTo('\\') != 0; i--) ;
-            _actual_path = _actual_path.Substring(0, i);
+            if (_fileListAuthorize.Count() == 0 || listView1.Items.Count == 0)
+                return;
+            Debug.WriteLine("\n\nBEGIN: " + Path.GetFullPath(listView1.SelectedItems[0].Text) + "\n");
 
-            addDirList(getAllFileAndDirFromPath(_actual_path));
+            foreach(KeyValuePair<String, String> kvp in _fileListAuthorize)
+            {
+                Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
+            }
+
+            _fileListAuthorize.Remove(listView1.SelectedItems[0].Text);
+
+            foreach (KeyValuePair<String, String> kvp in _fileListAuthorize)
+            {
+                Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
+            }
+
+            listView1.Items.Remove(listView1.SelectedItems[0]);
         }
 
         private void pictureBox1_MouseEnter(object sender, EventArgs e)
@@ -163,11 +173,43 @@ namespace App
         {
             ListView listview = (ListView)sender;
 
-            String name = listview.Items[listview.SelectedIndices[0]].Text;
+            _selectedFileName = listview.Items[listview.SelectedIndices[0]].Text;
 
-            if (Directory.Exists(_actual_path + "\\" + name))
+/*            if (Directory.Exists(_actual_path + "\\" + name))
             {
                 addDirList(getAllFileAndDirFromPath(_actual_path + "\\" + name));
+            }*/
+        }
+
+        private void buttonDirectory_Click(object sender, EventArgs e)
+        {
+            using (var fbd = new FolderBrowserDialog())
+            {
+                fbd.SelectedPath = Path.Combine(_actual_path, _selectedFileName);
+                DialogResult result = fbd.ShowDialog();
+
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                {
+                    string[] files = Directory.GetFiles(fbd.SelectedPath);
+                    /*foreach (String file in files)
+                        _fileListAuthorize.Add(file, Path.Combine(fbd.SelectedPath, file));*/
+                    _fileListAuthorize.Add(Path.GetFileName(fbd.SelectedPath), fbd.SelectedPath);
+                    addDirList(fbd.SelectedPath);
+                }
+            }
+        }
+
+        private void buttonFile_Click(object sender, EventArgs e)
+        {
+            System.Windows.Forms.OpenFileDialog fileDialog = new System.Windows.Forms.OpenFileDialog();
+            System.Windows.Forms.FolderBrowserDialog dirDialog = new System.Windows.Forms.FolderBrowserDialog();
+            fileDialog.InitialDirectory = Path.Combine(_actual_path, _selectedFileName);
+            fileDialog.Filter = "All files (*.*)|*.*";
+
+            if (fileDialog.ShowDialog() == DialogResult.OK)
+            {
+                addDirList(fileDialog.FileName);
+                _fileListAuthorize.Add(Path.GetFileName(fileDialog.FileName), fileDialog.FileName);
             }
         }
     }
