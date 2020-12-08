@@ -107,7 +107,6 @@ namespace App
             this.metroSetSetTabPage1.ThemeAuthor = "Narwin";
             this.metroSetSetTabPage1.ThemeName = "MetroLite";
             this.metroSetSetTabPage1.ToolTipText = null;
-            this.metroSetSetTabPage1.Click += new System.EventHandler(this.metroSetSetTabPage1_Click);
             // 
             // metroSetDivider1
             // 
@@ -187,7 +186,6 @@ namespace App
             this.chart1.Size = new System.Drawing.Size(404, 256);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "chart1";
-            this.chart1.Click += new System.EventHandler(this.chart1_Click);
             // 
             // metroSetSetTabPage3
             // 
@@ -315,7 +313,6 @@ namespace App
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.List;
             this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
-            this.listView1.DoubleClick += new System.EventHandler(this.listView1_DoubleClick);
             // 
             // imageList1
             // 

@@ -52,12 +52,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="InternalErrorException.cs" />
-    <Compile Include="Util.cs" />
-    <Compile Include="OpenFileOrFolderDialog.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="InteropUtil.cs" />
     <Compile Include="LycaniteApplication.cs">
       <SubType>Form</SubType>
     </Compile>

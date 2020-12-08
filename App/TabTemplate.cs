@@ -17,9 +17,8 @@ namespace App
 {
     public partial class TabTemplate : UserControl, IMetroSetControl
     {
-        private String _actual_path = "";
-        private String _selectedFileName = "";
         private Dictionary<String, String> _fileListAuthorize = new Dictionary<String, String>();
+        private String _appPath = "";
         public TabTemplate()
         {
             InitializeComponent();
@@ -44,9 +43,9 @@ namespace App
 
             listView1.View = View.Details;
             listView1.HeaderStyle = ColumnHeaderStyle.None;
-            ColumnHeader h = new ColumnHeader();
-            h.Width = listView1.ClientSize.Width - SystemInformation.VerticalScrollBarWidth;
-            listView1.Columns.Add(h);
+            ColumnHeader colHeader = new ColumnHeader();
+            colHeader.Width = listView1.ClientSize.Width - SystemInformation.VerticalScrollBarWidth;
+            listView1.Columns.Add(colHeader);
 
             ListViewItem tmp_item = new ListViewItem(Path.GetFileName(filename));
             if (Directory.Exists(filename))
@@ -58,24 +57,13 @@ namespace App
 
         public void addPath(String path)
         {
-            _actual_path = path;
-        }
-
-        private void chart1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void metroSetSetTabPage1_Click(object sender, EventArgs e)
-        {
-
+            _appPath = path;
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            if (_fileListAuthorize.Count() == 0 || listView1.Items.Count == 0)
+            if (_fileListAuthorize.Count() == 0 || listView1.Items.Count == 0 || listView1.SelectedItems.Count == 0)
                 return;
-            Debug.WriteLine("\n\nBEGIN: " + Path.GetFullPath(listView1.SelectedItems[0].Text) + "\n");
 
             foreach(KeyValuePair<String, String> kvp in _fileListAuthorize)
             {
@@ -131,8 +119,6 @@ namespace App
         {
             MetroSet_UI.Controls.MetroSetSwitch switch_obj = (MetroSet_UI.Controls.MetroSetSwitch)sender;
 
-            System.Diagnostics.Debug.WriteLine(switch_obj.CheckState.ToString());
-
             if (switch_obj.CheckState.ToString().CompareTo("Checked") == 0)
             {
                 metroSetLabel2.ForeColor = Color.FromArgb(210, 210, 210);
@@ -159,8 +145,6 @@ namespace App
                 allFileAndDir.Add(file_tmp);
             }
 
-            _actual_path = path;
-
             return allFileAndDir.ToArray();
         }
 
@@ -169,32 +153,19 @@ namespace App
 
         }
 
-        private void listView1_DoubleClick(object sender, EventArgs e)
-        {
-            ListView listview = (ListView)sender;
-
-            _selectedFileName = listview.Items[listview.SelectedIndices[0]].Text;
-
-/*            if (Directory.Exists(_actual_path + "\\" + name))
-            {
-                addDirList(getAllFileAndDirFromPath(_actual_path + "\\" + name));
-            }*/
-        }
-
         private void buttonDirectory_Click(object sender, EventArgs e)
         {
-            using (var fbd = new FolderBrowserDialog())
+            using (var folderDialog = new FolderBrowserDialog())
             {
-                fbd.SelectedPath = Path.Combine(_actual_path, _selectedFileName);
-                DialogResult result = fbd.ShowDialog();
+                folderDialog.SelectedPath = _appPath;
+                DialogResult result = folderDialog.ShowDialog();
 
-                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(folderDialog.SelectedPath))
                 {
-                    string[] files = Directory.GetFiles(fbd.SelectedPath);
-                    /*foreach (String file in files)
-                        _fileListAuthorize.Add(file, Path.Combine(fbd.SelectedPath, file));*/
-                    _fileListAuthorize.Add(Path.GetFileName(fbd.SelectedPath), fbd.SelectedPath);
-                    addDirList(fbd.SelectedPath);
+                    string[] files = Directory.GetFiles(folderDialog.SelectedPath);
+
+                    _fileListAuthorize.Add(Path.GetFileName(folderDialog.SelectedPath), folderDialog.SelectedPath);
+                    addDirList(folderDialog.SelectedPath);
                 }
             }
         }
@@ -202,9 +173,7 @@ namespace App
         private void buttonFile_Click(object sender, EventArgs e)
         {
             System.Windows.Forms.OpenFileDialog fileDialog = new System.Windows.Forms.OpenFileDialog();
-            System.Windows.Forms.FolderBrowserDialog dirDialog = new System.Windows.Forms.FolderBrowserDialog();
-            fileDialog.InitialDirectory = Path.Combine(_actual_path, _selectedFileName);
-            fileDialog.Filter = "All files (*.*)|*.*";
+            fileDialog.InitialDirectory = _appPath;
 
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
