@@ -110,7 +110,7 @@ public:
     */
     DWORD getOperationStatusDisk(const HANDLE handle, OVERLAPPED& overlapped, VIRTUAL_DISK_PROGRESS& progress) const;
 
-    void attachDisk(bool readOnly);
+    void attachDisk(bool readOnly = true);
 
 private:
     using WaiterDiskHandler = std::function<bool(const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress)>;
