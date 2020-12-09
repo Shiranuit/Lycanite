@@ -117,7 +117,7 @@ extern "C" {
     /// @return On success 0 is returned.
     static INT8 hashmap_remove(struct hashmap_s* CONST hashmap,
         CONST PCHAR key,
-        CONST UINT32 len
+        CONST UINT32 len,
         PVOID *data_removed) HASHMAP_USED;
 
     /// @brief Iterate over all the elements in a hashmap.
@@ -295,8 +295,7 @@ PVOID hashmap_get(CONST struct hashmap_s* CONST m, CONST PCHAR key,
 }
 
 INT8 hashmap_remove(struct hashmap_s* CONST m, CONST PCHAR key,
-    CONST UINT32 len
-    PVOID* data_removed) {
+    CONST UINT32 len, PVOID* data_removed) {
     UINT32 i;
     UINT32 curr;
 
