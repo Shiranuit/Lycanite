@@ -184,22 +184,22 @@ namespace App
             }
         }
 
-        private Thread cpuThread;
-        private double[] cpuArray = new double[60];
+        private Thread graphThread;
+        private double[] networkUsageArray = new double[60];
 
         private void getPerformanceCounters()
         {
-            var cpuPerfCounter = new PerformanceCounter("Processor Information", "% Processor Time", "_Total");
+            var data = new PerformanceCounter("Processor Information", "% Processor Time", "_Total");
 
             while (true)
             {
-                cpuArray[cpuArray.Length - 1] = Math.Round(cpuPerfCounter.NextValue(), 0);
+                networkUsageArray[networkUsageArray.Length - 1] = Math.Round(data.NextValue(), 0);
 
-                Array.Copy(cpuArray, 1, cpuArray, 0, cpuArray.Length - 1);
+                Array.Copy(networkUsageArray, 1, networkUsageArray, 0, networkUsageArray.Length - 1);
 
                 if (performanceChart.IsHandleCreated)
                 {
-                    this.Invoke((MethodInvoker)delegate { UpdateCpuChart(); });
+                    Invoke((MethodInvoker)delegate { UpdateCpuChart(); });
                 }
                 else
                 {
@@ -214,9 +214,9 @@ namespace App
         {
             performanceChart.Series["Series1"].Points.Clear();
 
-            for (int i = 0; i < cpuArray.Length - 1; ++i)
+            for (int i = 0; i < networkUsageArray.Length - 1; ++i)
             {
-                performanceChart.Series["Series1"].Points.AddY(cpuArray[i]);
+                performanceChart.Series["Series1"].Points.AddY(networkUsageArray[i]);
             }
         }
 
@@ -226,9 +226,9 @@ namespace App
 
             if (current.Text == "Network")
             {
-                cpuThread = new Thread(new ThreadStart(this.getPerformanceCounters));
-                cpuThread.IsBackground = true;
-                cpuThread.Start();
+                graphThread = new Thread(new ThreadStart(getPerformanceCounters));
+                graphThread.IsBackground = true;
+                graphThread.Start();
             }
         }
     }
