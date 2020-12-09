@@ -200,6 +200,64 @@ const HANDLE VirtualDisk::getHandle() const
     return (_handle);
 }
 
+
+void VirtualDisk::setUserMetaData(const PVOID &data, const GUID &uniqueId, const ULONG& nbToWrite)
+{
+    DWORD status;
+
+    status = SetVirtualDiskMetadata(
+        _handle,
+        &uniqueId,
+        nbToWrite,
+        data);
+
+    if (status != ERROR_SUCCESS) {
+        throw std::runtime_error("error = " + status);
+    }
+}
+
+void VirtualDisk::getUserMetaData(const GUID &uniqueId, ULONG &metaDataSize, const std::shared_ptr<VOID> &data) const
+{
+    DWORD status;
+
+    status = GetVirtualDiskMetadata(
+        _handle,
+        &uniqueId,
+        &metaDataSize,
+        data.get());
+
+    if (status != ERROR_SUCCESS) {
+        throw std::runtime_error("error = " + status);
+    }
+}
+
+void VirtualDisk::deleteUserMetaData(const GUID &uniqueId)
+{
+    DWORD status;
+    status = DeleteVirtualDiskMetadata(_handle, &uniqueId);
+    if (status != ERROR_SUCCESS) {
+        throw std::runtime_error("error in deleteUserMetaData. code = " + status);
+    }
+}
+
+std::unique_ptr<std::vector<GUID>> VirtualDisk::enumerateUserMetaData() const
+{
+    std::unique_ptr<std::vector<GUID>> guids;
+    DWORD status;
+    ULONG numberOfItems = 0;
+
+    status = EnumerateVirtualDiskMetadata(_handle, &numberOfItems, nullptr);
+    if (status != ERROR_SUCCESS && status != ERROR_MORE_DATA) {
+        throw std::runtime_error("error in enumerateUserMetaData. code = " + status);
+    }
+    guids = std::make_unique<std::vector<GUID>>(numberOfItems);
+    status = EnumerateVirtualDiskMetadata(_handle, &numberOfItems, guids.get()->data());
+    if (status != ERROR_SUCCESS && status != ERROR_MORE_DATA) {
+        throw std::runtime_error("error in enumerateUserMetaData. code = " + status);
+    }
+    return (std::move(guids));
+}
+
 void VirtualDisk::attachDisk(bool readOnly)
 {
     ATTACH_VIRTUAL_DISK_PARAMETERS attachParameters;
@@ -227,5 +285,4 @@ void VirtualDisk::attachDisk(bool readOnly)
 
     if (opStatus != ERROR_SUCCESS)
         throw std::runtime_error("Error attach disk: " + opStatus);
-
 }
