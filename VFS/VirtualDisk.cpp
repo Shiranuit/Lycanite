@@ -200,8 +200,13 @@ const HANDLE VirtualDisk::getHandle() const
     return (_handle);
 }
 
-void VirtualDisk::getInfo(GET_VIRTUAL_DISK_INFO_VERSION flag)
+const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo(GET_VIRTUAL_DISK_INFO_VERSION flag)
 {
+    if (!isOpen())
+        throw std::runtime_error("Error: disk not open");
+    if (flag <= 0 || flag > 16)
+        throw std::runtime_error("Error: flag do not exist");
+
     _diskInfo.Version = flag;
     ULONG diskInfoSize = sizeof(GET_VIRTUAL_DISK_INFO);
     DWORD opStatus = GetVirtualDiskInformation(
@@ -209,64 +214,11 @@ void VirtualDisk::getInfo(GET_VIRTUAL_DISK_INFO_VERSION flag)
         &diskInfoSize,
         &_diskInfo,
         nullptr);
-    if (opStatus != ERROR_SUCCESS) {
-        std::cout << "flag: " << flag << "opstatus: " << opStatus << std::endl;
+
+    if (opStatus != ERROR_SUCCESS)
         throw std::runtime_error("Error getInfos: " + opStatus);
-    }
-}
-
-const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo()
-{
-    if (!isOpen())
-        throw std::runtime_error("Error: disk not open");
-
-    // Get the VHD/VHDX type.
-    getInfo(GET_VIRTUAL_DISK_INFO_PROVIDER_SUBTYPE);
-    
-    // Get the VHD/VHDX format. 
-    getInfo(GET_VIRTUAL_DISK_INFO_VIRTUAL_STORAGE_TYPE);
-
-    // Get the VHD/VHDX virtual disk size.
-    getInfo(GET_VIRTUAL_DISK_INFO_SIZE);
-
-    // Get the VHD physical sector size.
-    getInfo(GET_VIRTUAL_DISK_INFO_VHD_PHYSICAL_SECTOR_SIZE);
-
-    // Get the virtual disk ID.
-    getInfo(GET_VIRTUAL_DISK_INFO_IDENTIFIER);
-
-    // Get the VHD parent path.
-    if (_diskInfo.ProviderSubtype == 0x4)
-    {
-        // Get parent location
-        getInfo(GET_VIRTUAL_DISK_INFO_PARENT_LOCATION);
-
-        // Get parent ID.
-        getInfo(GET_VIRTUAL_DISK_INFO_PARENT_IDENTIFIER);
-
-        // Get parent timestamp.
-        getInfo(GET_VIRTUAL_DISK_INFO_PARENT_TIMESTAMP);
-    }
-
-    // Get the VHD fragmentation percentage.
-    getInfo(GET_VIRTUAL_DISK_INFO_FRAGMENTATION);
-
-    // Get the VHD alignement.
-    getInfo(GET_VIRTUAL_DISK_INFO_IS_4K_ALIGNED);
-
-    // Get the VHD physical disk.
-    getInfo(GET_VIRTUAL_DISK_INFO_PHYSICAL_DISK);
-
-    // Get the VHD loaded state.
-    getInfo(GET_VIRTUAL_DISK_INFO_IS_LOADED);
-
-    // get virtual disk id
-    getInfo(GET_VIRTUAL_DISK_INFO_VIRTUAL_DISK_ID);
-
-    // get tracking state
-    getInfo(GET_VIRTUAL_DISK_INFO_CHANGE_TRACKING_STATE);
-
-    return _diskInfo;
+    else
+        return _diskInfo;
 }
 
 void VirtualDisk::setDiskInfo(SET_VIRTUAL_DISK_INFO &diskInfo)
