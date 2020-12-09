@@ -1,6 +1,6 @@
 #include "VirtualDisk.h"
 
-VirtualDisk::VirtualDisk() : _handle(nullptr), attached(false)
+VirtualDisk::VirtualDisk() : _handle(nullptr), _attached(false)
 {
 }
 
@@ -129,5 +129,10 @@ void VirtualDisk::detachDisk()
     if (opStatus != ERROR_SUCCESS)
         throw std::runtime_error("Error attach disk: " + opStatus);
     else
-        attached = false;
+        _attached = false;
+}
+
+bool VirtualDisk::isAttached()
+{
+    return _attached;
 }
