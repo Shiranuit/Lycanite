@@ -40,8 +40,11 @@ public:
 
     void detachDisk();
 
+    bool isattached() const;
+
 protected:
     std::wstring _diskPath;
     std::wstring _parentPath;
     HANDLE _handle;
+    bool attached;
 };
