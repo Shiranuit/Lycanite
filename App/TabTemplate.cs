@@ -12,6 +12,8 @@ using MetroSet_UI.Components;
 using MetroSet_UI.Enums;
 using MetroSet_UI.Interfaces;
 using System.Diagnostics;
+using System.Diagnostics;
+using System.Threading;
 
 namespace App
 {
@@ -179,6 +181,50 @@ namespace App
             {
                 addDirList(fileDialog.FileName);
                 _fileListAuthorize.Add(Path.GetFileName(fileDialog.FileName), fileDialog.FileName);
+            }
+        }
+
+        private Thread graphThread;
+        private double[] networkUsageArray = new double[60];
+
+        private void getPerformanceCounters()
+        {
+            var data = new PerformanceCounter("Processor Information", "% Processor Time", "_Total");
+
+            while (true)
+            {
+                networkUsageArray[networkUsageArray.Length - 1] = Math.Round(data.NextValue(), 0);
+
+                Array.Copy(networkUsageArray, 1, networkUsageArray, 0, networkUsageArray.Length - 1);
+
+                if (performanceChart.IsHandleCreated)
+                {
+                    Invoke((MethodInvoker)delegate { UpdateGraph(); });
+                }
+
+                Thread.Sleep(1000);
+            }
+        }
+
+        private void UpdateGraph()
+        {
+            performanceChart.Series["Network"].Points.Clear();
+
+            for (int i = 0; i < networkUsageArray.Length - 1; ++i)
+            {
+                performanceChart.Series["Network"].Points.AddY(networkUsageArray[i]);
+            }
+        }
+
+        private void metroSetTabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            TabPage current = (sender as TabControl).SelectedTab;
+
+            if (current.Text == "Network")
+            {
+                graphThread = new Thread(new ThreadStart(getPerformanceCounters));
+                graphThread.IsBackground = true;
+                graphThread.Start();
             }
         }
     }
