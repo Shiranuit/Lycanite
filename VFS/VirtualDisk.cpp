@@ -122,7 +122,7 @@ const HANDLE VirtualDisk::getHandle() const
 
 void VirtualDisk::detachDisk()
 {
-    if (!isOpen())
+    if (!isOpen() || _handle == nullptr)
         throw std::runtime_error("Error: disk not open");
     DWORD opStatus = DetachVirtualDisk(_handle, DETACH_VIRTUAL_DISK_FLAG_NONE, 0);
 
