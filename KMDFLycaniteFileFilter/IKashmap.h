@@ -104,10 +104,9 @@ extern "C" {
     /*
      * Remove an element with that key from the map
      */
-    static INT ihashmap_remove(map_t in, INT key, any_t* data_removed);
+    static INT ihashmap_remove(map_t in, INT key, any_t *data_removed);
 
     /* Deallocate the hashmap */
-    static INT ifree_data(any_t other, any_t data);
     static VOID ihashmap_free(map_t in);
 
     /* Return the length of the hashmap */
@@ -229,11 +228,6 @@ INT ihashmap_rehash(map_t in) {
 INT ihashmap_put(map_t in, INT key, any_t value) {
     INT index;
     hashmap_map* map;
-    PINT32 get;
-
-    if (ihashmap_get(in, key, (PVOID*)&get) != MAP_MISSING) {
-        free(get);
-    }
 
     /* Cast the hashmap */
     map = (hashmap_map*)in;
@@ -377,15 +371,8 @@ INT ihashmap_remove(map_t in, INT key, any_t *data_removed) {
     return MAP_MISSING;
 }
 
-/* Deallocate the hashmap */
-INT ifree_data(any_t other, any_t data) {
-    free(data);
-    return MAP_OK;
-}
-
 VOID ihashmap_free(map_t in) {
     hashmap_map* map = (hashmap_map*)in;
-    ihashmap_iterate(in, &ifree_data, NULL);
     free(map->data);
     free(map);
 }
