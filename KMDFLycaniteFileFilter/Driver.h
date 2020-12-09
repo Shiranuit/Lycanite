@@ -10,7 +10,25 @@
 *                       DEFINES & MACROS
 *  ======================================================*/
 
+#define PermFlag(x, y) ((x & y) != y)
 
+typedef struct processPerm_s {
+    UINT8 leaf;
+    union data {
+        UINT64 permissions;
+        struct processPerm_s* ptr;
+    };
+} ProcessPerm;
+
+enum Permission {
+    LYCANITE_READ =  0b10,
+    LYCANITE_WRITE = 0b01
+};
+
+enum LycaniteAction {
+    SET_LYCANITE_PID = 0,
+    SET_AUTHORIZATION = 1
+};
 
 /* ======================================================
 *                       Driver
@@ -25,6 +43,8 @@ DriverEntry(
 );
 
 NTSTATUS CgUnload(FLT_FILTER_UNLOAD_FLAGS Flags);
+
+
 
 /* ======================================================
 *               Communication Callbacks
@@ -57,6 +77,12 @@ comMessageNotifyCallback(
 /* ======================================================
 *                       Callbacks
 *  ======================================================*/
+
+VOID CreateProcessNotify(
+    _In_ HANDLE ParentId,
+    _In_ HANDLE ProcessId,
+    _In_ BOOLEAN Create
+);
 
 FLT_PREOP_CALLBACK_STATUS
 AvPreCreate(

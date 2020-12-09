@@ -209,6 +209,11 @@ PVOID Kmemcpy(PVOID destination, CONST PVOID source, SIZE_T size) {
 
 // override memcmp
 INT32 Kmemcmp(CONST PVOID pointer1, CONST PVOID pointer2, SIZE_T size) {
+    char str[64] = { 0 };
+    char str2[64] = { 0 };
+    RtlCopyMemory(str, pointer1, size);
+    RtlCopyMemory(str2, pointer2, size);
+
     if (pointer1 == pointer2) return 0;
     for (SIZE_T i = 0; i < size; i++) {
         if (((PCHAR)pointer1)[i] != ((PCHAR)pointer2)[i]) {
