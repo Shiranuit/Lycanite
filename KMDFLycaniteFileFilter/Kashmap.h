@@ -118,7 +118,8 @@ extern "C" {
     static INT8 hashmap_remove(struct hashmap_s* CONST hashmap,
         CONST PCHAR key,
         CONST UINT32 len,
-        PVOID *data_removed) HASHMAP_USED;
+        PVOID* data_removed,
+        PCHAR* key_removed) HASHMAP_USED;
 
     /// @brief Iterate over all the elements in a hashmap.
     /// @param hashmap The hashmap to iterate over.
@@ -295,7 +296,7 @@ PVOID hashmap_get(CONST struct hashmap_s* CONST m, CONST PCHAR key,
 }
 
 INT8 hashmap_remove(struct hashmap_s* CONST m, CONST PCHAR key,
-    CONST UINT32 len, PVOID* data_removed) {
+    CONST UINT32 len, PVOID* data_removed, PCHAR* key_removed) {
     UINT32 i;
     UINT32 curr;
 
@@ -308,6 +309,9 @@ INT8 hashmap_remove(struct hashmap_s* CONST m, CONST PCHAR key,
             if (hashmap_match_helper(&m->data[curr], key, len)) {
                 /* Return the data removed */
                 *data_removed = m->data[curr].data;
+
+                /* Return the key removed */
+                *key_removed = m->data[curr].key;
 
                 /* Blank out the fields including in_use */
                 Kmemset(&m->data[curr], 0, sizeof(struct hashmap_element_s));
