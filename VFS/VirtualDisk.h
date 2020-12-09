@@ -6,6 +6,7 @@
 #include <chrono>
 #include <functional>
 #include <exception>
+#include <vector>
 #include <windows.h>
 #include <initguid.h>
 #include <virtdisk.h>
@@ -71,23 +72,6 @@ public:
     bool isOpen() const;
 
     /**
-    * Mirroring is a form of disk backup in which anything that is written to a disk is simultaneously written to a second disk.
-    * This creates fault tolerance in the critical storage systems.
-    * If a physical hardware failure occurs in a disk system, the data is not lost, as the other hard disk contains an exact copy of that data.
-    * @param destinationPath vhd(x) destination path (ex: c:\\mirror.vhd)
-    */
-    void mirror(const std::wstring& destinationPath);
-
-    /**
-    * GetOperationStatusDisk
-    * @param handle vhd handle
-    * @param overlapped contains information for asynchronous IO
-    * @param progress contains progress information
-    * @return the operation status of the specified vhd handle
-    */
-    DWORD getOperationStatusDisk(const HANDLE handle, OVERLAPPED& overlapped, VIRTUAL_DISK_PROGRESS& progress) const;
-
-    /**
     * GetDiskInfo
     * @return the struction containing the information about the disk
     */
@@ -105,6 +89,34 @@ public:
     * @param physicalSectorSize physical size to be changed
     */ 
     void setDiskInfo(std::wstring parentPath, DWORD physicalSectorSize);
+
+    void deleteUserMetaData(const GUID& uniqueId);
+
+    /**
+    * Mirroring is a form of disk backup in which anything that is written to a disk is simultaneously written to a second disk.
+    * This creates fault tolerance in the critical storage systems.
+    * If a physical hardware failure occurs in a disk system, the data is not lost, as the other hard disk contains an exact copy of that data.
+    * @param destinationPath vhd(x) destination path (ex: c:\\mirror.vhd)
+    */
+    void mirror(const std::wstring& destinationPath);
+
+    /**
+    * GetOperationStatusDisk
+    * @param handle vhd handle
+    * @param overlapped contains information for asynchronous IO
+    * @param progress contains progress information
+    * @return the operation status of the specified vhd handle
+    */
+    DWORD getOperationStatusDisk(const HANDLE handle, OVERLAPPED& overlapped, VIRTUAL_DISK_PROGRESS& progress) const;
+    
+    void setUserMetaData(const PVOID &data, const GUID &uniqueId, const ULONG &nbToWrite);
+
+    void getUserMetaData(const GUID& uniqueId, ULONG& metaDataSize, const std::shared_ptr<VOID>& data) const;
+  
+    /// <summary>Enumerate the available metadata items of the opened vhdx file.
+    /// <para>Warning, this method is heavy due to a vector instantiation. Do not use it without thinking</para>
+    /// </summary>
+    std::unique_ptr<std::vector<GUID>> enumerateUserMetaData() const;
 
 private:
     using WaiterDiskHandler = std::function<bool(const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress)>;
