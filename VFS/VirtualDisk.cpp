@@ -119,3 +119,11 @@ const HANDLE VirtualDisk::getHandle() const
 {
     return (_handle);
 }
+
+void VirtualDisk::detachDisk()
+{
+    DWORD opStatus = DetachVirtualDisk(_handle, DETACH_VIRTUAL_DISK_FLAG_NONE, 0);
+
+    if (opStatus != ERROR_SUCCESS)
+        throw std::runtime_error("Error attach disk: " + opStatus);
+}

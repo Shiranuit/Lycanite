@@ -9,6 +9,8 @@
 #include <virtdisk.h>
 #include <rpcdce.h>
 #include <rpc.h>
+#include <Shlwapi.h>
+#include <sddl.h>
 
 class VirtualDisk {
 public:
@@ -35,6 +37,8 @@ public:
     bool close();
 
     bool isOpen() const;
+
+    void detachDisk();
 
 protected:
     std::wstring _diskPath;
