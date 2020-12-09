@@ -260,6 +260,8 @@ std::unique_ptr<std::vector<GUID>> VirtualDisk::enumerateUserMetaData() const
 
 void VirtualDisk::attachDisk(bool readOnly)
 {
+    if (!isOpen())
+        throw std::runtime_error("Error: disk not open");
     ATTACH_VIRTUAL_DISK_PARAMETERS attachParameters;
     ATTACH_VIRTUAL_DISK_FLAG attachFlags;
     PSECURITY_DESCRIPTOR sd = nullptr;
