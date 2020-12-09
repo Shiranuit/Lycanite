@@ -274,7 +274,7 @@ void VirtualDisk::attachDisk(bool readOnly)
     if (!::ConvertStringSecurityDescriptorToSecurityDescriptor(L"O:BAG:BAD:(A;;GA;;;WD)",SDDL_REVISION_1,&sd, nullptr))
             throw std::runtime_error("Error convert string");
 
-    memset(&attachParameters, 0, sizeof(attachParameters));
+    std::memset(&attachParameters, 0, sizeof(attachParameters));
     attachParameters.Version = ATTACH_VIRTUAL_DISK_VERSION_1;
     attachFlags = ATTACH_VIRTUAL_DISK_FLAG_PERMANENT_LIFETIME;
 
