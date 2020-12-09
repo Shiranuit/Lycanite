@@ -339,7 +339,7 @@ const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo()
     }
 }
 
-void VirtualDisk::setDiskInfo(SET_VIRTUAL_DISK_INFO diskInfo)
+void VirtualDisk::setDiskInfo(SET_VIRTUAL_DISK_INFO &diskInfo)
 {
     DWORD opStatus = SetVirtualDiskInformation(_handle, &diskInfo);
 

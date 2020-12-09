@@ -81,7 +81,7 @@ public:
     * SetDiskInfo
     * @param diskInfo structure with all the information to be changed
     */ 
-    void setDiskInfo(SET_VIRTUAL_DISK_INFO diskInfo);
+    void setDiskInfo(SET_VIRTUAL_DISK_INFO &diskInfo);
 
     void deleteUserMetaData(const GUID& uniqueId);
 
