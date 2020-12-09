@@ -39,7 +39,7 @@ namespace App
             this.metroSetDivider1 = new MetroSet_UI.Controls.MetroSetDivider();
             this.metroSetLabel1 = new MetroSet_UI.Controls.MetroSetLabel();
             this.metroSetSetTabPage2 = new MetroSet_UI.Child.MetroSetSetTabPage();
-            this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.performanceChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.metroSetSetTabPage3 = new MetroSet_UI.Child.MetroSetSetTabPage();
             this.metroSetSetTabPage4 = new MetroSet_UI.Child.MetroSetSetTabPage();
             this.ButtonFile = new MetroSet_UI.Controls.MetroSetButton();
@@ -54,7 +54,7 @@ namespace App
             this.metroSetTabControl1.SuspendLayout();
             this.metroSetSetTabPage1.SuspendLayout();
             this.metroSetSetTabPage2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.performanceChart)).BeginInit();
             this.metroSetSetTabPage4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -69,13 +69,13 @@ namespace App
             this.metroSetTabControl1.Controls.Add(this.metroSetSetTabPage3);
             this.metroSetTabControl1.Controls.Add(this.metroSetSetTabPage4);
             this.metroSetTabControl1.Controls.Add(this.metroSetSetTabPage5);
-            this.metroSetTabControl1.Cursor = System.Windows.Forms.Cursors.Default;
+            this.metroSetTabControl1.Cursor = System.Windows.Forms.Cursors.Hand;
             this.metroSetTabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.metroSetTabControl1.IsDerivedStyle = true;
             this.metroSetTabControl1.ItemSize = new System.Drawing.Size(100, 38);
             this.metroSetTabControl1.Location = new System.Drawing.Point(0, 0);
             this.metroSetTabControl1.Name = "metroSetTabControl1";
-            this.metroSetTabControl1.SelectedIndex = 0;
+            this.metroSetTabControl1.SelectedIndex = 1;
             this.metroSetTabControl1.SelectedTextColor = System.Drawing.Color.White;
             this.metroSetTabControl1.Size = new System.Drawing.Size(766, 320);
             this.metroSetTabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
@@ -87,6 +87,7 @@ namespace App
             this.metroSetTabControl1.ThemeName = "MetroDark";
             this.metroSetTabControl1.UnselectedTextColor = System.Drawing.Color.Gray;
             this.metroSetTabControl1.UseAnimation = false;
+            this.metroSetTabControl1.SelectedIndexChanged += new System.EventHandler(this.metroSetTabControl1_SelectedIndexChanged);
             // 
             // metroSetSetTabPage1
             // 
@@ -137,39 +138,10 @@ namespace App
             this.metroSetLabel1.ThemeAuthor = "Narwin";
             this.metroSetLabel1.ThemeName = "MetroDark";
             // 
-            // metroSetDivider1
-            // 
-            this.metroSetDivider1.IsDerivedStyle = true;
-            this.metroSetDivider1.Location = new System.Drawing.Point(30, 131);
-            this.metroSetDivider1.Name = "metroSetDivider1";
-            this.metroSetDivider1.Orientation = MetroSet_UI.Enums.DividerStyle.Horizontal;
-            this.metroSetDivider1.Size = new System.Drawing.Size(685, 4);
-            this.metroSetDivider1.Style = MetroSet_UI.Enums.Style.Dark;
-            this.metroSetDivider1.StyleManager = null;
-            this.metroSetDivider1.TabIndex = 1;
-            this.metroSetDivider1.Text = "metroSetDivider1";
-            this.metroSetDivider1.ThemeAuthor = "Narwin";
-            this.metroSetDivider1.ThemeName = "MetroDark";
-            this.metroSetDivider1.Thickness = 1;
-            // 
-            // metroSetLabel1
-            // 
-            this.metroSetLabel1.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.metroSetLabel1.IsDerivedStyle = true;
-            this.metroSetLabel1.Location = new System.Drawing.Point(281, 9);
-            this.metroSetLabel1.Name = "metroSetLabel1";
-            this.metroSetLabel1.Size = new System.Drawing.Size(174, 36);
-            this.metroSetLabel1.Style = MetroSet_UI.Enums.Style.Dark;
-            this.metroSetLabel1.StyleManager = null;
-            this.metroSetLabel1.TabIndex = 0;
-            this.metroSetLabel1.Text = "Authorization";
-            this.metroSetLabel1.ThemeAuthor = "Narwin";
-            this.metroSetLabel1.ThemeName = "MetroDark";
-            // 
             // metroSetSetTabPage2
             // 
             this.metroSetSetTabPage2.BaseColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.metroSetSetTabPage2.Controls.Add(this.chart1);
+            this.metroSetSetTabPage2.Controls.Add(this.performanceChart);
             this.metroSetSetTabPage2.Font = null;
             this.metroSetSetTabPage2.ImageIndex = 0;
             this.metroSetSetTabPage2.ImageKey = null;
@@ -185,14 +157,14 @@ namespace App
             this.metroSetSetTabPage2.ThemeName = "MetroLite";
             this.metroSetSetTabPage2.ToolTipText = null;
             // 
-            // chart1
+            // performanceChart
             // 
-            this.chart1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
-            this.chart1.BorderlineColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
+            this.performanceChart.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.performanceChart.BorderlineColor = System.Drawing.Color.FromArgb(((int)(((byte)(80)))), ((int)(((byte)(80)))), ((int)(((byte)(80)))));
             chartArea2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(125)))), ((int)(((byte)(125)))), ((int)(((byte)(125)))));
             chartArea2.BorderColor = System.Drawing.Color.White;
             chartArea2.Name = "ChartArea1";
-            this.chart1.ChartAreas.Add(chartArea2);
+            this.performanceChart.ChartAreas.Add(chartArea2);
             legend2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(100)))), ((int)(((byte)(100)))));
             legend2.ForeColor = System.Drawing.Color.White;
             legend2.HeaderSeparatorColor = System.Drawing.Color.White;
@@ -200,9 +172,9 @@ namespace App
             legend2.Name = "Legend1";
             legend2.TitleForeColor = System.Drawing.Color.White;
             legend2.TitleSeparatorColor = System.Drawing.Color.White;
-            this.chart1.Legends.Add(legend2);
-            this.chart1.Location = new System.Drawing.Point(240, 15);
-            this.chart1.Name = "chart1";
+            this.performanceChart.Legends.Add(legend2);
+            this.performanceChart.Location = new System.Drawing.Point(240, 15);
+            this.performanceChart.Name = "performanceChart";
             series2.ChartArea = "ChartArea1";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series2.Color = System.Drawing.Color.DeepSkyBlue;
@@ -211,10 +183,10 @@ namespace App
             series2.Legend = "Legend1";
             series2.MarkerColor = System.Drawing.Color.White;
             series2.Name = "Series1";
-            this.chart1.Series.Add(series2);
-            this.chart1.Size = new System.Drawing.Size(404, 256);
-            this.chart1.TabIndex = 0;
-            this.chart1.Text = "chart1";
+            this.performanceChart.Series.Add(series2);
+            this.performanceChart.Size = new System.Drawing.Size(404, 256);
+            this.performanceChart.TabIndex = 0;
+            this.performanceChart.Text = "performanceChart";
             // 
             // metroSetSetTabPage3
             // 
@@ -436,7 +408,7 @@ namespace App
             this.metroSetTabControl1.ResumeLayout(false);
             this.metroSetSetTabPage1.ResumeLayout(false);
             this.metroSetSetTabPage2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.performanceChart)).EndInit();
             this.metroSetSetTabPage4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
@@ -450,7 +422,7 @@ namespace App
         private MetroSet_UI.Child.MetroSetSetTabPage metroSetSetTabPage2;
         private MetroSet_UI.Child.MetroSetSetTabPage metroSetSetTabPage3;
         private MetroSet_UI.Child.MetroSetSetTabPage metroSetSetTabPage4;
-        private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
+        private System.Windows.Forms.DataVisualization.Charting.Chart performanceChart;
         private System.Windows.Forms.PictureBox pictureBox1;
         private MetroSet_UI.Child.MetroSetSetTabPage metroSetSetTabPage5;
         private MetroSet_UI.Controls.MetroSetDivider metroSetDivider1;
