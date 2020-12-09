@@ -201,10 +201,6 @@ namespace App
                 {
                     Invoke((MethodInvoker)delegate { UpdateCpuChart(); });
                 }
-                else
-                {
-                    //......
-                }
 
                 Thread.Sleep(1000);
             }
