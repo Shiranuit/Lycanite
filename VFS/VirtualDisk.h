@@ -101,15 +101,6 @@ public:
     /// </summary>
     std::unique_ptr<std::vector<GUID>> enumerateUserMetaData() const;
 
-    /**
-    * GetOperationStatusDisk
-    * @param handle vhd handle
-    * @param overlapped contains information for asynchronous IO
-    * @param progress contains progress information
-    * @return the operation status of the specified vhd handle
-    */
-    DWORD getOperationStatusDisk(const HANDLE handle, OVERLAPPED& overlapped, VIRTUAL_DISK_PROGRESS& progress) const;
-
     void attachDisk(bool readOnly = true);
 
 private:
