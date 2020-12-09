@@ -202,6 +202,9 @@ const HANDLE VirtualDisk::getHandle() const
 
 const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo()
 {
+    if (!isOpen())
+        throw std::runtime_error("Error: disk not open");
+
     ULONG diskInfoSize = sizeof(GET_VIRTUAL_DISK_INFO);
     DWORD opStatus;
     GUID identifier;
@@ -347,6 +350,10 @@ void VirtualDisk::setDiskInfo(SET_VIRTUAL_DISK_INFO diskInfo)
 
 void VirtualDisk::setDiskInfo(std::wstring parentPath, DWORD physicalSectorSize)
 {
+    if (!isOpen()) {
+        throw std::runtime_error("Error: disk not open");
+        return;
+    }
     SET_VIRTUAL_DISK_INFO diskInfo;
 
     diskInfo.Version = SET_VIRTUAL_DISK_INFO_PARENT_PATH_WITH_DEPTH;
@@ -357,7 +364,6 @@ void VirtualDisk::setDiskInfo(std::wstring parentPath, DWORD physicalSectorSize)
     
     if (opStatus != ERROR_SUCCESS)
         throw std::runtime_error("Error setInfos: " + opStatus);
-
 
     diskInfo.Version = SET_VIRTUAL_DISK_INFO_PHYSICAL_SECTOR_SIZE;
     diskInfo.VhdPhysicalSectorSize = physicalSectorSize;
