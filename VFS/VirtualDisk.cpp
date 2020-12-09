@@ -207,7 +207,6 @@ const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo()
 
     ULONG diskInfoSize = sizeof(GET_VIRTUAL_DISK_INFO);
     DWORD opStatus;
-    GUID identifier;
 
     // Get the VHD/VHDX type.
     _diskInfo.Version = GET_VIRTUAL_DISK_INFO_PROVIDER_SUBTYPE;
@@ -343,32 +342,6 @@ const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo()
 void VirtualDisk::setDiskInfo(SET_VIRTUAL_DISK_INFO diskInfo)
 {
     DWORD opStatus = SetVirtualDiskInformation(_handle, &diskInfo);
-
-    if (opStatus != ERROR_SUCCESS)
-        throw std::runtime_error("Error setInfos: " + opStatus);
-}
-
-void VirtualDisk::setDiskInfo(const std::wstring &parentPath, DWORD physicalSectorSize)
-{
-    if (!isOpen()) {
-        throw std::runtime_error("Error: disk not open");
-        return;
-    }
-    SET_VIRTUAL_DISK_INFO diskInfo;
-
-    diskInfo.Version = SET_VIRTUAL_DISK_INFO_PARENT_PATH_WITH_DEPTH;
-    diskInfo.ParentPathWithDepthInfo.ChildDepth = 1;
-    diskInfo.ParentPathWithDepthInfo.ParentFilePath = parentPath.c_str();
-
-    DWORD opStatus = SetVirtualDiskInformation(_handle, &diskInfo);
-    
-    if (opStatus != ERROR_SUCCESS)
-        throw std::runtime_error("Error setInfos: " + opStatus);
-
-    diskInfo.Version = SET_VIRTUAL_DISK_INFO_PHYSICAL_SECTOR_SIZE;
-    diskInfo.VhdPhysicalSectorSize = physicalSectorSize;
-
-    opStatus = SetVirtualDiskInformation(_handle, &diskInfo);
 
     if (opStatus != ERROR_SUCCESS)
         throw std::runtime_error("Error setInfos: " + opStatus);

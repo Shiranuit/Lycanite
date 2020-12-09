@@ -83,13 +83,6 @@ public:
     */ 
     void setDiskInfo(SET_VIRTUAL_DISK_INFO diskInfo);
 
-    /**
-    * SetDiskInfo
-    * @param parentPath path of the parent disk to be changed
-    * @param physicalSectorSize physical size to be changed
-    */ 
-    void setDiskInfo(std::wstring parentPath, DWORD physicalSectorSize);
-
     void deleteUserMetaData(const GUID& uniqueId);
 
     /**
