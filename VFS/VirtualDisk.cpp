@@ -239,13 +239,45 @@ void VirtualDisk::deleteUserMetaData(const GUID &uniqueId)
         throw std::runtime_error("error in deleteUserMetaData. code = " + status);
     }
 }
-void VirtualDisk::getAllVirtualDisk(std::shared_ptr<LPWSTR> &data) {
-    LPWSTR pathList = nullptr;
-    ULONG pathSize = 0;
-    DWORD status = 0;
 
-    if ((status = GetAllAttachedVirtualDiskPhysicalPaths(&pathSize, pathList)) != ERROR_SUCCESS) {
-        throw std::runtime_error("error in getAllVirtualDisk");
+std::unique_ptr<std::vector<std::wstring>> VirtualDisk::getAllAttachedPaths()
+{
+    std::unique_ptr<std::vector<std::wstring>> listPaths = std::make_unique<std::vector<std::wstring>>();
+    LPWSTR pathList = nullptr;
+    ULONG pathListSize = 0;
+    DWORD opStatus = 0;
+    size_t  nextPathListSize;
+    HRESULT stringLengthResult;
+
+    do {
+        if ((opStatus = GetAllAttachedVirtualDiskPhysicalPaths(&pathListSize, pathList)) == ERROR_SUCCESS)
+            break;
+        if (pathList != nullptr)
+            std::free(pathList);
+        if (opStatus != ERROR_INSUFFICIENT_BUFFER)
+            throw std::runtime_error("Error while trying to get all attached physical disk paths, code:" + opStatus);
+
+        // Allocate a larger buffer
+        pathList = (LPWSTR)std::malloc(pathListSize);
+        if (pathList == nullptr)
+            throw std::bad_alloc();
+    } while (opStatus == ERROR_INSUFFICIENT_BUFFER);
+
+    if (pathList == nullptr || pathList[0] == NULL)
+        throw std::runtime_error("Error while in getAllAttachedPaths: There are no loopback mounted virtual disks.");
+
+    while ((pathListSize >= sizeof(pathList[0])) && (*pathList != 0)) {
+        stringLengthResult = StringCbLengthW(pathList, pathListSize, &nextPathListSize); // check if pathList.length < pathListSize
+
+        if (FAILED(stringLengthResult)) {
+            if (pathList != nullptr)
+                std::free(pathList);
+            throw std::runtime_error("Error while trying to get all attached physical disk paths, code: " + opStatus);
+        }
+        listPaths->push_back(pathList);
+        nextPathListSize += sizeof(pathList[0]);
+        pathList = pathList + (nextPathListSize / sizeof(pathList[0]));
+        pathListSize -= nextPathListSize;
     }
-    data.reset(pathList);
+    return (std::move(listPaths));
 }

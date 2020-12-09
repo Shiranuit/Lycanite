@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <memory>
+#include <vector>
 #include <chrono>
 #include <functional>
 #include <exception>
@@ -10,6 +12,7 @@
 #include <initguid.h>
 #include <virtdisk.h>
 #include <rpcdce.h>
+#include <strsafe.h>
 #include <rpc.h>
 
 class VirtualDisk {
@@ -93,7 +96,7 @@ public:
 
     void getUserMetaData(const GUID& uniqueId, ULONG& metaDataSize, const std::shared_ptr<VOID>& data) const;
 
-    void getAllVirtualDisk(std::shared_ptr<LPWSTR> &data);
+    static std::unique_ptr<std::vector<std::wstring>> getAllAttachedPaths();
 
 
 private:
