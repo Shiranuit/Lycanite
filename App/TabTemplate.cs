@@ -208,11 +208,11 @@ namespace App
 
         private void UpdateGraph()
         {
-            performanceChart.Series["Series1"].Points.Clear();
+            performanceChart.Series["Network"].Points.Clear();
 
             for (int i = 0; i < networkUsageArray.Length - 1; ++i)
             {
-                performanceChart.Series["Series1"].Points.AddY(networkUsageArray[i]);
+                performanceChart.Series["Network"].Points.AddY(networkUsageArray[i]);
             }
         }
 
