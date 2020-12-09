@@ -199,14 +199,14 @@ namespace App
 
                 if (performanceChart.IsHandleCreated)
                 {
-                    Invoke((MethodInvoker)delegate { UpdateCpuChart(); });
+                    Invoke((MethodInvoker)delegate { UpdateGraph(); });
                 }
 
                 Thread.Sleep(1000);
             }
         }
 
-        private void UpdateCpuChart()
+        private void UpdateGraph()
         {
             performanceChart.Series["Series1"].Points.Clear();
 
