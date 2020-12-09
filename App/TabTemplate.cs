@@ -48,6 +48,8 @@ namespace App
             listView1.Columns.Add(colHeader);
 
             ListViewItem tmp_item = new ListViewItem(Path.GetFileName(filename));
+            Debug.WriteLine(filename);
+            Debug.WriteLine(Path.GetFileName(filename));
             if (Directory.Exists(filename))
                 tmp_item.ImageIndex = 0;
             else
@@ -153,32 +155,37 @@ namespace App
 
         }
 
-        private void buttonDirectory_Click(object sender, EventArgs e)
-        {
-            using (var folderDialog = new FolderBrowserDialog())
-            {
-                folderDialog.SelectedPath = _appPath;
-                DialogResult result = folderDialog.ShowDialog();
-
-                if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(folderDialog.SelectedPath))
-                {
-                    string[] files = Directory.GetFiles(folderDialog.SelectedPath);
-
-                    _fileListAuthorize.Add(Path.GetFileName(folderDialog.SelectedPath), folderDialog.SelectedPath);
-                    addDirList(folderDialog.SelectedPath);
-                }
-            }
-        }
-
         private void buttonFile_Click(object sender, EventArgs e)
         {
             System.Windows.Forms.OpenFileDialog fileDialog = new System.Windows.Forms.OpenFileDialog();
+            fileDialog.ValidateNames = false;
             fileDialog.InitialDirectory = _appPath;
+            fileDialog.Multiselect = true;
+            fileDialog.CheckPathExists = true;
+            fileDialog.CheckFileExists = false;
+            fileDialog.FileName = "Default";
 
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
-                addDirList(fileDialog.FileName);
-                _fileListAuthorize.Add(Path.GetFileName(fileDialog.FileName), fileDialog.FileName);
+                if (File.Exists(fileDialog.FileName))
+                {
+                    addDirList(fileDialog.FileName);
+                    if (_fileListAuthorize.ContainsKey(Path.GetFileName(fileDialog.FileName)))
+                    {
+                        MessageBox.Show("ERROR: File already in the autorization list");
+                        return;
+                    } else
+                    {
+                    _fileListAuthorize.Add(Path.GetFileName(fileDialog.FileName), fileDialog.FileName);
+                    }
+
+                }
+                else if (Directory.Exists(Path.GetDirectoryName(fileDialog.FileName)))
+                {
+                    fileDialog.FileName = Path.GetDirectoryName(fileDialog.FileName);
+                    addDirList(fileDialog.FileName);
+                    _fileListAuthorize.Add(Path.GetFileName(fileDialog.FileName), fileDialog.FileName);
+                }
             }
         }
     }

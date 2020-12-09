@@ -31,6 +31,7 @@ namespace App
             Console.WriteLine("Path = {0}", path);
             try
             {
+                KillAllProcessesSpawnedBy((UInt32)_processes[path].Id);
                 _processes[path].CloseMainWindow();
                 _processes.Remove(path);
                 Console.WriteLine("\n\nDELETEDDD\n\n");
@@ -57,6 +58,33 @@ namespace App
             Console.WriteLine("NEED TO DELETE THE TAB");
         }
 
+        private static void KillAllProcessesSpawnedBy(UInt32 parentProcessId)
+        {
+            Console.WriteLine("Finding processes spawned by process with Id [" + parentProcessId + "]");
+
+            // NOTE: Process Ids are reused!
+            System.Management.ManagementObjectSearcher searcher = new System.Management.ManagementObjectSearcher(
+                "SELECT * " +
+                "FROM Win32_Process " +
+                "WHERE ParentProcessId=" + parentProcessId);
+            System.Management.ManagementObjectCollection collection = searcher.Get();
+            if (collection.Count > 0)
+            {
+                Console.WriteLine("Killing [" + collection.Count + "] processes spawned by process with Id [" + parentProcessId + "]");
+                foreach (var item in collection)
+                {
+                    UInt32 childProcessId = (UInt32)item["ProcessId"];
+                    if ((int)childProcessId != Process.GetCurrentProcess().Id)
+                    {
+                        KillAllProcessesSpawnedBy(childProcessId);
+                        Console.WriteLine("LE PROCESS {0} n'est pas terminer {1}", childProcessId, item.ToString());
+                        Process childProcess = Process.GetProcessById((int)childProcessId);
+                        Console.WriteLine("Killing child process [" + childProcess.ProcessName + "] with Id [" + childProcessId + "]");
+                        childProcess.Kill();
+                    }
+                }
+            }
+        }
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
@@ -87,7 +115,12 @@ namespace App
                     ProcessStartInfo startInfo = new ProcessStartInfo(file);
                     try
                     {
-                        _processes.Add(name, Process.Start(startInfo));
+                        Process proc_tmp = Process.Start(startInfo);
+                        _processes.Add(name, proc_tmp);
+                        foreach (KeyValuePair<String, Process> kvp in _processes)
+                        {
+                            Console.WriteLine("Key = {0} ", kvp.Key);
+                        }
                         _processes[name].EnableRaisingEvents = true;
                         _processes[name].Exited += processIsClosed;
                     }
@@ -98,10 +131,9 @@ namespace App
                     }
                 }
             }
-            
-    
-            
         }
+
+
 
         private void openExecButton_Click(object sender, EventArgs e)
         {
@@ -117,13 +149,22 @@ namespace App
                 ProcessStartInfo startInfo = new ProcessStartInfo(fileDialog.FileName);
                 try
                 {
-                    _processes.Add(Path.GetFileName(fileDialog.FileName), Process.Start(startInfo));
+                    Process proc_tmp = Process.Start(startInfo);
+                    _processes.Add(name, proc_tmp);
+                    foreach (KeyValuePair<String, Process> kvp in _processes)
+                    {
+                        Console.WriteLine("Key = {0} ", kvp.Key);
+                    }
+                    _processes[name].EnableRaisingEvents = true;
+                    _processes[name].Exited += processIsClosed;
+
                 }
                 catch (Win32Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                     return;
                 }
+
                 newTab.addPath(fileDialog.FileName);
 
                 metroSetLabel1.Visible = false;
