@@ -17,6 +17,8 @@ using MetroSet_UI.Forms;
 using System.IO;
 using System.Drawing;
 
+public delegate void NotifyTabClose(String path);
+
 namespace MetroSet_UI.Controls
 {
     [ToolboxItem(true)]
@@ -26,9 +28,10 @@ namespace MetroSet_UI.Controls
 
     public class TabController : MetroSetTabControl
     {
+        public event NotifyTabClose TabClose;
         public TabController() : base()
         {
-            
+
         }
 
         private void DrawTab(int i, Graphics g)
@@ -81,6 +84,7 @@ namespace MetroSet_UI.Controls
                     {
                         TabPage tabPage = TabPages[i];
                         TabPages.Remove(tabPage);
+                        TabClose?.Invoke(tabPage.Text);
                         break;
                     }
                 }
