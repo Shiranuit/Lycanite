@@ -472,6 +472,178 @@ comDisconnectNotifyCallback(
     }
 }
 
+UINT16
+comSetLycanitePid(
+    _In_ unsigned char* Input,
+    _In_ ULONG InputBufferSize,
+    _In_ UINT64* LPID
+) {
+    if (InputBufferSize != 9) {
+        return (INVALID_REQUEST_SIZE);
+    }
+
+    UINT64 pid = 0;
+
+    pid |= (((UINT64)Input[1]) & 0xFF);
+    pid |= (((UINT64)Input[2]) & 0xFF) << 8L;
+    pid |= (((UINT64)Input[3]) & 0xFF) << 16L;
+    pid |= (((UINT64)Input[4]) & 0xFF) << 24L;
+    pid |= (((UINT64)Input[5]) & 0xFF) << 32L;
+    pid |= (((UINT64)Input[6]) & 0xFF) << 40L;
+    pid |= (((UINT64)Input[7]) & 0xFF) << 48L;
+    pid |= (((UINT64)Input[8]) & 0xFF) << 56L;
+
+    KdPrint(("Set Lycanite PID [%llu]\n", pid));
+
+    *LPID = pid;
+    return (STATUS_SUCCESS);
+}
+
+UINT16
+comSetAuthorizationPid(
+    _In_ unsigned char* Input,
+    _In_ UINT64 InputBufferSize
+) {
+    if (InputBufferSize <= 20) {
+        return (INVALID_REQUEST_SIZE);
+    }
+
+    UINT32 len = 0;
+    UINT64 pid = 0;
+    UINT64 perms = 0;
+
+    pid |= (((UINT64)Input[1]) & 0xFF);
+    pid |= (((UINT64)Input[2]) & 0xFF) << 8L;
+    pid |= (((UINT64)Input[3]) & 0xFF) << 16L;
+    pid |= (((UINT64)Input[4]) & 0xFF) << 24L;
+    pid |= (((UINT64)Input[5]) & 0xFF) << 32L;
+    pid |= (((UINT64)Input[6]) & 0xFF) << 40L;
+    pid |= (((UINT64)Input[7]) & 0xFF) << 48L;
+    pid |= (((UINT64)Input[8]) & 0xFF) << 56L;
+
+    perms |= (((UINT64)Input[9]) & 0xFF);
+    perms |= (((UINT64)Input[10]) & 0xFF) << 8L;
+    perms |= (((UINT64)Input[11]) & 0xFF) << 16L;
+    perms |= (((UINT64)Input[12]) & 0xFF) << 24L;
+    perms |= (((UINT64)Input[13]) & 0xFF) << 32L;
+    perms |= (((UINT64)Input[14]) & 0xFF) << 40L;
+    perms |= (((UINT64)Input[15]) & 0xFF) << 48L;
+    perms |= (((UINT64)Input[16]) & 0xFF) << 56L;
+
+    len |= (((UINT32)Input[17]) & 0xFF);
+    len |= (((UINT32)Input[18]) & 0xFF) << 8L;
+    len |= (((UINT32)Input[19]) & 0xFF) << 16L;
+    len |= (((UINT32)Input[20]) & 0xFF) << 24L;
+
+    char* Message = (char*)calloc(len, sizeof(char));
+    RtlCopyMemory(Message, (PCHAR)Input+21, len);
+
+    KdPrint(("[%d] %s\n", len, Message));
+
+    return (STATUS_SUCCESS);
+}
+
+UINT16
+comSetAuthorizationGlobal(
+    _In_ unsigned char* Input,
+    _In_ UINT64 InputBufferSize
+) {
+    if (InputBufferSize <= 12) {
+        return (INVALID_REQUEST_SIZE);
+    }
+
+    UINT32 len = 0;
+    UINT64 perms = 0;
+
+    perms |= (((UINT64)Input[1]) & 0xFF);
+    perms |= (((UINT64)Input[2]) & 0xFF) << 8L;
+    perms |= (((UINT64)Input[3]) & 0xFF) << 16L;
+    perms |= (((UINT64)Input[4]) & 0xFF) << 24L;
+    perms |= (((UINT64)Input[5]) & 0xFF) << 32L;
+    perms |= (((UINT64)Input[6]) & 0xFF) << 40L;
+    perms |= (((UINT64)Input[7]) & 0xFF) << 48L;
+    perms |= (((UINT64)Input[8]) & 0xFF) << 56L;
+
+    len |= (((UINT32)Input[9]) & 0xFF);
+    len |= (((UINT32)Input[10]) & 0xFF) << 8L;
+    len |= (((UINT32)Input[11]) & 0xFF) << 16L;
+    len |= (((UINT32)Input[12]) & 0xFF) << 24L;
+
+    char* Message = (char*)calloc(len, sizeof(char));
+    RtlCopyMemory(Message, (PCHAR)Input + 13, len);
+
+    KdPrint(("[%d] %s\n", len, Message));
+
+    return (STATUS_SUCCESS);
+}
+
+UINT16
+comGetProcessStats(
+    _In_ unsigned char* Output,
+    _In_ UINT64 OutputBufferSize
+) {
+
+}
+
+UINT16
+comDeleteAuthorizationPid(
+    _In_ unsigned char* Input,
+    _In_ UINT64 InputBufferSize
+) {
+    if (InputBufferSize <= 12) {
+        return (INVALID_REQUEST_SIZE);
+    }
+
+    UINT32 len = 0;
+    UINT64 pid = 0;
+
+    pid |= (((UINT64)Input[1]) & 0xFF);
+    pid |= (((UINT64)Input[2]) & 0xFF) << 8L;
+    pid |= (((UINT64)Input[3]) & 0xFF) << 16L;
+    pid |= (((UINT64)Input[4]) & 0xFF) << 24L;
+    pid |= (((UINT64)Input[5]) & 0xFF) << 32L;
+    pid |= (((UINT64)Input[6]) & 0xFF) << 40L;
+    pid |= (((UINT64)Input[7]) & 0xFF) << 48L;
+    pid |= (((UINT64)Input[8]) & 0xFF) << 56L;
+
+    len |= (((UINT32)Input[9]) & 0xFF);
+    len |= (((UINT32)Input[10]) & 0xFF) << 8L;
+    len |= (((UINT32)Input[11]) & 0xFF) << 16L;
+    len |= (((UINT32)Input[12]) & 0xFF) << 24L;
+
+    char* Message = (char*)calloc(len, sizeof(char));
+    RtlCopyMemory(Message, (PCHAR)Input + 13, len);
+
+    KdPrint(("[%d] %s\n", len, Message));
+
+    return (STATUS_SUCCESS);
+}
+
+UINT16
+comDeleteAuthorizationGlobal(
+    _In_ unsigned char* Input,
+    _In_ UINT64 InputBufferSize
+) {
+    if (InputBufferSize <= 4) {
+        return (INVALID_REQUEST_SIZE);
+    }
+
+    UINT32 len = 0;
+
+    len |= (((UINT32)Input[1]) & 0xFF);
+    len |= (((UINT32)Input[2]) & 0xFF) << 8L;
+    len |= (((UINT32)Input[3]) & 0xFF) << 16L;
+    len |= (((UINT32)Input[4]) & 0xFF) << 24L;
+
+    char* Message = (char*)calloc(len, sizeof(char));
+    RtlCopyMemory(Message, (PCHAR)Input + 5, len);
+
+    KdPrint(("[%d] %s\n", len, Message));
+
+    return (STATUS_SUCCESS);
+}
+
+
 NTSTATUS
 comMessageNotifyCallback(
     _In_ PVOID ConnectionCookie,
@@ -490,63 +662,37 @@ comMessageNotifyCallback(
     
     *ReturnOutputBufferLength = 0;
 
+    UINT16 status = UNKNOWN_REQUEST;
+
     if (InputBuffer != NULL && InputBufferSize > 0) {
         unsigned char* Input = (unsigned char*)InputBuffer;
+        unsigned char* Output = (unsigned char*)OutputBuffer;
 
-        if (Input[0] == SET_LYCANITE_PID && InputBufferSize == 9) {
-            UINT64 pid = 0;
-
-            pid |= (((UINT64)Input[1]) & 0xFF);
-            pid |= (((UINT64)Input[2]) & 0xFF) << 8L;
-            pid |= (((UINT64)Input[3]) & 0xFF) << 16L;
-            pid |= (((UINT64)Input[4]) & 0xFF) << 24L;
-            pid |= (((UINT64)Input[5]) & 0xFF) << 32L;
-            pid |= (((UINT64)Input[6]) & 0xFF) << 40L;
-            pid |= (((UINT64)Input[7]) & 0xFF) << 48L;
-            pid |= (((UINT64)Input[8]) & 0xFF) << 56L;
-
-            KdPrint(("Set Lycanite PID [%llu]\n", pid));
-
-            LPID = pid;
+        switch (Input[0]) {
+            case SET_LYCANITE_PID :
+                status = comSetLycanitePid(Input, InputBufferSize, &LPID);
+                break;
+            case SET_AUTHORIZATION_PID:
+                status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+                break;
+            case SET_AUTHORIZATION_GLOBAL:
+                status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+                break;
+            case GET_PROCESS_STATS:
+                status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+                break;
+            case DELETE_AUTHORIZATION_PID:
+                status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+                break;
+            case DELETE_AUTHORIZATION_GLOBAL:
+                status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+                break;
         }
-        else if (Input[0] == SET_AUTHORIZATION && InputBufferSize > 12) {
-            UINT32 len = 0;
-            UINT64 perms = 0;
-
-            perms |= (((UINT64)Input[1]) & 0xFF);
-            perms |= (((UINT64)Input[2]) & 0xFF) << 8L;
-            perms |= (((UINT64)Input[3]) & 0xFF) << 16L;
-            perms |= (((UINT64)Input[4]) & 0xFF) << 24L;
-            perms |= (((UINT64)Input[5]) & 0xFF) << 32L;
-            perms |= (((UINT64)Input[6]) & 0xFF) << 40L;
-            perms |= (((UINT64)Input[7]) & 0xFF) << 48L;
-            perms |= (((UINT64)Input[8]) & 0xFF) << 56L;
-
-            len |= (((UINT32)Input[9]) & 0xFF);
-            len |= (((UINT32)Input[10]) & 0xFF) << 8L;
-            len |= (((UINT32)Input[11]) & 0xFF) << 16L;
-            len |= (((UINT32)Input[12]) & 0xFF) << 24L;
-
-            char* Message = (char*)calloc(len, sizeof(char));
-            RtlCopyMemory(Message, (PCHAR)InputBuffer+13, len);
-
-            KdPrint(("[%d] %s\n", len, Message));
-
-            ProcessPerm* perm = (ProcessPerm*)hashmap_get(ProcessInfos, Message, len);
-
-            if (perm == NULL) {
-                ProcessPerm* newperm = (ProcessPerm*)calloc(1, sizeof(ProcessPerm));
-                if (newperm == NULL) {
-                    KdPrint(("%s\n", "Failed to alloc"));
-                    return STATUS_SUCCESS;
-                }
-                newperm->permissions = perms;
-                hashmap_put(ProcessInfos, Message, len, newperm);
-            }
-            else {
-                perm->permissions = perms;
-                free(Message);
-            }
+        if (status == INVALID_REQUEST_SIZE) {
+            // TODO: Error gestion when the request size is bad
+        }
+        else if (status == UNKNOWN_REQUEST) {
+            // TODO: Error gestion when the request size is bad
         }
     }
 
