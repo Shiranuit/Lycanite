@@ -127,6 +127,8 @@ private:
         const WaiterDiskHandler& progressHandler,
         int                      msWaits = 1000) const;
 
+    void getInfo(GET_VIRTUAL_DISK_INFO_VERSION flag);
+
 protected:
     std::wstring _diskPath;
     std::wstring _parentPath;
