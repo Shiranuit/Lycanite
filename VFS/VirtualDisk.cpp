@@ -1,13 +1,8 @@
 #include "VirtualDisk.h"
 
-VirtualDisk::VirtualDisk(VIRTUAL_DISK_TYPE type, bool resizable)
+VirtualDisk::VirtualDisk(bool resizable)
     : _handle(nullptr),
-      _type(type),
       _resizable(resizable)
-{
-}
-
-VirtualDisk::VirtualDisk(bool resizable) : VirtualDisk(VIRTUAL_DISK_TYPE::DEFAULT, resizable)
 {
 }
 
@@ -187,7 +182,7 @@ bool VirtualDisk::isResizable() const
 
 const VirtualDisk::VIRTUAL_DISK_TYPE& VirtualDisk::getType() const
 {
-    return (_type);
+    return (VIRTUAL_DISK_TYPE::DEFAULT);
 }
 
 bool VirtualDisk::resize(ULONGLONG newDiskSize)

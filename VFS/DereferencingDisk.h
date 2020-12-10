@@ -7,6 +7,8 @@ public:
 
     DereferencingDisk();
 
+    ~DereferencingDisk();
+
     void create(const std::wstring& virtualDiskPath, const std::wstring& parentPath);
 
     /**
@@ -16,5 +18,5 @@ public:
     */
     void mergeToParent() const;
 
-    ~DereferencingDisk();
+    const VIRTUAL_DISK_TYPE& getType() const;
 };

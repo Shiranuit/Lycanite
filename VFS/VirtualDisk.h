@@ -22,9 +22,7 @@ public:
         DEREFERENCING
     };
 
-    VirtualDisk(VIRTUAL_DISK_TYPE type, bool resizable);
-
-    VirtualDisk(bool resizable);
+    explicit VirtualDisk(bool resizable);
 
     /**
     * Destructor of VirtualDisk
@@ -141,6 +139,5 @@ protected:
     std::wstring _diskPath;
     std::wstring _parentPath;
     HANDLE _handle;
-    VIRTUAL_DISK_TYPE _type;
     bool _resizable;
 };

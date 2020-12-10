@@ -7,6 +7,8 @@ public:
 
     DynamicDisk();
 
+    ~DynamicDisk();
+
     void create(
         const std::wstring& virtualDiskPath,
         ULONGLONG           diskSize,
@@ -14,6 +16,6 @@ public:
         DWORD               logicalSectorSize,
         DWORD               physicalSectorSize);
 
-    ~DynamicDisk();
+    const VIRTUAL_DISK_TYPE& getType() const;
 };
 

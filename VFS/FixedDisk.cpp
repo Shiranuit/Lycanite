@@ -1,6 +1,10 @@
 #include "FixedDisk.h"
 
-FixedDisk::FixedDisk() : VirtualDisk(VIRTUAL_DISK_TYPE::FIXED, false)
+FixedDisk::FixedDisk() : VirtualDisk(false)
+{
+}
+
+FixedDisk::~FixedDisk()
 {
 }
 
@@ -22,6 +26,7 @@ void FixedDisk::create(
     );
 }
 
-FixedDisk::~FixedDisk()
+const VirtualDisk::VIRTUAL_DISK_TYPE& FixedDisk::getType() const
 {
+    return (VIRTUAL_DISK_TYPE::FIXED);
 }
