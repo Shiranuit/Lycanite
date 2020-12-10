@@ -50,8 +50,6 @@ namespace App
             listView1.Columns.Add(colHeader);
 
             ListViewItem tmp_item = new ListViewItem(Path.GetFileName(filename));
-            Debug.WriteLine(filename);
-            Debug.WriteLine(Path.GetFileName(filename));
             if (Directory.Exists(filename))
                 tmp_item.ImageIndex = 0;
             else
@@ -69,17 +67,7 @@ namespace App
             if (_fileListAuthorize.Count() == 0 || listView1.Items.Count == 0 || listView1.SelectedItems.Count == 0)
                 return;
 
-            foreach(KeyValuePair<String, String> kvp in _fileListAuthorize)
-            {
-                Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
-            }
-
             _fileListAuthorize.Remove(listView1.SelectedItems[0].Text);
-
-            foreach (KeyValuePair<String, String> kvp in _fileListAuthorize)
-            {
-                Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
-            }
 
             listView1.Items.Remove(listView1.SelectedItems[0]);
         }

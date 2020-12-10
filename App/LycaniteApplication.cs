@@ -24,21 +24,14 @@ namespace App
 
         public void closeProcess(String path)
         {
-            /*foreach (KeyValuePair<String, Process> kvp in _processes)
-            {
-                Console.WriteLine("Key = {0}", kvp.Key);
-            }
-            Console.WriteLine("Path = {0}", path);*/
             try
             {
                 KillAllProcessesSpawnedBy((UInt32)_processes[path].Id);
                 _processes[path].CloseMainWindow();
-                //Console.WriteLine("\n\nDELETEDDD\n\n");
             }
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                //Console.WriteLine("\n\nNOT     DELETEDDD\n\n");
             }
             _processes.Remove(path);
         }
@@ -55,7 +48,7 @@ namespace App
 
         public void processIsClosed(object sender, EventArgs e)
         {
-            //Console.WriteLine("NEED TO DELETE THE TAB");
+            // The tab should be delete here
         }
 
         private static void KillAllProcessesSpawnedBy(UInt32 parentProcessId)
@@ -70,16 +63,16 @@ namespace App
             System.Management.ManagementObjectCollection collection = searcher.Get();
             if (collection.Count > 0)
             {
-                //Console.WriteLine("Killing [" + collection.Count + "] processes spawned by process with Id [" + parentProcessId + "]");
+                // Killing 'collection.Count' processes spawned by process with Id 'parentProcessId'
                 foreach (var item in collection)
                 {
                     UInt32 childProcessId = (UInt32)item["ProcessId"];
                     if ((int)childProcessId != Process.GetCurrentProcess().Id)
                     {
                         KillAllProcessesSpawnedBy(childProcessId);
-                        //Console.WriteLine("LE PROCESS {0} n'est pas terminer {1}", childProcessId, item.ToString());
+                        // LE PROCESS 'childProcessId' n'est pas terminer
                         Process childProcess = Process.GetProcessById((int)childProcessId);
-                        //Console.WriteLine("Killing child process [" + childProcess.ProcessName + "] with Id [" + childProcessId + "]");
+                        // Killing child process  'childProcess.ProcessName' with Id 'childProcessId'
                         childProcess.Kill();
                     }
                 }
@@ -121,10 +114,7 @@ namespace App
                         {
                             return;
                         }
-                        /*foreach (KeyValuePair<String, Process> kvp in _processes)
-                        {
-                            Console.WriteLine("Key = {0} ", kvp.Key);
-                        }*/
+
                         _processes[name].EnableRaisingEvents = true;
                         _processes[name].Exited += processIsClosed;
                     }
@@ -157,11 +147,7 @@ namespace App
                     {
                         return;
                     }
-                    /*foreach (KeyValuePair<String, Process> kvp in _processes)
-                    {
-                        Console.WriteLine("Key = {0}", kvp.Key);
-                        Console.WriteLine("ID = {0}", kvp.Value.Id);
-                    }*/
+
                     _processes[name].EnableRaisingEvents = true;
                     _processes[name].Exited += processIsClosed;
 
