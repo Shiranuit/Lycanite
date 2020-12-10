@@ -218,8 +218,13 @@ namespace App
 
         private void metroSetTabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            TabPage current = (sender as TabControl).SelectedTab;
+            
+        }
 
+        private void TabTemplate_Load(object sender, EventArgs e)
+        {
+            TabPage current = metroSetTabControl1.SelectedTab;
+            
             if (current.Text == "Network")
             {
                 graphThread = new Thread(new ThreadStart(getPerformanceCounters));

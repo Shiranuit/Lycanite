@@ -40,7 +40,6 @@ namespace App
             {
                 if (File.Exists(file))
                 {
-                    MessageBox.Show(file);
                     name = Path.GetFileName(file);
 
                     newTab.addPath(file);

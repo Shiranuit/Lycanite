@@ -405,6 +405,7 @@ namespace App
             this.Controls.Add(this.metroSetTabControl1);
             this.Name = "TabTemplate";
             this.Size = new System.Drawing.Size(766, 320);
+            this.Load += new System.EventHandler(this.TabTemplate_Load);
             this.metroSetTabControl1.ResumeLayout(false);
             this.metroSetSetTabPage1.ResumeLayout(false);
             this.metroSetSetTabPage2.ResumeLayout(false);
