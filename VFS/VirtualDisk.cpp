@@ -204,8 +204,6 @@ const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo(GET_VIRTUAL_DISK_INFO_VERS
 {
     if (!isOpen())
         throw std::runtime_error("Error: disk not open");
-    if (flag <= 0 || flag > 16)
-        throw std::runtime_error("Error: flag do not exist");
 
     _diskInfo.Version = flag;
     ULONG diskInfoSize = sizeof(GET_VIRTUAL_DISK_INFO);
