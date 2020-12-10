@@ -178,7 +178,6 @@ namespace App
                     {
                     _fileListAuthorize.Add(Path.GetFileName(fileDialog.FileName), fileDialog.FileName);
                     }
-
                 }
                 else if (Directory.Exists(Path.GetDirectoryName(fileDialog.FileName)))
                 {
