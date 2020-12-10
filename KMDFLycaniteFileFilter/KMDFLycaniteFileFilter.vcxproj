@@ -187,6 +187,7 @@
     <ClInclude Include="Driver.h" />
     <ClInclude Include="Kashmap.h" />
     <ClInclude Include="IKashmap.h" />
+    <ClInclude Include="Permissions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
