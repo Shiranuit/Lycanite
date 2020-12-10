@@ -28,7 +28,7 @@ UUIDRecycler* UUIDRecycler_create(UINT64 initialCapacity) {
 }
 
 void UUIDRecycler_recycleUUID(UUIDRecycler* recycler, UUID uuid) {
-	if (recycler != NULL && recycler->uuids) {
+	if (recycler != NULL && recycler->uuids != NULL) {
 		if (recycler->size + 1 > recycler->capacity) {
 			recycler->capacity += (recycler->capacity >> 1) | 1;
 			UUID* newUUIDs = (UUID*)calloc(recycler->capacity, sizeof(UUID));
@@ -44,7 +44,7 @@ void UUIDRecycler_recycleUUID(UUIDRecycler* recycler, UUID uuid) {
 
 
 UUID UUIDRecycler_getUUID(UUIDRecycler* recycler) {
-	if (recycler != NULL && recycler->uuids) {
+	if (recycler != NULL && recycler->uuids != NULL) {
 		if (recycler->size == 0) {
 			return recycler->lastID++;
 		}
