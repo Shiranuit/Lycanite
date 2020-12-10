@@ -472,7 +472,7 @@ comDisconnectNotifyCallback(
     }
 }
 
-UINT16
+UINT8
 comSetLycanitePid(
     _In_ unsigned char* Input,
     _In_ ULONG InputBufferSize,
@@ -499,16 +499,16 @@ comSetLycanitePid(
     return (STATUS_SUCCESS);
 }
 
-UINT16
+UINT8
 comSetAuthorizationPid(
     _In_ unsigned char* Input,
     _In_ UINT64 InputBufferSize
 ) {
-    if (InputBufferSize <= 20) {
+    if (InputBufferSize <= 18) {
         return (INVALID_REQUEST_SIZE);
     }
 
-    UINT32 len = 0;
+    UINT16 len = 0;
     UINT64 pid = 0;
     UINT64 perms = 0;
 
@@ -530,29 +530,27 @@ comSetAuthorizationPid(
     perms |= (((UINT64)Input[15]) & 0xFF) << 48L;
     perms |= (((UINT64)Input[16]) & 0xFF) << 56L;
 
-    len |= (((UINT32)Input[17]) & 0xFF);
-    len |= (((UINT32)Input[18]) & 0xFF) << 8L;
-    len |= (((UINT32)Input[19]) & 0xFF) << 16L;
-    len |= (((UINT32)Input[20]) & 0xFF) << 24L;
+    len |= (((UINT16)Input[17]) & 0xFF);
+    len |= (((UINT16)Input[18]) & 0xFF) << 8L;
 
     char* Message = (char*)calloc(len, sizeof(char));
-    RtlCopyMemory(Message, (PCHAR)Input+21, len);
+    RtlCopyMemory(Message, (PCHAR)Input+19, len);
 
     KdPrint(("[%d] %s\n", len, Message));
 
     return (STATUS_SUCCESS);
 }
 
-UINT16
+UINT8
 comSetAuthorizationGlobal(
     _In_ unsigned char* Input,
     _In_ UINT64 InputBufferSize
 ) {
-    if (InputBufferSize <= 12) {
+    if (InputBufferSize <= 10) {
         return (INVALID_REQUEST_SIZE);
     }
 
-    UINT32 len = 0;
+    UINT16 len = 0;
     UINT64 perms = 0;
 
     perms |= (((UINT64)Input[1]) & 0xFF);
@@ -564,20 +562,18 @@ comSetAuthorizationGlobal(
     perms |= (((UINT64)Input[7]) & 0xFF) << 48L;
     perms |= (((UINT64)Input[8]) & 0xFF) << 56L;
 
-    len |= (((UINT32)Input[9]) & 0xFF);
-    len |= (((UINT32)Input[10]) & 0xFF) << 8L;
-    len |= (((UINT32)Input[11]) & 0xFF) << 16L;
-    len |= (((UINT32)Input[12]) & 0xFF) << 24L;
+    len |= (((UINT16)Input[9]) & 0xFF);
+    len |= (((UINT16)Input[10]) & 0xFF) << 8L;
 
     char* Message = (char*)calloc(len, sizeof(char));
-    RtlCopyMemory(Message, (PCHAR)Input + 13, len);
+    RtlCopyMemory(Message, (PCHAR)Input + 11, len);
 
     KdPrint(("[%d] %s\n", len, Message));
 
     return (STATUS_SUCCESS);
 }
 
-UINT16
+UINT8
 comGetProcessStats(
     _In_ unsigned char* Output,
     _In_ UINT64 OutputBufferSize
@@ -585,16 +581,16 @@ comGetProcessStats(
 
 }
 
-UINT16
+UINT8
 comDeleteAuthorizationPid(
     _In_ unsigned char* Input,
     _In_ UINT64 InputBufferSize
 ) {
-    if (InputBufferSize <= 12) {
+    if (InputBufferSize <= 10) {
         return (INVALID_REQUEST_SIZE);
     }
 
-    UINT32 len = 0;
+    UINT16 len = 0;
     UINT64 pid = 0;
 
     pid |= (((UINT64)Input[1]) & 0xFF);
@@ -606,37 +602,33 @@ comDeleteAuthorizationPid(
     pid |= (((UINT64)Input[7]) & 0xFF) << 48L;
     pid |= (((UINT64)Input[8]) & 0xFF) << 56L;
 
-    len |= (((UINT32)Input[9]) & 0xFF);
-    len |= (((UINT32)Input[10]) & 0xFF) << 8L;
-    len |= (((UINT32)Input[11]) & 0xFF) << 16L;
-    len |= (((UINT32)Input[12]) & 0xFF) << 24L;
+    len |= (((UINT16)Input[9]) & 0xFF);
+    len |= (((UINT16)Input[10]) & 0xFF) << 8L;
 
     char* Message = (char*)calloc(len, sizeof(char));
-    RtlCopyMemory(Message, (PCHAR)Input + 13, len);
+    RtlCopyMemory(Message, (PCHAR)Input + 11, len);
 
     KdPrint(("[%d] %s\n", len, Message));
 
     return (STATUS_SUCCESS);
 }
 
-UINT16
+UINT8
 comDeleteAuthorizationGlobal(
     _In_ unsigned char* Input,
     _In_ UINT64 InputBufferSize
 ) {
-    if (InputBufferSize <= 4) {
+    if (InputBufferSize <= 2) {
         return (INVALID_REQUEST_SIZE);
     }
 
-    UINT32 len = 0;
+    UINT16 len = 0;
 
-    len |= (((UINT32)Input[1]) & 0xFF);
-    len |= (((UINT32)Input[2]) & 0xFF) << 8L;
-    len |= (((UINT32)Input[3]) & 0xFF) << 16L;
-    len |= (((UINT32)Input[4]) & 0xFF) << 24L;
+    len |= (((UINT16)Input[1]) & 0xFF);
+    len |= (((UINT16)Input[2]) & 0xFF) << 8L;
 
     char* Message = (char*)calloc(len, sizeof(char));
-    RtlCopyMemory(Message, (PCHAR)Input + 5, len);
+    RtlCopyMemory(Message, (PCHAR)Input + 3, len);
 
     KdPrint(("[%d] %s\n", len, Message));
 
@@ -689,10 +681,10 @@ comMessageNotifyCallback(
                 break;
         }
         if (status == INVALID_REQUEST_SIZE) {
-            // TODO: Error gestion when the request size is bad
+            DbgPrint(("request size invalid\n"));
         }
         else if (status == UNKNOWN_REQUEST) {
-            // TODO: Error gestion when the request size is bad
+            DbgPrint(("request unknow\n"));
         }
     }
 

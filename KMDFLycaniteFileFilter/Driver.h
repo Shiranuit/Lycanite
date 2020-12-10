@@ -90,38 +90,38 @@ comMessageNotifyCallback(
 *                    Communication
 *  ======================================================*/
 
-UINT16
+UINT8
 comSetLycanitePid(
     _In_ unsigned char* Input,
     _In_ ULONG InputBufferSize,
     _In_ UINT64* LPID
 );
 
-UINT16
+UINT8
 comSetAuthorizationPid(
     _In_ unsigned char* Input,
     _In_ UINT64 InputBufferSize
 );
 
-UINT16
+UINT8
 comSetAuthorizationGlobal(
     _In_ unsigned char* Input,
     _In_ UINT64 InputBufferSize
 );
 
-UINT16
+UINT8
 comGetProcessStats(
     _In_ unsigned char* Output,
     _In_ UINT64 OutputBufferSize
 );
 
-UINT16
+UINT8
 comDeleteAuthorizationPid(
     _In_ unsigned char* Input,
     _In_ UINT64 InputBufferSize
 );
 
-UINT16
+UINT8
 comDeleteAuthorizationGlobal(
     _In_ unsigned char* Input,
     _In_ UINT64 InputBufferSize
