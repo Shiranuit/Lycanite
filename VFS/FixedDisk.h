@@ -16,5 +16,7 @@ public:
         DWORD               logicalSectorSize,
         DWORD               physicalSectorSize);
 
-    const VIRTUAL_DISK_TYPE& getType() const;
+    bool isResizable() const;
+
+    const VirtualDisk::VIRTUAL_DISK_TYPE getType() const;
 };

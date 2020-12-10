@@ -16,13 +16,12 @@ class VirtualDisk {
 public:
 
     enum class VIRTUAL_DISK_TYPE {
-        DEFAULT,
         DYNAMIC,
         FIXED,
         DEREFERENCING
     };
 
-    explicit VirtualDisk(bool resizable);
+    explicit VirtualDisk();
 
     /**
     * Destructor of VirtualDisk
@@ -46,7 +45,7 @@ public:
     * @param virtualDiskPath: path where the disk will be created
     * @param parentPath: path of the parent disk. If the string is empty disk will not have parent
     * @param flags: disk creation flags
-    * @param diskSize: actual disk size in bytes, , must be multiple of 512
+    * @param diskSize: actual disk size in bytes, must be multiple of 512
     * @param blockSize
     * @param logicalSectorSize
     * @param physicalSectorSize
@@ -110,13 +109,13 @@ public:
     * Check if virtual disk is resizable
     * @return true is resizable else false
     */
-    virtual bool isResizable() const;
+    virtual bool isResizable() const = 0;
 
     /**
     * Get type of the virtual disk
     * @return type
     */
-    virtual const VIRTUAL_DISK_TYPE& getType() const;
+    virtual const VIRTUAL_DISK_TYPE getType() const = 0;
 
 private:
 
@@ -139,5 +138,4 @@ protected:
     std::wstring _diskPath;
     std::wstring _parentPath;
     HANDLE _handle;
-    bool _resizable;
 };

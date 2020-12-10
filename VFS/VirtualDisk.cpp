@@ -1,8 +1,7 @@
 #include "VirtualDisk.h"
 
-VirtualDisk::VirtualDisk(bool resizable)
-    : _handle(nullptr),
-      _resizable(resizable)
+VirtualDisk::VirtualDisk()
+    : _handle(nullptr)
 {
 }
 
@@ -175,19 +174,9 @@ void VirtualDisk::mirror(const std::wstring& destinationPath)
     }
 }
 
-bool VirtualDisk::isResizable() const
-{
-    return (_resizable);
-}
-
-const VirtualDisk::VIRTUAL_DISK_TYPE& VirtualDisk::getType() const
-{
-    return (VIRTUAL_DISK_TYPE::DEFAULT);
-}
-
 bool VirtualDisk::resize(ULONGLONG newDiskSize)
 {
-    if (_resizable) {
+    if (isResizable()) {
         RESIZE_VIRTUAL_DISK_PARAMETERS resizeParameters;
         DWORD opStatus;
 

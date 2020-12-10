@@ -1,6 +1,6 @@
 #include "DereferencingDisk.h"
 
-DereferencingDisk::DereferencingDisk() : VirtualDisk(true)
+DereferencingDisk::DereferencingDisk() : VirtualDisk()
 {
 }
 
@@ -45,7 +45,12 @@ void DereferencingDisk::mergeToParent() const
         throw std::runtime_error("Error while merging to its parent, code: " + opStatus);
 }
 
-const VirtualDisk::VIRTUAL_DISK_TYPE& DereferencingDisk::getType() const
+bool DereferencingDisk::isResizable() const
+{
+    return (true);
+}
+
+const VirtualDisk::VIRTUAL_DISK_TYPE DereferencingDisk::getType() const
 {
     return (VIRTUAL_DISK_TYPE::DEREFERENCING);
 }

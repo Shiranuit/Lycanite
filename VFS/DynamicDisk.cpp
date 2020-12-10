@@ -1,6 +1,6 @@
 #include "DynamicDisk.h"
 
-DynamicDisk::DynamicDisk() : VirtualDisk(true)
+DynamicDisk::DynamicDisk() : VirtualDisk()
 {
 }
 
@@ -26,7 +26,12 @@ void DynamicDisk::create(
     );
 }
 
-const VirtualDisk::VIRTUAL_DISK_TYPE& DynamicDisk::getType() const
+bool DynamicDisk::isResizable() const
+{
+    return (true);
+}
+
+const VirtualDisk::VIRTUAL_DISK_TYPE DynamicDisk::getType() const
 {
     return (VIRTUAL_DISK_TYPE::DYNAMIC);
 }
