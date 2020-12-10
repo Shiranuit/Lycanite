@@ -216,16 +216,11 @@ namespace App
             }
         }
 
-        private void metroSetTabControl1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            
-        }
-
         private void TabTemplate_Load(object sender, EventArgs e)
         {
-            TabPage current = metroSetTabControl1.SelectedTab;
+            TabPage currentTab = metroSetTabControl1.SelectedTab;
             
-            if (current.Text == "Network")
+            if (currentTab.Text == "Network")
             {
                 graphThread = new Thread(new ThreadStart(getPerformanceCounters));
                 graphThread.IsBackground = true;
