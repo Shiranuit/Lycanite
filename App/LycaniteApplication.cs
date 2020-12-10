@@ -18,7 +18,6 @@ namespace App
     {
 
         Dictionary<String, TabTemplate> tabDictionary = new Dictionary<String, TabTemplate>();
-        int count = 0;
 
         public LycaniteApplication()
         {
@@ -86,8 +85,7 @@ namespace App
     
             metroSetTabControl1.Controls.Add(tab);
 
-            tabDictionary.Add(count.ToString(), newTab);
-            count++;
+            tabDictionary.Add(tabDictionary.Count.ToString(), newTab);
             metroSetLabel1.Visible = false;
             metroSetTabControl1.Visible = true;
         }
