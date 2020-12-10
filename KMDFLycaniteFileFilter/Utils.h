@@ -60,9 +60,7 @@ VOID free(PVOID mem) {
 }
 
 PVOID Kmemcpy(PVOID destination, CONST PVOID source, SIZE_T size) {
-    for (SIZE_T i = 0; destination != NULL && i < size; i++) {
-        ((PCHAR)destination)[i] = ((PCHAR)source)[i];
-    }
+    RtlCopyMemory(destination, source, size);
 
     return destination;
 }
