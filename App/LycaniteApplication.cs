@@ -25,7 +25,7 @@ namespace App
         }
 
         private Thread graphThread;
-        private double[] networkUsageArray = new double[60];
+        private List<double[]> networkUsageArray = new List<double[]>();
 
         private void getPerformanceCounters()
         {
@@ -33,15 +33,15 @@ namespace App
 
             while (true)
             {
-                networkUsageArray[networkUsageArray.Length - 1] = Math.Round(data.NextValue(), 0);
-
-                Array.Copy(networkUsageArray, 1, networkUsageArray, 0, networkUsageArray.Length - 1);
-
                 for (int i = 0; tabDictionary.Count != i; i++)
                 {
+                    networkUsageArray[i][networkUsageArray[i].Length - 1] = Math.Round(data.NextValue(), 0);
+
+                    Array.Copy(networkUsageArray[i], 1, networkUsageArray[i], 0, networkUsageArray[i].Length - 1);
+
                     if (tabDictionary[i.ToString()].GetChart().IsHandleCreated)
                     {
-                        Invoke((MethodInvoker)delegate { tabDictionary[i.ToString()].UpdateGraph(networkUsageArray); });
+                        Invoke((MethodInvoker)delegate { tabDictionary[i.ToString()].UpdateGraph(networkUsageArray[i]); });
                     }
 
                     Thread.Sleep(1000);
@@ -88,6 +88,7 @@ namespace App
             tabDictionary.Add(tabDictionary.Count.ToString(), newTab);
             metroSetLabel1.Visible = false;
             metroSetTabControl1.Visible = true;
+            networkUsageArray.Add(new double[60]);
         }
     }
 }
