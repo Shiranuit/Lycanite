@@ -17,7 +17,7 @@ namespace App
     public partial class LycaniteApplication : MetroSetForm
     {
 
-        Dictionary<String, TabTemplate> dictionary = new Dictionary<String, TabTemplate>();
+        Dictionary<String, TabTemplate> tabDictionary = new Dictionary<String, TabTemplate>();
         int count = 0;
 
         public LycaniteApplication()
@@ -38,11 +38,11 @@ namespace App
 
                 Array.Copy(networkUsageArray, 1, networkUsageArray, 0, networkUsageArray.Length - 1);
 
-                for (int i = 0; dictionary.Count != i; i++)
+                for (int i = 0; tabDictionary.Count != i; i++)
                 {
-                    if (dictionary[i.ToString()].GetChart().IsHandleCreated)
+                    if (tabDictionary[i.ToString()].GetChart().IsHandleCreated)
                     {
-                        Invoke((MethodInvoker)delegate { dictionary[i.ToString()].UpdateGraph(networkUsageArray); });
+                        Invoke((MethodInvoker)delegate { tabDictionary[i.ToString()].UpdateGraph(networkUsageArray); });
                     }
 
                     Thread.Sleep(1000);
@@ -86,7 +86,7 @@ namespace App
     
             metroSetTabControl1.Controls.Add(tab);
 
-            dictionary.Add(count.ToString(), newTab);
+            tabDictionary.Add(count.ToString(), newTab);
             count++;
             metroSetLabel1.Visible = false;
             metroSetTabControl1.Visible = true;
