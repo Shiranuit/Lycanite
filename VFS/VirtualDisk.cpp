@@ -1,7 +1,6 @@
 #include "VirtualDisk.h"
 
-VirtualDisk::VirtualDisk()
-    : _handle(nullptr)
+VirtualDisk::VirtualDisk() : _handle(nullptr), _diskInfo()
 {
 }
 
@@ -226,4 +225,88 @@ const std::wstring& VirtualDisk::getDiskPath() const
 const HANDLE VirtualDisk::getHandle() const
 {
     return (_handle);
+}
+
+const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo(GET_VIRTUAL_DISK_INFO_VERSION flag)
+{
+    if (!isOpen())
+        throw std::runtime_error("Error: disk not open");
+
+    _diskInfo.Version = flag;
+    ULONG diskInfoSize = sizeof(GET_VIRTUAL_DISK_INFO);
+    DWORD opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        &_diskInfo,
+        nullptr);
+
+    if (opStatus != ERROR_SUCCESS)
+        throw std::runtime_error("Error getInfos: " + opStatus);
+    else
+        return _diskInfo;
+}
+
+void VirtualDisk::setDiskInfo(SET_VIRTUAL_DISK_INFO &diskInfo)
+{
+    DWORD opStatus = SetVirtualDiskInformation(_handle, &diskInfo);
+
+    if (opStatus != ERROR_SUCCESS)
+        throw std::runtime_error("Error setInfos: " + opStatus);
+}
+
+void VirtualDisk::setUserMetaData(const PVOID &data, const GUID &uniqueId, const ULONG& nbToWrite)
+{
+    DWORD status;
+
+    status = SetVirtualDiskMetadata(
+        _handle,
+        &uniqueId,
+        nbToWrite,
+        data);
+
+    if (status != ERROR_SUCCESS) {
+        throw std::runtime_error("error = " + status);
+    }
+}
+
+void VirtualDisk::getUserMetaData(const GUID &uniqueId, ULONG &metaDataSize, const std::shared_ptr<VOID> &data) const
+{
+    DWORD status;
+
+    status = GetVirtualDiskMetadata(
+        _handle,
+        &uniqueId,
+        &metaDataSize,
+        data.get());
+
+    if (status != ERROR_SUCCESS) {
+        throw std::runtime_error("error = " + status);
+    }
+}
+
+void VirtualDisk::deleteUserMetaData(const GUID &uniqueId)
+{
+    DWORD status;
+    status = DeleteVirtualDiskMetadata(_handle, &uniqueId);
+    if (status != ERROR_SUCCESS) {
+        throw std::runtime_error("error in deleteUserMetaData. code = " + status);
+    }
+}
+
+std::unique_ptr<std::vector<GUID>> VirtualDisk::enumerateUserMetaData() const
+{
+    std::unique_ptr<std::vector<GUID>> guids;
+    DWORD status;
+    ULONG numberOfItems = 0;
+
+    status = EnumerateVirtualDiskMetadata(_handle, &numberOfItems, nullptr);
+    if (status != ERROR_SUCCESS && status != ERROR_MORE_DATA) {
+        throw std::runtime_error("error in enumerateUserMetaData. code = " + status);
+    }
+    guids = std::make_unique<std::vector<GUID>>(numberOfItems);
+    status = EnumerateVirtualDiskMetadata(_handle, &numberOfItems, guids.get()->data());
+    if (status != ERROR_SUCCESS && status != ERROR_MORE_DATA) {
+        throw std::runtime_error("error in enumerateUserMetaData. code = " + status);
+    }
+    return (std::move(guids));
 }
