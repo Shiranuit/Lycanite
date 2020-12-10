@@ -71,6 +71,18 @@ public:
     */
     bool isOpen() const;
 
+    /**
+    * GetDiskInfo
+    * @return the struction containing the information about the disk
+    */
+    const GET_VIRTUAL_DISK_INFO &getDiskInfo(GET_VIRTUAL_DISK_INFO_VERSION flag);
+
+    /**
+    * SetDiskInfo
+    * @param diskInfo structure with all the information to be changed
+    */ 
+    void setDiskInfo(SET_VIRTUAL_DISK_INFO &diskInfo);
+
     void deleteUserMetaData(const GUID& uniqueId);
 
     /**
@@ -118,5 +130,6 @@ private:
 protected:
     std::wstring _diskPath;
     std::wstring _parentPath;
+    GET_VIRTUAL_DISK_INFO _diskInfo;
     HANDLE _handle;
 };

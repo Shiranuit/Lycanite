@@ -1,6 +1,6 @@
 #include "VirtualDisk.h"
 
-VirtualDisk::VirtualDisk() : _handle(nullptr)
+VirtualDisk::VirtualDisk() : _handle(nullptr), _diskInfo()
 {
 }
 
@@ -200,6 +200,32 @@ const HANDLE VirtualDisk::getHandle() const
     return (_handle);
 }
 
+const GET_VIRTUAL_DISK_INFO &VirtualDisk::getDiskInfo(GET_VIRTUAL_DISK_INFO_VERSION flag)
+{
+    if (!isOpen())
+        throw std::runtime_error("Error: disk not open");
+
+    _diskInfo.Version = flag;
+    ULONG diskInfoSize = sizeof(GET_VIRTUAL_DISK_INFO);
+    DWORD opStatus = GetVirtualDiskInformation(
+        _handle,
+        &diskInfoSize,
+        &_diskInfo,
+        nullptr);
+
+    if (opStatus != ERROR_SUCCESS)
+        throw std::runtime_error("Error getInfos: " + opStatus);
+    else
+        return _diskInfo;
+}
+
+void VirtualDisk::setDiskInfo(SET_VIRTUAL_DISK_INFO &diskInfo)
+{
+    DWORD opStatus = SetVirtualDiskInformation(_handle, &diskInfo);
+
+    if (opStatus != ERROR_SUCCESS)
+        throw std::runtime_error("Error setInfos: " + opStatus);
+}
 
 void VirtualDisk::setUserMetaData(const PVOID &data, const GUID &uniqueId, const ULONG& nbToWrite)
 {
