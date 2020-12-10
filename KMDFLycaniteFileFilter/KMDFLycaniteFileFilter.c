@@ -479,7 +479,7 @@ comSetLycanitePid(
     _In_ UINT64* LPID
 ) {
     if (InputBufferSize != 9) {
-        return (INVALID_REQUEST_SIZE);
+        return INVALID_REQUEST_SIZE;
     }
 
     UINT64 pid = 0;
@@ -496,7 +496,7 @@ comSetLycanitePid(
     KdPrint(("Set Lycanite PID [%llu]\n", pid));
 
     *LPID = pid;
-    return (STATUS_SUCCESS);
+    return STATUS_SUCCESS;
 }
 
 UINT8
@@ -505,7 +505,7 @@ comSetAuthorizationPid(
     _In_ UINT64 InputBufferSize
 ) {
     if (InputBufferSize <= 18) {
-        return (INVALID_REQUEST_SIZE);
+        return INVALID_REQUEST_SIZE;
     }
 
     UINT16 len = 0;
@@ -538,7 +538,7 @@ comSetAuthorizationPid(
 
     KdPrint(("[%d] %s\n", len, Message));
 
-    return (STATUS_SUCCESS);
+    return STATUS_SUCCESS;
 }
 
 UINT8
@@ -547,7 +547,7 @@ comSetAuthorizationGlobal(
     _In_ UINT64 InputBufferSize
 ) {
     if (InputBufferSize <= 10) {
-        return (INVALID_REQUEST_SIZE);
+        return INVALID_REQUEST_SIZE;
     }
 
     UINT16 len = 0;
@@ -570,7 +570,7 @@ comSetAuthorizationGlobal(
 
     KdPrint(("[%d] %s\n", len, Message));
 
-    return (STATUS_SUCCESS);
+    return STATUS_SUCCESS;
 }
 
 UINT8
@@ -587,7 +587,7 @@ comDeleteAuthorizationPid(
     _In_ UINT64 InputBufferSize
 ) {
     if (InputBufferSize <= 10) {
-        return (INVALID_REQUEST_SIZE);
+        return INVALID_REQUEST_SIZE;
     }
 
     UINT16 len = 0;
@@ -610,7 +610,7 @@ comDeleteAuthorizationPid(
 
     KdPrint(("[%d] %s\n", len, Message));
 
-    return (STATUS_SUCCESS);
+    return STATUS_SUCCESS;
 }
 
 UINT8
@@ -619,7 +619,7 @@ comDeleteAuthorizationGlobal(
     _In_ UINT64 InputBufferSize
 ) {
     if (InputBufferSize <= 2) {
-        return (INVALID_REQUEST_SIZE);
+        return INVALID_REQUEST_SIZE;
     }
 
     UINT16 len = 0;
@@ -632,7 +632,7 @@ comDeleteAuthorizationGlobal(
 
     KdPrint(("[%d] %s\n", len, Message));
 
-    return (STATUS_SUCCESS);
+    return STATUS_SUCCESS;
 }
 
 
