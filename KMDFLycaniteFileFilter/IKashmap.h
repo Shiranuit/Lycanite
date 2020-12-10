@@ -100,7 +100,7 @@ extern "C" {
     /*
      * Remove an element with that key from the map
      */
-    static INT ihashmap_remove(map_t in, INT key);
+    static INT ihashmap_remove(map_t in, INT key, any_t *data_removed);
 
     /* Deallocate the hashmap */
     static VOID ihashmap_free(map_t in);
@@ -336,7 +336,7 @@ INT ihashmap_iterate(map_t in, PFany f, any_t item) {
 /*
  * Remove an element with that key from the map
  */
-INT ihashmap_remove(map_t in, INT key) {
+INT ihashmap_remove(map_t in, INT key, any_t *data_removed) {
     INT i;
     INT curr;
     hashmap_map* map;
@@ -350,6 +350,7 @@ INT ihashmap_remove(map_t in, INT key) {
     /* Linear probing, if necessary */
     for (i = 0; i < map->table_size; i++) {
         if (map->data[curr].key == key && map->data[curr].in_use == 1) {
+            *data_removed = map->data[curr].data;
             /* Blank out the fields */
             map->data[curr].in_use = 0;
             map->data[curr].data = NULL;
@@ -366,7 +367,6 @@ INT ihashmap_remove(map_t in, INT key) {
     return MAP_MISSING;
 }
 
-/* Deallocate the hashmap */
 VOID ihashmap_free(map_t in) {
     hashmap_map* map = (hashmap_map*)in;
     free(map->data);
