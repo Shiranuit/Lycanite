@@ -4,9 +4,13 @@ FixedDisk::FixedDisk() : VirtualDisk()
 {
 }
 
+FixedDisk::~FixedDisk()
+{
+}
+
 void FixedDisk::create(
     const std::wstring& virtualDiskPath,
-    ULONGLONG           fileSize,
+    ULONGLONG           diskSize,
     DWORD               blockSize,
     DWORD               logicalSectorSize,
     DWORD               physicalSectorSize)
@@ -15,13 +19,19 @@ void FixedDisk::create(
         virtualDiskPath,
         L"",
         CREATE_VIRTUAL_DISK_FLAG_FULL_PHYSICAL_ALLOCATION,
-        fileSize,
+        diskSize,
         blockSize,
         logicalSectorSize,
         physicalSectorSize
     );
 }
 
-FixedDisk::~FixedDisk()
+bool FixedDisk::isResizable() const
 {
+    return (false);
+}
+
+const VirtualDisk::VIRTUAL_DISK_TYPE FixedDisk::getType() const
+{
+    return (VIRTUAL_DISK_TYPE::FIXED);
 }

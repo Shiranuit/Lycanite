@@ -16,40 +16,51 @@
 class VirtualDisk {
 public:
 
-    VirtualDisk();
+    enum class VIRTUAL_DISK_TYPE {
+        DYNAMIC,
+        FIXED,
+        DEREFERENCING
+    };
 
+    explicit VirtualDisk();
+
+    /**
+    * Destructor of VirtualDisk
+    */
     ~VirtualDisk();
 
     /**
     * Get the actual disk path
     * @return disk path
     */
-    const std::wstring& getDiskPath() const;
+    virtual const std::wstring& getDiskPath() const;
 
     /**
     * Get the virtual disk handle
     * @return HANDLE of disk
     */
-    const HANDLE getHandle() const;
+    virtual const HANDLE getHandle() const;
 
     /**
     * Check if Virtual Disk is open
     * @param virtualDiskPath: path where the disk will be created
     * @param parentPath: path of the parent disk. If the string is empty disk will not have parent
     * @param flags: disk creation flags
-    * @param fileSize: actual disk size in bytes
+    * @param diskSize: actual disk size in bytes, must be multiple of 512
     * @param blockSize
     * @param logicalSectorSize
     * @param physicalSectorSize
+    * @param resizable know if disk can be resizable
     */
     virtual void create(
         const std::wstring&             virtualDiskPath,
         const std::wstring&             parentPath,
         const CREATE_VIRTUAL_DISK_FLAG& flags,
-        ULONGLONG                       fileSize,
+        ULONGLONG                       diskSize,
         DWORD                           blockSize,
         DWORD                           logicalSectorSize,
-        DWORD                           physicalSectorSize);
+        DWORD                           physicalSectorSize
+    );
 
     /**
     * Open the virtual disk
@@ -57,19 +68,19 @@ public:
     * @param accessMask: access flag mask
     * @param openFlag: open flag
     */
-    void open(const std::wstring& diskPath, const VIRTUAL_DISK_ACCESS_MASK& accessMask = VIRTUAL_DISK_ACCESS_NONE, const OPEN_VIRTUAL_DISK_FLAG& openFlag = OPEN_VIRTUAL_DISK_FLAG_NONE);
+    virtual void open(const std::wstring& diskPath, const VIRTUAL_DISK_ACCESS_MASK& accessMask = VIRTUAL_DISK_ACCESS_NONE, const OPEN_VIRTUAL_DISK_FLAG& openFlag = OPEN_VIRTUAL_DISK_FLAG_NONE);
 
     /**
     * Close the handle of virtual disk if handle is opened
     * @return a boolean if the disk is open
     */
-    bool close();
+    virtual bool close();
 
     /**
     * Check if Virtual Disk is open
     * @return a boolean if the disk is open
     */
-    bool isOpen() const;
+    virtual bool isOpen() const;
 
     /**
     * GetDiskInfo
@@ -91,27 +102,47 @@ public:
     * If a physical hardware failure occurs in a disk system, the data is not lost, as the other hard disk contains an exact copy of that data.
     * @param destinationPath vhd(x) destination path (ex: c:\\mirror.vhd)
     */
-    void mirror(const std::wstring& destinationPath);
+    virtual void mirror(const std::wstring& destinationPath);
 
     /**
-    * GetOperationStatusDisk
+    * Get operation status of the virtual disk
     * @param handle vhd handle
     * @param overlapped contains information for asynchronous IO
     * @param progress contains progress information
     * @return the operation status of the specified vhd handle
     */
-    DWORD getOperationStatusDisk(const HANDLE handle, OVERLAPPED& overlapped, VIRTUAL_DISK_PROGRESS& progress) const;
-    
+    virtual DWORD getOperationStatusDisk(const HANDLE handle, OVERLAPPED& overlapped, VIRTUAL_DISK_PROGRESS& progress) const;
+
+    /**
+    * Resize the virtual disk
+    * @param newDiskSize new size of the virtual disk in bytes, must be multiple of 512
+    * @return true is resized else false
+    */
+    virtual bool resize(ULONGLONG newDiskSize);
+
+    /**
+    * Check if virtual disk is resizable
+    * @return true is resizable else false
+    */
+    virtual bool isResizable() const = 0;
+
+    /**
+    * Get type of the virtual disk
+    * @return type
+    */
+    virtual const VIRTUAL_DISK_TYPE getType() const = 0;
+
     void setUserMetaData(const PVOID &data, const GUID &uniqueId, const ULONG &nbToWrite);
 
     void getUserMetaData(const GUID& uniqueId, ULONG& metaDataSize, const std::shared_ptr<VOID>& data) const;
-  
+
     /// <summary>Enumerate the available metadata items of the opened vhdx file.
     /// <para>Warning, this method is heavy due to a vector instantiation. Do not use it without thinking</para>
     /// </summary>
     std::unique_ptr<std::vector<GUID>> enumerateUserMetaData() const;
 
 private:
+
     using WaiterDiskHandler = std::function<bool(const DWORD& status, const VIRTUAL_DISK_PROGRESS& progress)>;
 
     /**

@@ -7,15 +7,17 @@ public:
 
     DynamicDisk();
 
+    ~DynamicDisk();
+
     void create(
         const std::wstring& virtualDiskPath,
-        ULONGLONG           fileSize,
+        ULONGLONG           diskSize,
         DWORD               blockSize,
         DWORD               logicalSectorSize,
         DWORD               physicalSectorSize);
 
-    ~DynamicDisk();
+    bool isResizable() const;
 
-    void mergeToParent() const;
+    const VirtualDisk::VIRTUAL_DISK_TYPE getType() const;
 };
 

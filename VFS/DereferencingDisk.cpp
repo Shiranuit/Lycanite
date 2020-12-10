@@ -4,6 +4,10 @@ DereferencingDisk::DereferencingDisk() : VirtualDisk()
 {
 }
 
+DereferencingDisk::~DereferencingDisk()
+{
+}
+
 void DereferencingDisk::create(const std::wstring& virtualDiskPath, const std::wstring& parentPath)
 {
     VirtualDisk::create(
@@ -17,10 +21,6 @@ void DereferencingDisk::create(const std::wstring& virtualDiskPath, const std::w
     );
 }
 
-//
-// DO NOT attempt to perform a live merge of a leaf (a)VHD or (a)VHDX of a VM as the
-// operation will not update the virtual machine configuration file.
-//
 void DereferencingDisk::mergeToParent() const
 {
     MERGE_VIRTUAL_DISK_PARAMETERS mergeParameters;
@@ -45,6 +45,12 @@ void DereferencingDisk::mergeToParent() const
         throw std::runtime_error("Error while merging to its parent, code: " + opStatus);
 }
 
-DereferencingDisk::~DereferencingDisk()
+bool DereferencingDisk::isResizable() const
 {
+    return (true);
+}
+
+const VirtualDisk::VIRTUAL_DISK_TYPE DereferencingDisk::getType() const
+{
+    return (VIRTUAL_DISK_TYPE::DEREFERENCING);
 }
