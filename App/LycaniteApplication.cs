@@ -162,17 +162,9 @@ namespace App
                         Console.WriteLine("Key = {0}", kvp.Key);
                         Console.WriteLine("ID = {0}", kvp.Value.Id);
                     }*/
-                    try
-                    {
-                        _processes[name].EnableRaisingEvents = true;
-                        _processes[name].Exited += processIsClosed;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                        //Debug.WriteLine("\n\n\n EXECPTION \n\n\n");
-                        return;
-                    }
+                    _processes[name].EnableRaisingEvents = true;
+                    _processes[name].Exited += processIsClosed;
+
 
                 }
                 catch (Exception ex)
