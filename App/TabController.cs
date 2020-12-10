@@ -17,7 +17,7 @@ using MetroSet_UI.Forms;
 using System.IO;
 using System.Drawing;
 
-public delegate void NotifyTabClose(String path);
+public delegate void NotifyTabClose(int id);
 
 namespace MetroSet_UI.Controls
 {
@@ -84,7 +84,7 @@ namespace MetroSet_UI.Controls
                     {
                         TabPage tabPage = TabPages[i];
                         TabPages.Remove(tabPage);
-                        TabClose?.Invoke(tabPage.Text);
+                        TabClose?.Invoke(int.Parse(tabPage.Tag.ToString()));
                         break;
                     }
                 }

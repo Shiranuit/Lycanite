@@ -15,25 +15,25 @@ namespace App
 {
     public partial class LycaniteApplication : MetroSetForm
     {
-        private Dictionary<String, Process> _processes = new Dictionary<String, Process>();
+        private Dictionary<int, Process> _processes = new Dictionary<int, Process>();
         public LycaniteApplication()
         {
             InitializeComponent();
             metroSetTabControl1.TabClose += closeProcess;
         }
 
-        public void closeProcess(String path)
+        public void closeProcess(int id)
         {
             try
             {
-                KillAllProcessesSpawnedBy((UInt32)_processes[path].Id);
-                _processes[path].CloseMainWindow();
+                KillAllProcessesSpawnedBy((UInt32)_processes[id].Id);
+                _processes[id].CloseMainWindow();
             }
             catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-            _processes.Remove(path);
+            _processes.Remove(id);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -83,6 +83,7 @@ namespace App
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
             String name = "";
             TabTemplate newTab = new TabTemplate();
+            int id = 0;
             
             foreach (string file in files)
             {
@@ -103,26 +104,28 @@ namespace App
                     newTab.Dock = DockStyle.Fill;
                     tab.Text = name;
 
-                    metroSetTabControl1.Controls.Add(tab);
-
                     ProcessStartInfo startInfo = new ProcessStartInfo(file);
                     try
                     {
                         Process proc_tmp = Process.Start(startInfo);
-                        _processes.Add(name, proc_tmp);
+                        _processes.Add(proc_tmp.Id, proc_tmp);
                         if (proc_tmp == null)
                         {
                             return;
                         }
-
-                        _processes[name].EnableRaisingEvents = true;
-                        _processes[name].Exited += processIsClosed;
+                        id = proc_tmp.Id;
+                        _processes[proc_tmp.Id].EnableRaisingEvents = true;
+                        _processes[proc_tmp.Id].Exited += processIsClosed;
                     }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex.Message);
                         return;
                     }
+                    if (id != 0)
+                        tab.Tag = id;
+
+                    metroSetTabControl1.Controls.Add(tab);
                 }
             }
         }
@@ -132,6 +135,7 @@ namespace App
             System.Windows.Forms.OpenFileDialog fileDialog = new System.Windows.Forms.OpenFileDialog();
             TabTemplate newTab = new TabTemplate();
             String name = "";
+            int id = 0;
 
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
@@ -142,15 +146,15 @@ namespace App
                 try
                 {
                     Process proc_tmp = Process.Start(startInfo);
-                    _processes.Add(name, proc_tmp);
                     if (proc_tmp == null)
                     {
                         return;
                     }
+                    _processes.Add(proc_tmp.Id, proc_tmp);
 
-                    _processes[name].EnableRaisingEvents = true;
-                    _processes[name].Exited += processIsClosed;
-
+                    _processes[proc_tmp.Id].EnableRaisingEvents = true;
+                    _processes[proc_tmp.Id].Exited += processIsClosed;
+                    id = proc_tmp.Id;
 
                 }
                 catch (Exception ex)
@@ -171,7 +175,8 @@ namespace App
                 tab.Controls.Add(newTab);
                 newTab.Dock = DockStyle.Fill;
                 tab.Text = name;
-
+                if (id != 0)
+                    tab.Tag = id;
                 metroSetTabControl1.Controls.Add(tab);
 
             }

@@ -39,7 +39,7 @@ namespace App
             InitializeComponent();
         }
 
-        public void addDirList(String filename)
+        public void addPathToList(String filename)
         {
             listView1.ForeColor = Color.White;
 
@@ -159,21 +159,26 @@ namespace App
             {
                 if (File.Exists(fileDialog.FileName))
                 {
-                    addDirList(fileDialog.FileName);
                     if (_fileListAuthorize.ContainsKey(Path.GetFileName(fileDialog.FileName)))
                     {
-                        MessageBox.Show("ERROR: File already in the autorization list");
                         return;
                     } else
                     {
-                    _fileListAuthorize.Add(Path.GetFileName(fileDialog.FileName), fileDialog.FileName);
+                        _fileListAuthorize.Add(Path.GetFileName(fileDialog.FileName), fileDialog.FileName);
+                        addPathToList(fileDialog.FileName);
                     }
                 }
                 else if (Directory.Exists(Path.GetDirectoryName(fileDialog.FileName)))
                 {
                     fileDialog.FileName = Path.GetDirectoryName(fileDialog.FileName);
-                    addDirList(fileDialog.FileName);
-                    _fileListAuthorize.Add(Path.GetFileName(fileDialog.FileName), fileDialog.FileName);
+                    if (_fileListAuthorize.ContainsKey(Path.GetFileName(fileDialog.FileName)))
+                    {
+                        return;
+                    } else
+                    {
+                        addPathToList(fileDialog.FileName);
+                        _fileListAuthorize.Add(Path.GetFileName(fileDialog.FileName), fileDialog.FileName);
+                    }
                 }
             }
         }
