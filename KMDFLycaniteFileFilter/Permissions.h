@@ -55,7 +55,7 @@ UINT64 getFilePermissionWithFree(CONST PCHAR path, CONST struct hashmap_s* map)
 
 PCHAR hasParentFolder(CONST PCHAR path, CONST struct hashmap_s* map)
 {
-	SIZE_T memsize = my_strlen(path);
+	SIZE_T memsize = my_strlen(path) + 1;
 	PCHAR parent = (PCHAR)calloc(memsize, 1);
 
 	Kmemcpy((PVOID)parent, (PVOID)path, memsize);
