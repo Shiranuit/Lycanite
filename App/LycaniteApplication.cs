@@ -61,20 +61,17 @@ namespace App
                 "FROM Win32_Process " +
                 "WHERE ParentProcessId=" + parentProcessId);
             System.Management.ManagementObjectCollection collection = searcher.Get();
-            if (collection.Count > 0)
+            // Killing 'collection.Count' processes spawned by process with Id 'parentProcessId'
+            foreach (var item in collection)
             {
-                // Killing 'collection.Count' processes spawned by process with Id 'parentProcessId'
-                foreach (var item in collection)
+                UInt32 childProcessId = (UInt32)item["ProcessId"];
+                if ((int)childProcessId != Process.GetCurrentProcess().Id)
                 {
-                    UInt32 childProcessId = (UInt32)item["ProcessId"];
-                    if ((int)childProcessId != Process.GetCurrentProcess().Id)
-                    {
-                        KillAllProcessesSpawnedBy(childProcessId);
-                        // LE PROCESS 'childProcessId' n'est pas terminer
-                        Process childProcess = Process.GetProcessById((int)childProcessId);
-                        // Killing child process  'childProcess.ProcessName' with Id 'childProcessId'
-                        childProcess.Kill();
-                    }
+                    KillAllProcessesSpawnedBy(childProcessId);
+                    // The process 'childProcessId' is currently running
+                    Process childProcess = Process.GetProcessById((int)childProcessId);
+                    // Killing child process  'childProcess.ProcessName' with Id 'childProcessId'
+                    childProcess.Kill();
                 }
             }
         }
