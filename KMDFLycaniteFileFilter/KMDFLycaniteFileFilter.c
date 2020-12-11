@@ -580,10 +580,11 @@ comSetAuthorizationGlobal(
 
 UINT8
 comGetProcessStats(
-    _In_ unsigned char* Output,
-    _In_ UINT64 OutputBufferSize
+    _Out_ unsigned char* Output,
+    _In_ UINT64 OutputBufferSize,
+    _Out_ PULONG ReturnOutputBufferLength
 ) {
-
+    //TODO : fill Output with data
 }
 
 UINT8
@@ -673,22 +674,22 @@ comMessageNotifyCallback(
 
         switch (Input[0]) {
         case SET_LYCANITE_PID:
-            status = comSetLycanitePid(Input, InputBufferSize, &LPID);
+            status = comSetLycanitePid(Input, InputBufferSize);
             break;
         case SET_AUTHORIZATION_PID:
-            status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+            status = comSetAuthorizationPid(Input, InputBufferSize);
             break;
         case SET_AUTHORIZATION_GLOBAL:
-            status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+            status = comSetAuthorizationGlobal(Input, InputBufferSize);
             break;
         case GET_PROCESS_STATS:
-            status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+            status = comGetProcessStats(Output, OutputBufferSize, ReturnOutputBufferLength);
             break;
         case DELETE_AUTHORIZATION_PID:
-            status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+            status = comDeleteAuthorizationPid(Input, InputBufferSize);
             break;
         case DELETE_AUTHORIZATION_GLOBAL:
-            status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+            status = comDeleteAuthorizationGlobal(Input, InputBufferSize);
             break;
         }
 

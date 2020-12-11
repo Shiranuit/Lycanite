@@ -111,8 +111,9 @@ comSetAuthorizationGlobal(
 
 UINT8
 comGetProcessStats(
-    _In_ unsigned char* Output,
-    _In_ UINT64 OutputBufferSize
+    _Out_ unsigned char* Output,
+    _In_ UINT64 OutputBufferSize,
+    _Out_ PULONG ReturnOutputBufferLength
 );
 
 UINT8
