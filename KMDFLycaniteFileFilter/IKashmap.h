@@ -70,7 +70,7 @@ extern "C" {
      * Return the integer of the location in data
      * to store the point to the item, or MAP_FULL.
      */
-    static UINT64 ihashmap_hash(map_t in, UINT64 key, INT *error_set);
+    static UINT64 ihashmap_hash(map_t in, UINT64 key, CODE *error_set);
 
     /*
      * Doubles the size of the hashmap, and rehashes all the elements
@@ -152,7 +152,7 @@ UINT64 ihashmap_hash_int(hashmap_map* map, UINT64 key) {
  * Return the integer of the location in data
  * to store the point to the item, or MAP_FULL.
  */
-UINT64 ihashmap_hash(map_t in, UINT64 key, INT *error_set) {
+UINT64 ihashmap_hash(map_t in, UINT64 key, CODE *error_set) {
     UINT64 curr;
     INT i;
 
@@ -213,7 +213,7 @@ CODE ihashmap_rehash(map_t in) {
 
     /* Rehash the elements */
     for (i = 0; i < old_size; i++) {
-        INT status = ihashmap_put(map, curr[i].key, curr[i].data);
+        CODE status = ihashmap_put(map, curr[i].key, curr[i].data);
         if (status != MAP_OK)
             return status;
     }
@@ -227,19 +227,20 @@ CODE ihashmap_rehash(map_t in) {
  * Add a pointer to the hashmap with some key
  */
 CODE ihashmap_put(map_t in, UINT64 key, any_t value) {
-    INT index;
+    UINT64 index;
+    CODE status;
     hashmap_map* map;
 
     /* Cast the hashmap */
     map = (hashmap_map*)in;
 
     /* Find a place to put our value */
-    ihashmap_hash(in, key, &index);
-    while (index == MAP_FULL) {
+    index = ihashmap_hash(in, key, &status);
+    while (status == MAP_FULL) {
         if (ihashmap_rehash(in) == MAP_OMEM) {
             return MAP_OMEM;
         }
-        ihashmap_hash(in, key, &index);
+        index = ihashmap_hash(in, key, &status);
     }
 
     /* Set the data */
