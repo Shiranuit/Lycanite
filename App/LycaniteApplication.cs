@@ -13,27 +13,14 @@ using System.Diagnostics;
 
 namespace App
 {
+    public delegate void NotifyProcessClose(Process process);
     public partial class LycaniteApplication : MetroSetForm
     {
+        private int mainThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
         private Dictionary<int, Process> _processes = new Dictionary<int, Process>();
         public LycaniteApplication()
         {
             InitializeComponent();
-            metroSetTabControl1.TabClose += closeProcess;
-        }
-
-        public void closeProcess(int id)
-        {
-            try
-            {
-                KillAllProcessesSpawnedBy((UInt32)_processes[id].Id);
-                _processes[id].CloseMainWindow();
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            _processes.Remove(id);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -46,83 +33,83 @@ namespace App
             e.Effect = DragDropEffects.All;
         }
 
-        public void processIsClosed(object sender, EventArgs e)
+        // Do this when you start your application
+        
+        private void closeTab(Process process)
         {
-            // The tab should be delete here
-        }
-
-        private static void KillAllProcessesSpawnedBy(UInt32 parentProcessId)
-        {
-            Console.WriteLine("Finding processes spawned by process with Id [" + parentProcessId + "]");
-
-            // NOTE: Process Ids are reused!
-            System.Management.ManagementObjectSearcher searcher = new System.Management.ManagementObjectSearcher(
-                "SELECT * " +
-                "FROM Win32_Process " +
-                "WHERE ParentProcessId=" + parentProcessId);
-            System.Management.ManagementObjectCollection collection = searcher.Get();
-            // Killing 'collection.Count' processes spawned by process with Id 'parentProcessId'
-            foreach (var item in collection)
+            foreach (TabPage page in metroSetTabControl1.TabPages)
             {
-                UInt32 childProcessId = (UInt32)item["ProcessId"];
-                if ((int)childProcessId != Process.GetCurrentProcess().Id)
+                if (page.Tag.ToString().CompareTo(_processes[process.Id].Id.ToString()) == 0)
                 {
-                    KillAllProcessesSpawnedBy(childProcessId);
-                    // The process 'childProcessId' is currently running
-                    Process childProcess = Process.GetProcessById((int)childProcessId);
-                    // Killing child process  'childProcess.ProcessName' with Id 'childProcessId'
-                    childProcess.Kill();
+                    metroSetTabControl1.TabPages.Remove(page);
                 }
             }
         }
+
+        public void processIsClosed(object sender, EventArgs e)
+        {
+            if (this.InvokeRequired)
+                this.Invoke(new NotifyProcessClose(closeTab), (Process)sender);
+            else
+                closeTab((Process)sender);
+        }
+
+        void createProcessAndTab(String fileName)
+        {
+            TabTemplate newTab = new TabTemplate();
+            MessageBox.Show(fileName);
+            String name = Path.GetFileName(fileName);
+            int id = 0;
+
+            ProcessStartInfo startInfo = new ProcessStartInfo(fileName);
+            try
+            {
+                Process proc_tmp = Process.Start(startInfo);
+                if (proc_tmp == null)
+                {
+                    return;
+                }
+                _processes.Add(proc_tmp.Id, proc_tmp);
+
+                _processes[proc_tmp.Id].EnableRaisingEvents = true;
+                _processes[proc_tmp.Id].Exited += processIsClosed;
+                id = proc_tmp.Id;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return;
+            }
+
+            newTab.addPath(fileName);
+
+            metroSetLabel1.Visible = false;
+            metroSetTabControl1.Visible = true;
+            openExecButton.Location = new Point(700, 40);
+            openExecButton.Size = new Size(80, 30);
+
+            // Create tab only when receive event with id from driver
+            TabPage tab = new TabPage();
+            tab.Controls.Add(newTab);
+            newTab.Dock = DockStyle.Fill;
+            tab.Text = name;
+            if (id != 0)
+                tab.Tag = id;
+            metroSetTabControl1.Controls.Add(tab);
+        }
+
         private void Form1_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
             String name = "";
             TabTemplate newTab = new TabTemplate();
             int id = 0;
-            
+
             foreach (string file in files)
             {
                 if (File.Exists(file))
                 {
-                    MessageBox.Show(file);
-                    name = Path.GetFileName(file);
-
-                    newTab.addPath(file);
-
-                    metroSetLabel1.Visible = false;
-                    metroSetTabControl1.Visible = true;
-                    openExecButton.Location = new Point(700, 40);
-                    openExecButton.Size = new Size(80, 30);
-
-                    TabPage tab = new TabPage();
-                    tab.Controls.Add(newTab);
-                    newTab.Dock = DockStyle.Fill;
-                    tab.Text = name;
-
-                    ProcessStartInfo startInfo = new ProcessStartInfo(file);
-                    try
-                    {
-                        Process proc_tmp = Process.Start(startInfo);
-                        _processes.Add(proc_tmp.Id, proc_tmp);
-                        if (proc_tmp == null)
-                        {
-                            return;
-                        }
-                        id = proc_tmp.Id;
-                        _processes[proc_tmp.Id].EnableRaisingEvents = true;
-                        _processes[proc_tmp.Id].Exited += processIsClosed;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                        return;
-                    }
-                    if (id != 0)
-                        tab.Tag = id;
-
-                    metroSetTabControl1.Controls.Add(tab);
+                    createProcessAndTab(file);
                 }
             }
         }
@@ -130,52 +117,10 @@ namespace App
         private void openExecButton_Click(object sender, EventArgs e)
         {
             System.Windows.Forms.OpenFileDialog fileDialog = new System.Windows.Forms.OpenFileDialog();
-            TabTemplate newTab = new TabTemplate();
-            String name = "";
-            int id = 0;
 
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
-                MessageBox.Show(fileDialog.FileName);
-                name = Path.GetFileName(fileDialog.FileName);
-
-                ProcessStartInfo startInfo = new ProcessStartInfo(fileDialog.FileName);
-                try
-                {
-                    Process proc_tmp = Process.Start(startInfo);
-                    if (proc_tmp == null)
-                    {
-                        return;
-                    }
-                    _processes.Add(proc_tmp.Id, proc_tmp);
-
-                    _processes[proc_tmp.Id].EnableRaisingEvents = true;
-                    _processes[proc_tmp.Id].Exited += processIsClosed;
-                    id = proc_tmp.Id;
-
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    return;
-                }
-
-                newTab.addPath(fileDialog.FileName);
-
-                metroSetLabel1.Visible = false;
-                metroSetTabControl1.Visible = true;
-                openExecButton.Location = new Point(700, 40);
-                openExecButton.Size = new Size(80, 30);
-                
-
-                TabPage tab = new TabPage();
-                tab.Controls.Add(newTab);
-                newTab.Dock = DockStyle.Fill;
-                tab.Text = name;
-                if (id != 0)
-                    tab.Tag = id;
-                metroSetTabControl1.Controls.Add(tab);
-
+                createProcessAndTab(fileDialog.FileName);
             }
         }
 

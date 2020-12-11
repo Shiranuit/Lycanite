@@ -17,7 +17,6 @@ using MetroSet_UI.Forms;
 using System.IO;
 using System.Drawing;
 
-public delegate void NotifyTabClose(int id);
 
 namespace MetroSet_UI.Controls
 {
@@ -28,7 +27,6 @@ namespace MetroSet_UI.Controls
 
     public class TabController : MetroSetTabControl
     {
-        public event NotifyTabClose TabClose;
         public TabController() : base()
         {
 
@@ -44,26 +42,6 @@ namespace MetroSet_UI.Controls
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            var graphics = e.Graphics;
-
-            graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-
-            switch (TabStyle)
-            {
-                case TabStyle.Style1:
-
-                    for (var i = 0; i <= TabCount - 1; i++)
-                    {
-                        DrawTab(i, graphics);
-                    }
-                    break;
-                case TabStyle.Style2:
-                    for (var i = 0; i <= TabCount - 1; i++)
-                    {
-                        DrawTab(i, graphics);
-                    }
-                    break;
-            }
         }
 
         protected override void OnMouseClick(MouseEventArgs e)
@@ -82,9 +60,6 @@ namespace MetroSet_UI.Controls
 
                     if (rect.Contains(e.Location))
                     {
-                        TabPage tabPage = TabPages[i];
-                        TabPages.Remove(tabPage);
-                        TabClose?.Invoke(int.Parse(tabPage.Tag.ToString()));
                         break;
                     }
                 }
