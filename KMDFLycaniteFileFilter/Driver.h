@@ -30,16 +30,17 @@ enum Permission {
 
 enum LycaniteAction {
     SET_LYCANITE_PID = 0,
-    SET_AUTHORIZATION_PID = 1,          // envoiyer le pid du processus (unsigned int 64) permission (unsigned int 64) et le fichier
-    SET_AUTHORIZATION_GLOBAL = 2,       // set des global permission pour tout les processus (pareil qu'au dessus sans le pid)
-    GET_PROCESS_STATS = 3,              // demander les stats d'un processus (par le PID) genre 4 int
-    DELETE_AUTHORIZATION_PID = 4,       // remove un chemin dans la liste d'authorisation pour le pid
-    DELETE_AUTHORIZATION_GLOBAL = 5     // remove un chemin dans la liste d'authorisation pour le global
+    SET_AUTHORIZATION_PID = 1,
+    SET_AUTHORIZATION_GLOBAL = 2,
+    GET_PROCESS_STATS = 3,
+    DELETE_AUTHORIZATION_PID = 4,
+    DELETE_AUTHORIZATION_GLOBAL = 5
 };
 
 enum comError {
     INVALID_REQUEST_SIZE = 0,
-    UNKNOWN_REQUEST = 1
+    UNKNOWN_REQUEST = 1,
+    BAD_ALLOC = 2
 };
 
 /* ======================================================
@@ -93,8 +94,7 @@ comMessageNotifyCallback(
 UINT8
 comSetLycanitePid(
     _In_ unsigned char* Input,
-    _In_ ULONG InputBufferSize,
-    _In_ UINT64* LPID
+    _In_ ULONG InputBufferSize
 );
 
 UINT8
@@ -111,8 +111,9 @@ comSetAuthorizationGlobal(
 
 UINT8
 comGetProcessStats(
-    _In_ unsigned char* Output,
-    _In_ UINT64 OutputBufferSize
+    _Out_ unsigned char* Output,
+    _In_ UINT64 OutputBufferSize,
+    _Out_ PULONG ReturnOutputBufferLength
 );
 
 UINT8
