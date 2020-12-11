@@ -24,7 +24,7 @@ typedef PVOID any_t;
  * PFany is a pointer to a function that can take two any_t arguments
  * and return an INTeger. Returns status code..
  */
-typedef INT (*PFany)(any_t, any_t);
+typedef INT(*PFany)(any_t, any_t);
 
 typedef INT CODE;
 
@@ -70,7 +70,7 @@ extern "C" {
      * Return the integer of the location in data
      * to store the point to the item, or MAP_FULL.
      */
-    static UINT64 ihashmap_hash(map_t in, UINT64 key, CODE *error_set);
+    static UINT64 ihashmap_hash(map_t in, UINT64 key, CODE* error_set);
 
     /*
      * Doubles the size of the hashmap, and rehashes all the elements
@@ -102,7 +102,7 @@ extern "C" {
     /*
      * Remove an element with that key from the map
      */
-    static CODE ihashmap_remove(map_t in, UINT64 key, any_t *data_removed);
+    static CODE ihashmap_remove(map_t in, UINT64 key, any_t* data_removed);
 
     /* Deallocate the hashmap */
     static VOID ihashmap_free(map_t in);
@@ -152,7 +152,7 @@ UINT64 ihashmap_hash_int(hashmap_map* map, UINT64 key) {
  * Return the integer of the location in data
  * to store the point to the item, or MAP_FULL.
  */
-UINT64 ihashmap_hash(map_t in, UINT64 key, CODE *error_set) {
+UINT64 ihashmap_hash(map_t in, UINT64 key, CODE* error_set) {
     UINT64 curr;
     INT i;
 
@@ -342,7 +342,7 @@ CODE ihashmap_iterate(map_t in, PFany f, any_t item) {
 /*
  * Remove an element with that key from the map
  */
-CODE ihashmap_remove(map_t in, UINT64 key, any_t *data_removed) {
+CODE ihashmap_remove(map_t in, UINT64 key, any_t* data_removed) {
     INT i;
     UINT64 curr;
     hashmap_map* map;
