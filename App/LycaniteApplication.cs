@@ -55,6 +55,25 @@ namespace App
 
             metroSetLabel1.Visible = false;
             metroSetTabControl1.Visible = true;
+            Demand_Autherization();
+        }
+
+        private void Demand_Autherization()
+        {
+            const string message = "Do you want to give this app permission to access a file?";
+            const string caption = "Form Closing";
+            var result = MessageBox.Show(message, caption,
+                                         MessageBoxButtons.YesNo,
+                                         MessageBoxIcon.Question);
+
+            if (result == DialogResult.Yes)
+            {
+                // Si il donne la permission
+            }
+            else
+            {
+                
+            }
         }
     }
 }
