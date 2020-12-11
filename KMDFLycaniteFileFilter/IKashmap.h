@@ -22,9 +22,11 @@ typedef PVOID any_t;
 
 /*
  * PFany is a pointer to a function that can take two any_t arguments
- * and return an integer. Returns status code..
+ * and return an INTeger. Returns status code..
  */
 typedef INT (*PFany)(any_t, any_t);
+
+typedef INT CODE;
 
 /*
  * map_t is a pointer to an internally maintained data structure.
@@ -68,39 +70,39 @@ extern "C" {
      * Return the integer of the location in data
      * to store the point to the item, or MAP_FULL.
      */
-    static INT ihashmap_hash(map_t in, UINT64 key);
+    static UINT64 ihashmap_hash(map_t in, UINT64 key, INT *error_set);
 
     /*
      * Doubles the size of the hashmap, and rehashes all the elements
      */
-    static INT ihashmap_rehash(map_t in);
+    static CODE ihashmap_rehash(map_t in);
 
     /*
      * Add a pointer to the hashmap with some key
      */
-    static INT ihashmap_put(map_t in, UINT64 key, any_t value);
+    static CODE ihashmap_put(map_t in, UINT64 key, any_t value);
 
     /*
      * Get your pointer out of the hashmap with a key
      */
-    static INT ihashmap_get(map_t in, UINT64 key, any_t* arg);
+    static CODE ihashmap_get(map_t in, UINT64 key, any_t* arg);
 
     /*
      * Get a random element from the hashmap
      */
-    static INT ihashmap_get_one(map_t in, any_t* arg, INT remove);
+    static CODE ihashmap_get_one(map_t in, any_t* arg, INT remove);
 
     /*
      * Iterate the function parameter over each element in the hashmap.  The
      * additional any_t argument is passed to the function as its first
      * argument and the hashmap element is the second.
      */
-    static INT ihashmap_iterate(map_t in, PFany f, any_t item);
+    static CODE ihashmap_iterate(map_t in, PFany f, any_t item);
 
     /*
      * Remove an element with that key from the map
      */
-    static INT ihashmap_remove(map_t in, UINT64 key, any_t *data_removed);
+    static CODE ihashmap_remove(map_t in, UINT64 key, any_t *data_removed);
 
     /* Deallocate the hashmap */
     static VOID ihashmap_free(map_t in);
@@ -150,18 +152,25 @@ UINT64 ihashmap_hash_int(hashmap_map* map, UINT64 key) {
  * Return the integer of the location in data
  * to store the point to the item, or MAP_FULL.
  */
-INT ihashmap_hash(map_t in, UINT64 key) {
-    INT curr;
+UINT64 ihashmap_hash(map_t in, UINT64 key, INT *error_set) {
+    UINT64 curr;
     INT i;
+
+    if (error_set != NULL)
+        *error_set = MAP_OK;
 
     /* Cast the hashmap */
     hashmap_map* map = (hashmap_map*)in;
 
     /* If full, return immediately */
-    if (map->size == map->table_size) return MAP_FULL;
+    if (map->size == map->table_size) {
+        if (error_set != NULL)
+            *error_set = MAP_FULL;
+        return 0;
+    }
 
     /* Find the best index */
-    curr = (INT)ihashmap_hash_int(map, key);
+    curr = ihashmap_hash_int(map, key);
 
     /* Linear probling */
     for (i = 0; i < map->table_size; i++) {
@@ -174,13 +183,15 @@ INT ihashmap_hash(map_t in, UINT64 key) {
         curr = (curr + 1) % map->table_size;
     }
 
-    return MAP_FULL;
+    if (error_set != NULL)
+        *error_set = MAP_FULL;
+    return 0;
 }
 
 /*
  * Doubles the size of the hashmap, and rehashes all the elements
  */
-INT ihashmap_rehash(map_t in) {
+CODE ihashmap_rehash(map_t in) {
     INT i;
     INT old_size;
     hashmap_element* curr;
@@ -215,7 +226,7 @@ INT ihashmap_rehash(map_t in) {
 /*
  * Add a pointer to the hashmap with some key
  */
-INT ihashmap_put(map_t in, UINT64 key, any_t value) {
+CODE ihashmap_put(map_t in, UINT64 key, any_t value) {
     INT index;
     hashmap_map* map;
 
@@ -223,12 +234,12 @@ INT ihashmap_put(map_t in, UINT64 key, any_t value) {
     map = (hashmap_map*)in;
 
     /* Find a place to put our value */
-    index = ihashmap_hash(in, key);
+    ihashmap_hash(in, key, &index);
     while (index == MAP_FULL) {
         if (ihashmap_rehash(in) == MAP_OMEM) {
             return MAP_OMEM;
         }
-        index = ihashmap_hash(in, key);
+        ihashmap_hash(in, key, &index);
     }
 
     /* Set the data */
@@ -243,8 +254,8 @@ INT ihashmap_put(map_t in, UINT64 key, any_t value) {
 /*
  * Get your pointer out of the hashmap with a key
  */
-INT ihashmap_get(map_t in, UINT64 key, any_t* arg) {
-    INT curr;
+CODE ihashmap_get(map_t in, UINT64 key, any_t* arg) {
+    UINT64 curr;
     INT i;
     hashmap_map* map;
 
@@ -252,7 +263,7 @@ INT ihashmap_get(map_t in, UINT64 key, any_t* arg) {
     map = (hashmap_map*)in;
 
     /* Find data location */
-    curr = (INT)ihashmap_hash_int(map, key);
+    curr = ihashmap_hash_int(map, key);
 
     /* Linear probing, if necessary */
     for (i = 0; i < map->table_size; i++) {
@@ -274,7 +285,7 @@ INT ihashmap_get(map_t in, UINT64 key, any_t* arg) {
 /*
  * Get a random element from the hashmap
  */
-INT ihashmap_get_one(map_t in, any_t* arg, INT remove) {
+CODE ihashmap_get_one(map_t in, any_t* arg, INT remove) {
     INT i;
     hashmap_map* map;
 
@@ -304,7 +315,7 @@ INT ihashmap_get_one(map_t in, any_t* arg, INT remove) {
  * additional any_t argument is passed to the function as its first
  * argument and the hashmap element is the second.
  */
-INT ihashmap_iterate(map_t in, PFany f, any_t item) {
+CODE ihashmap_iterate(map_t in, PFany f, any_t item) {
     INT i;
 
     /* Cast the hashmap */
@@ -330,16 +341,16 @@ INT ihashmap_iterate(map_t in, PFany f, any_t item) {
 /*
  * Remove an element with that key from the map
  */
-INT ihashmap_remove(map_t in, UINT64 key, any_t *data_removed) {
+CODE ihashmap_remove(map_t in, UINT64 key, any_t *data_removed) {
     INT i;
-    INT curr;
+    UINT64 curr;
     hashmap_map* map;
 
     /* Cast the hashmap */
     map = (hashmap_map*)in;
 
     /* Find key */
-    curr = (INT)ihashmap_hash_int(map, key);
+    curr = ihashmap_hash_int(map, key);
 
     /* Linear probing, if necessary */
     for (i = 0; i < map->table_size; i++) {
