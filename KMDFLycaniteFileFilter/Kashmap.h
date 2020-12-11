@@ -7,7 +7,7 @@
 #pragma warning(push, 0)
 #pragma warning(disable : 4668)
 #endif
-#include <ntddk.h>
+#include "Utils.h"
 
 #if (defined(_MSC_VER) && defined(__AVX__)) ||                                 \
     (!defined(_MSC_VER) && defined(__SSE4_2__))
@@ -63,21 +63,6 @@ struct hashmap_s {
 extern "C" {
 #endif
 
-    // override calloc for kernel
-    PVOID calloc(SIZE_T elementCount, SIZE_T elementSize);
-    
-    // override free for kernel
-    VOID free(PVOID mem);
-
-    // override memcpy for kernel
-    PVOID Kmemcpy(PVOID destination, CONST PVOID source, SIZE_T size);
-
-    // override memcmp
-    INT32 Kmemcmp(CONST PVOID pointer1, CONST PVOID pointer2, SIZE_T size);
-
-    // override memset
-    PVOID Kmemset(PVOID pointer, INT8 value, SIZE_T count);
-
     /// @brief Create a hashmap.
     /// @param initial_size The initial size of the hashmap. Must be a power of two.
     /// @param out_hashmap The storage for the created hashmap.
@@ -117,7 +102,9 @@ extern "C" {
     /// @return On success 0 is returned.
     static INT8 hashmap_remove(struct hashmap_s* CONST hashmap,
         CONST PCHAR key,
-        CONST UINT32 len) HASHMAP_USED;
+        CONST UINT32 len,
+        PVOID* data_removed,
+        PCHAR* key_removed) HASHMAP_USED;
 
     /// @brief Iterate over all the elements in a hashmap.
     /// @param hashmap The hashmap to iterate over.
@@ -180,56 +167,6 @@ extern "C" {
 #define HASHMAP_PTR_CAST(type, x) ((type)x)
 #define HASHMAP_NULL 0
 #endif
-
-PVOID calloc(SIZE_T elementCount, SIZE_T elementSize) {
-    SIZE_T total_size = elementCount * elementSize;
-    PCHAR mem = (PCHAR)ExAllocatePoolWithTag(NonPagedPoolNx, elementCount * elementSize, 'aloc');
-
-    // init data allocated with 0 like calloc
-    for (SIZE_T i = 0; mem != NULL && i < total_size; i++) {
-        mem[i] = 0;
-    }
-
-    return (PVOID)mem;
-}
-
-VOID free(PVOID mem) {
-    if (mem != NULL) {
-        ExFreePoolWithTag(mem, 'aloc');
-    }
-}
-
-PVOID Kmemcpy(PVOID destination, CONST PVOID source, SIZE_T size) {
-    for (SIZE_T i = 0; destination != NULL && i < size; i++) {
-        ((PCHAR)destination)[i] = ((PCHAR)source)[i];
-    }
-    
-    return destination;
-}
-
-// override memcmp
-INT32 Kmemcmp(CONST PVOID pointer1, CONST PVOID pointer2, SIZE_T size) {
-    char str[64] = { 0 };
-    char str2[64] = { 0 };
-    RtlCopyMemory(str, pointer1, size);
-    RtlCopyMemory(str2, pointer2, size);
-
-    if (pointer1 == pointer2) return 0;
-    for (SIZE_T i = 0; i < size; i++) {
-        if (((PCHAR)pointer1)[i] != ((PCHAR)pointer2)[i]) {
-            return (((PCHAR)pointer1)[i] - ((PCHAR)pointer2)[i]);
-        }
-    }
-    return 0;
-}
-
-// override memset
-PVOID Kmemset(PVOID pointer, INT8 value, SIZE_T count) {
-    for (SIZE_T i = 0; pointer != NULL && i < count; i++) {
-        ((PCHAR)pointer)[i] = value;
-    }
-    return (pointer);
-}
 
 INT8 hashmap_create(CONST UINT32 initial_size,
     struct hashmap_s* CONST out_hashmap) {
@@ -295,7 +232,7 @@ PVOID hashmap_get(CONST struct hashmap_s* CONST m, CONST PCHAR key,
 }
 
 INT8 hashmap_remove(struct hashmap_s* CONST m, CONST PCHAR key,
-    CONST UINT32 len) {
+    CONST UINT32 len, PVOID* data_removed, PCHAR* key_removed) {
     UINT32 i;
     UINT32 curr;
 
@@ -306,6 +243,12 @@ INT8 hashmap_remove(struct hashmap_s* CONST m, CONST PCHAR key,
     for (i = 0; i < HASHMAP_MAX_CHAIN_LENGTH; i++) {
         if (m->data[curr].in_use) {
             if (hashmap_match_helper(&m->data[curr], key, len)) {
+                /* Return the data removed */
+                *data_removed = m->data[curr].data;
+
+                /* Return the key removed */
+                *key_removed = m->data[curr].key;
+
                 /* Blank out the fields including in_use */
                 Kmemset(&m->data[curr], 0, sizeof(struct hashmap_element_s));
 
