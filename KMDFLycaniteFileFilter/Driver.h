@@ -1,10 +1,47 @@
 #pragma once
 
+#ifndef DRIVER_H_INCLUDED
+#define DRIVER_H_INCLUDED
+
 #include <fltkernel.h>
 #include <suppress.h>
 #include <dontuse.h>
 #include <wdm.h>
 #include <ntddk.h>
+
+/* ======================================================
+*                       DEFINES & MACROS
+*  ======================================================*/
+
+#define PermFlag(x, y) ((x & y) != y)
+
+typedef struct processPerm_s {
+    UINT8 leaf;
+    union data {
+        UINT64 permissions;
+        struct processPerm_s* ptr;
+    };
+} ProcessPerm;
+
+enum Permission {
+    LYCANITE_READ =  0b10,
+    LYCANITE_WRITE = 0b01
+};
+
+enum LycaniteAction {
+    SET_LYCANITE_PID = 0,
+    SET_AUTHORIZATION_PID = 1,
+    SET_AUTHORIZATION_GLOBAL = 2,
+    GET_PROCESS_STATS = 3,
+    DELETE_AUTHORIZATION_PID = 4,
+    DELETE_AUTHORIZATION_GLOBAL = 5
+};
+
+enum comError {
+    INVALID_REQUEST_SIZE = 0,
+    UNKNOWN_REQUEST = 1,
+    BAD_ALLOC = 2
+};
 
 /* ======================================================
 *                       Driver
@@ -18,9 +55,88 @@ DriverEntry(
     _In_ PUNICODE_STRING RegistryPath
 );
 
+NTSTATUS CgUnload(FLT_FILTER_UNLOAD_FLAGS Flags);
+
+
+
+/* ======================================================
+*               Communication Callbacks
+*  ======================================================*/
+
+NTSTATUS
+comConnectNotifyCallback(
+    _In_ PFLT_PORT ClientPort,
+    _In_ PVOID ServerPortCookie,
+    _In_reads_bytes_(SizeOfContext) PVOID ConnectionContext,
+    _In_ ULONG SizeOfContext,
+    _Outptr_result_maybenull_ PVOID* ConnectionCookie
+);
+
+VOID
+comDisconnectNotifyCallback(
+    _In_opt_ PVOID ConnectionCookie
+);
+
+NTSTATUS
+comMessageNotifyCallback(
+    _In_ PVOID ConnectionCookie,
+    _In_reads_bytes_opt_(InputBufferSize) PVOID InputBuffer,
+    _In_ ULONG InputBufferSize,
+    _Out_writes_bytes_to_opt_(OutputBufferSize, *ReturnOutputBufferLength) PVOID OutputBuffer,
+    _In_ ULONG OutputBufferSize,
+    _Out_ PULONG ReturnOutputBufferLength
+);
+
+/* ======================================================
+*                    Communication
+*  ======================================================*/
+
+UINT8
+comSetLycanitePid(
+    _In_ unsigned char* Input,
+    _In_ ULONG InputBufferSize
+);
+
+UINT8
+comSetAuthorizationPid(
+    _In_ unsigned char* Input,
+    _In_ UINT64 InputBufferSize
+);
+
+UINT8
+comSetAuthorizationGlobal(
+    _In_ unsigned char* Input,
+    _In_ UINT64 InputBufferSize
+);
+
+UINT8
+comGetProcessStats(
+    _Out_ unsigned char* Output,
+    _In_ UINT64 OutputBufferSize,
+    _Out_ PULONG ReturnOutputBufferLength
+);
+
+UINT8
+comDeleteAuthorizationPid(
+    _In_ unsigned char* Input,
+    _In_ UINT64 InputBufferSize
+);
+
+UINT8
+comDeleteAuthorizationGlobal(
+    _In_ unsigned char* Input,
+    _In_ UINT64 InputBufferSize
+);
+
 /* ======================================================
 *                       Callbacks
 *  ======================================================*/
+
+VOID CreateProcessNotify(
+    _In_ HANDLE ParentId,
+    _In_ HANDLE ProcessId,
+    _In_ BOOLEAN Create
+);
 
 FLT_PREOP_CALLBACK_STATUS
 AvPreCreate(
@@ -54,11 +170,6 @@ AvPreSetInformation(
 *                       Context
 *  ======================================================*/
 
-/* ======================================================
-*                       Filter
-*  ======================================================*/
-
-NTSTATUS CgUnload(FLT_FILTER_UNLOAD_FLAGS Flags);
 
 /* ======================================================
 *                       Text Section
@@ -71,4 +182,6 @@ NTSTATUS CgUnload(FLT_FILTER_UNLOAD_FLAGS Flags);
 #pragma alloc_text(PAGE, AvPreWrite)
 #pragma alloc_text(PAGE, AvPreRead)
 #pragma alloc_text(PAGE, AvPreSetInformation)
+#endif
+
 #endif
