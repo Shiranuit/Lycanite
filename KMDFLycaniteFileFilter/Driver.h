@@ -30,11 +30,11 @@ enum Permission {
 
 enum LycaniteAction {
     SET_LYCANITE_PID = 0,
-    SET_AUTHORIZATION_PID = 1,          // envoiyer le pid du processus (unsigned int 64) permission (unsigned int 64) et le fichier
-    SET_AUTHORIZATION_GLOBAL = 2,       // set des global permission pour tout les processus (pareil qu'au dessus sans le pid)
-    GET_PROCESS_STATS = 3,              // demander les stats d'un processus (par le PID) genre 4 int
-    DELETE_AUTHORIZATION_PID = 4,       // remove un chemin dans la liste d'authorisation pour le pid
-    DELETE_AUTHORIZATION_GLOBAL = 5     // remove un chemin dans la liste d'authorisation pour le global
+    SET_AUTHORIZATION_PID = 1,
+    SET_AUTHORIZATION_GLOBAL = 2,
+    GET_PROCESS_STATS = 3,
+    DELETE_AUTHORIZATION_PID = 4,
+    DELETE_AUTHORIZATION_GLOBAL = 5
 };
 
 enum comError {
