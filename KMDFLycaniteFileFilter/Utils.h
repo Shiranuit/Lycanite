@@ -27,7 +27,7 @@ extern "C" {
 }
 #endif
 
-UINT32 my_strlen(CONST PCHAR str)
+UINT32 my_strlen(CONST PWCHAR str)
 {
 	UINT32 len = 0;
 

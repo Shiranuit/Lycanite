@@ -10,6 +10,8 @@ PFLT_FILTER gFilterInstance = NULL;
 PFLT_PORT port = NULL;
 PFLT_PORT clientPort = NULL;
 
+typedef hashmap_map ihashmap;
+
 const FLT_OPERATION_REGISTRATION Callbacks[] = {
     { IRP_MJ_CREATE, // Filter Action Name
       0,
@@ -60,8 +62,12 @@ const FLT_REGISTRATION FilterRegistration = {
 
 };
 
-struct hashmap_s *ProcessInfos;
+ihashmap *ProcessesInfos = NULL;
+ihashmap* Processes = NULL;
+
 UINT64 LPID = 0; // Lycanite PID
+UUIDRecycler* uuidRecycler = NULL;
+
 
 
 /* ======================================================
@@ -84,21 +90,19 @@ UINT8 ulong2chr(UINT64 value, char* str) {
     return pos;
 }
 
-UINT8 isRestricted(PFLT_CALLBACK_DATA Data, UINT64 permissions) {
-    char PID[32] = { 0 };
-    ULONG process = FltGetRequestorProcessId(Data);
-    UINT8 len = ulong2chr(process, PID);
-    ProcessPerm *perm = (ProcessPerm *)hashmap_get(ProcessInfos, PID, len);
-
-    if (perm != NULL) {
-        if (perm->leaf) {
-            return PermFlag(perm->ptr->permissions, permissions);
-        }
-        else {
-            return PermFlag(perm->permissions, permissions);
-        }
+UINT8 isRestricted(PFLT_CALLBACK_DATA Data, PFLT_FILE_NAME_INFORMATION filenameInfo, UINT64 permissions) {
+    
+    UINT64 processId = FltGetRequestorProcessId(Data);
+   
+    processInfos* pinfo = NULL;
+    if (ihashmap_get(Processes, processId, (any_t*)&pinfo) == MAP_OK) {
+        PWCHAR filename = (PWCHAR)calloc(filenameInfo->Name.Length + 1, sizeof(WCHAR));
+        filename[filenameInfo->Name.Length] = 0;
+        RtlCopyMemory(filename, filenameInfo->Name.Buffer, filenameInfo->Name.Length);
+        UINT64 perm = getFilePermission(filename, &pinfo->permissions);
+        free(filename);
+        return PermFlag(perm, permissions);
     }
-
     return 0;
 }
 
@@ -108,6 +112,16 @@ INT8 cleanupHashmap(PVOID const context, struct hashmap_element_s * const e) {
     free(e->key);
     free(e->data);
     return -1;
+}
+
+INT cleanIHashmap(any_t item, any_t data) {
+    processInfos* pinfo = (processInfos*)data;
+    if (0 != hashmap_iterate_pairs(&pinfo->permissions, cleanupHashmap, NULL)) {
+        KdPrint(("%s\n", "failed to deallocate hashmap entries\n"));
+    }
+    hashmap_destroy(&pinfo->permissions);
+    free(data);
+    return MAP_OK;
 }
 
 /* ======================================================
@@ -125,14 +139,23 @@ DriverEntry(
     OBJECT_ATTRIBUTES objectAttributes = { 0 };
     UNICODE_STRING name = RTL_CONSTANT_STRING(L"\\LycaniteFF");
 
-    ProcessInfos = (struct hashmap_s *)calloc(1, sizeof(struct hashmap_s));
-    if (ProcessInfos == NULL) {
-        KdPrint(("%s", "Failed to alloc hashmap"));
+    uuidRecycler = UUIDRecycler_create(16);
+
+    if (uuidRecycler == NULL) {
+        KdPrint(("%s", "Failed to alloc UUIDRecycler"));
         return STATUS_ABANDONED;
     }
 
-    if (hashmap_create(8, ProcessInfos) != 0) {
-        KdPrint(("%s", "Failed to initialize hashmap of processInfos"));
+    ProcessesInfos = (ihashmap*)ihashmap_new();
+    if (ProcessesInfos == NULL) {
+        KdPrint(("%s", "Failed to alloc ProcessesInfos map"));
+        return STATUS_ABANDONED;
+    }
+
+    Processes = (ihashmap*)ihashmap_new();
+    if (Processes == NULL) {
+        KdPrint(("%s", "Failed to alloc Processes map"));
+        ihashmap_free(ProcessesInfos);
         return STATUS_ABANDONED;
     }
 
@@ -140,6 +163,9 @@ DriverEntry(
     if (!NT_SUCCESS(status))
     {
         KdPrint(("Faild to PsSetCreateProcessNotifyRoutineEx .status : 0x%X\n", status));
+        ihashmap_free(ProcessesInfos);
+        ihashmap_free(Processes);
+        free(Processes);
         return STATUS_ABANDONED;
     }
 
@@ -156,6 +182,9 @@ DriverEntry(
     );
 
     if (!NT_SUCCESS(status)) {
+        ihashmap_free(ProcessesInfos);
+        ihashmap_free(Processes);
+        free(Processes);
         return status;
     }
 
@@ -197,6 +226,9 @@ DriverEntry(
     FltUnregisterFilter(gFilterInstance);
     KdPrint(("[ERROR] FltBuildDefaultSecurityDescriptor FAILED. status = 0x%x\n", status));
 
+    ihashmap_free(ProcessesInfos);
+    ihashmap_free(Processes);
+    free(Processes);
     return status;
 }
 
@@ -210,14 +242,13 @@ NTSTATUS CgUnload(FLT_FILTER_UNLOAD_FLAGS Flags) {
     KdPrint(("%s", "Driver unload"));
     FltCloseCommunicationPort(port);
     FltUnregisterFilter(gFilterInstance);
-    if (0 != hashmap_iterate_pairs(ProcessInfos, cleanupHashmap, NULL)) {
-        KdPrint(("%s\n", "failed to deallocate hashmap entries\n"));
-    }
-    hashmap_destroy(ProcessInfos);
-    free(ProcessInfos);
+
+    ihashmap_iterate(ProcessesInfos, cleanIHashmap, NULL);
+    ihashmap_free(ProcessesInfos);
+    ihashmap_free(Processes);
 
     PsSetCreateProcessNotifyRoutine((PCREATE_PROCESS_NOTIFY_ROUTINE)CreateProcessNotify, TRUE);
-
+    UUIDRecycler_destroy(uuidRecycler);
     return STATUS_SUCCESS;
 }
 
@@ -225,60 +256,7 @@ FLT_PREOP_CALLBACK_STATUS AvPreCreate(_Inout_ PFLT_CALLBACK_DATA Data, _In_ PCFL
     UNREFERENCED_PARAMETER(FltObjects);
     UNREFERENCED_PARAMETER(CompletionContext);
 
-    NTSTATUS status;
-    PFLT_FILE_NAME_INFORMATION FileNameInfo;
-    WCHAR Name[256] = { 0 };
-    WCHAR Ext[256] = { 0 };
-
-    status = FltGetFileNameInformation(Data, FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT, &FileNameInfo);
-
-    if (isRestricted(Data, LYCANITE_WRITE)) {
-        if (NT_SUCCESS(status)) {
-            status = FltParseFileNameInformation(FileNameInfo);
-
-            if (NT_SUCCESS(status)) {
-
-                RtlCopyMemory(Name, FileNameInfo->Name.Buffer, FileNameInfo->Name.MaximumLength < 255 ? FileNameInfo->Name.MaximumLength : 255);
-                RtlCopyMemory(Ext, FileNameInfo->Extension.Buffer, FileNameInfo->Extension.MaximumLength < 255 ? FileNameInfo->Extension.MaximumLength : 255);
-
-                ULONG Disposition = (Data->Iopb->Parameters.Create.Options >> 24) & 0xFF;
-
-                if (Disposition == FILE_OPEN) {
-                    if (Data->Iopb->Parameters.Create.Options & FILE_DELETE_ON_CLOSE) {
-                        KdPrint(("[DELETE] file: %ws\n", Name));
-                    }
-                    else {
-                        KdPrint(("Open file: %ws\n", Name));
-                    }
-
-                }
-                else if (Disposition == FILE_CREATE) {
-                    KdPrint(("Create file: %ws\n", Name));
-                }
-                else if (Disposition == FILE_SUPERSEDE) {
-                    KdPrint(("Replace or Create file: %ws\n", Name));
-                }
-                else if (Disposition == FILE_OPEN_IF) {
-                    KdPrint(("Open or (Create + Open) file: %ws\n", Name));
-                }
-                else if (Disposition == FILE_OVERWRITE) {
-                    KdPrint(("Overwrite file: %ws\n", Name));
-                }
-                else if (Disposition == FILE_OVERWRITE_IF) {
-                    KdPrint(("Overwrite or Create file: %ws\n", Name));
-                }
-
-            FltReleaseFileNameInformation(FileNameInfo);
-            }
-        }
-
-        // Reject Operation
-        Data->IoStatus.Status = STATUS_ACCESS_DENIED;
-        Data->IoStatus.Information = 0;
-
-        return FLT_PREOP_COMPLETE;
-    }
-
+   
     return FLT_PREOP_SUCCESS_NO_CALLBACK;
 }
 
@@ -288,45 +266,21 @@ FLT_PREOP_CALLBACK_STATUS AvPreRead(_Inout_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_
 
     NTSTATUS status;
     PFLT_FILE_NAME_INFORMATION FileNameInfo;
-    WCHAR Name[256] = { 0 };
-    WCHAR Ext[256] = { 0 };
 
     status = FltGetFileNameInformation(Data, FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT, &FileNameInfo);
 
-    if (isRestricted(Data, LYCANITE_READ)) {
-
+    if (NT_SUCCESS(status)) {
+        status = FltParseFileNameInformation(FileNameInfo);
         if (NT_SUCCESS(status)) {
-            status = FltParseFileNameInformation(FileNameInfo);
-
-            if (NT_SUCCESS(status)) {
-
-                RtlCopyMemory(Name, FileNameInfo->Name.Buffer, FileNameInfo->Name.MaximumLength < 255 ? FileNameInfo->Name.MaximumLength : 255);
-                RtlCopyMemory(Ext, FileNameInfo->Extension.Buffer, FileNameInfo->Extension.MaximumLength < 255 ? FileNameInfo->Extension.MaximumLength : 255);
-
-
-                ULONG process = FltGetRequestorProcessId(Data);
-
-
-                //if (wcsstr(FileNameInfo->Extension.Buffer, L"txt") == NULL) {
-
-
-                if (process != 0) {
-                    KdPrint(("[%lu] Read file: %ws\n", process, Name));
-                }
-                else {
-                    KdPrint(("Read file: %ws", Name));
-                }
-
+            if (isRestricted(Data, FileNameInfo, LYCANITE_READ)) {
                 FltReleaseFileNameInformation(FileNameInfo);
+                Data->IoStatus.Status = STATUS_ACCESS_DENIED;
+                Data->IoStatus.Information = 0;
+
+                return FLT_PREOP_COMPLETE;
             }
-
+            FltReleaseFileNameInformation(FileNameInfo);
         }
-
-        // Reject Operation
-        Data->IoStatus.Status = STATUS_ACCESS_DENIED;
-        Data->IoStatus.Information = 0;
-
-        return FLT_PREOP_COMPLETE;
     }
 
 
@@ -342,37 +296,23 @@ FLT_PREOP_CALLBACK_STATUS AvPreWrite(_Inout_ PFLT_CALLBACK_DATA Data, _In_ PCFLT
     WCHAR Name[256] = { 0 };
     WCHAR Ext[256] = { 0 };
 
-    if (isRestricted(Data, LYCANITE_WRITE)) {
-        status = FltGetFileNameInformation(Data, FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT, &FileNameInfo);
+    NTSTATUS status;
+    PFLT_FILE_NAME_INFORMATION FileNameInfo;
 
+    status = FltGetFileNameInformation(Data, FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT, &FileNameInfo);
+
+    if (NT_SUCCESS(status)) {
+        status = FltParseFileNameInformation(FileNameInfo);
         if (NT_SUCCESS(status)) {
-            status = FltParseFileNameInformation(FileNameInfo);
-
-            if (NT_SUCCESS(status)) {
-
-                RtlCopyMemory(Name, FileNameInfo->Name.Buffer, FileNameInfo->Name.MaximumLength < 255 ? FileNameInfo->Name.MaximumLength : 255);
-                RtlCopyMemory(Ext, FileNameInfo->Extension.Buffer, FileNameInfo->Extension.MaximumLength < 255 ? FileNameInfo->Extension.MaximumLength : 255);
-
-
-                ULONG process = FltGetRequestorProcessId(Data);
-
-                if (process != 0) {
-                    KdPrint(("[%lu] Write file: %ws\n", process, Name));
-                }
-                else {
-                    KdPrint(("Write file: %ws", Name));
-                }
-
+            if (isRestricted(Data, FileNameInfo, LYCANITE_WRITE)) {
                 FltReleaseFileNameInformation(FileNameInfo);
+                Data->IoStatus.Status = STATUS_ACCESS_DENIED;
+                Data->IoStatus.Information = 0;
+
+                return FLT_PREOP_COMPLETE;
             }
-
+            FltReleaseFileNameInformation(FileNameInfo);
         }
-
-        // Reject Operation
-        Data->IoStatus.Status = STATUS_ACCESS_DENIED;
-        Data->IoStatus.Information = 0;
-
-        return FLT_PREOP_COMPLETE;
     }
 
     return FLT_PREOP_SUCCESS_NO_CALLBACK;
@@ -387,45 +327,33 @@ FLT_PREOP_CALLBACK_STATUS AvPreSetInformation(_Inout_ PFLT_CALLBACK_DATA Data, _
     WCHAR Name[256] = { 0 };
     WCHAR Ext[256] = { 0 };
 
-    if (isRestricted(Data, LYCANITE_WRITE)) {
+    NTSTATUS status;
+    PFLT_FILE_NAME_INFORMATION FileNameInfo;
 
-        status = FltGetFileNameInformation(Data, FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT, &FileNameInfo);
+    status = FltGetFileNameInformation(Data, FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT, &FileNameInfo);
 
+    if (NT_SUCCESS(status)) {
+        status = FltParseFileNameInformation(FileNameInfo);
         if (NT_SUCCESS(status)) {
-            status = FltParseFileNameInformation(FileNameInfo);
 
-            if (NT_SUCCESS(status)) {
+            if ((Data->Iopb->Parameters.SetFileInformation.FileInformationClass == FileDispositionInformation) ||
+                (Data->Iopb->Parameters.SetFileInformation.FileInformationClass == FileDispositionInformationEx)) {
 
-                RtlCopyMemory(Name, FileNameInfo->Name.Buffer, FileNameInfo->Name.MaximumLength < 255 ? FileNameInfo->Name.MaximumLength : 255);
-                RtlCopyMemory(Ext, FileNameInfo->Extension.Buffer, FileNameInfo->Extension.MaximumLength < 255 ? FileNameInfo->Extension.MaximumLength : 255);
+                ULONG flags = ((PFILE_DISPOSITION_INFORMATION_EX)Data->Iopb->Parameters.SetFileInformation.InfoBuffer)->Flags;
 
+                if (FlagOn(flags, FILE_DISPOSITION_DELETE)) {
+                    if (isRestricted(Data, FileNameInfo, LYCANITE_DELETE)) {
+                        FltReleaseFileNameInformation(FileNameInfo);
+                        Data->IoStatus.Status = STATUS_ACCESS_DENIED;
+                        Data->IoStatus.Information = 0;
 
-                if ((Data->Iopb->Parameters.SetFileInformation.FileInformationClass == FileDispositionInformation) ||
-                    (Data->Iopb->Parameters.SetFileInformation.FileInformationClass == FileDispositionInformationEx)) {
-
-                    ULONG flags = ((PFILE_DISPOSITION_INFORMATION_EX)Data->Iopb->Parameters.SetFileInformation.InfoBuffer)->Flags;
-
-                    if (FlagOn(flags, FILE_DISPOSITION_DELETE)) {
-                        ULONG process = FltGetRequestorProcessId(Data);
-                        if (process != 0) {
-                            KdPrint(("[%lu] Delete file: %ws\n", process, Name));
-                        }
-                        else {
-                            KdPrint(("Delete file: %ws", Name));
-                        }
+                        return FLT_PREOP_COMPLETE;
                     }
                 }
-
-                FltReleaseFileNameInformation(FileNameInfo);
             }
 
+            FltReleaseFileNameInformation(FileNameInfo);
         }
-
-        // Reject Operation
-        Data->IoStatus.Status = STATUS_ACCESS_DENIED;
-        Data->IoStatus.Information = 0;
-
-        return FLT_PREOP_COMPLETE;
     }
 
     return FLT_PREOP_SUCCESS_NO_CALLBACK;
@@ -532,11 +460,19 @@ comSetAuthorizationPid(
     len |= (((UINT16)Input[17]) & 0xFF);
     len |= (((UINT16)Input[18]) & 0xFF) << 8L;
 
-    char* Message = (char*)calloc(len, sizeof(char));
+
+    char* Message = (char*)calloc(len+1, sizeof(char));
+
     if (Message == NULL) {
         return BAD_ALLOC;
     }
+
+    Message[len] = 0;
     RtlCopyMemory(Message, (PCHAR)Input + 19, len);
+
+    UNICODE_STRING str;
+    RtlAnsiStringToUnicodeString(&str, Message, TRUE);
+    // WIP
 
     KdPrint(("[%d] %s\n", len, Message));
 
@@ -717,49 +653,58 @@ VOID CreateProcessNotify(
     if (LPID != 0) {
         if (Create) {
             if (LPID == ParentId) {
-                char* ID = (char*)calloc(24, sizeof(char));
-                UINT8 idlen = ulong2chr(ProcessId, ID);
-                ProcessPerm* newperm = (ProcessPerm*)calloc(1, sizeof(ProcessPerm));
+                UUID uuid = UUIDRecycler_getUUID(uuidRecycler);
 
-                newperm->leaf = 0;
-                newperm->permissions = 0;
+                if (uuid == 0) { // Fail
+                    return;
+                }
 
-                hashmap_put(ProcessInfos, ID, idlen, newperm);
+                processInfos* pinfo = (processInfos *)calloc(1, sizeof(processInfos));
 
-                KdPrint(("Create Parent Process [%llu]\n", ProcessId));
+                if (pinfo == NULL) {
+                    return;
+                }
+
+                pinfo->referenceCount = 1;
+                pinfo->uuid = uuid;
+                if (hashmap_create(8, &pinfo->permissions)) { // Failed to alloc hashmap
+                    free(pinfo);
+                    return;
+                }
+
+                ihashmap_put(ProcessesInfos, uuid, pinfo);
+                ihashmap_put(Processes, ProcessId, pinfo);
+
+                KdPrint(("Create Parent Process [%llu] -- %llu\n", ProcessId, uuid));
             }
             else {
-                char PID[32] = { 0 };
-                UINT8 len = ulong2chr(ParentId, PID);
-                ProcessPerm* perm = (ProcessPerm*)hashmap_get(ProcessInfos, PID, len);
-
-                if (perm != NULL) {
-                    char* ID = (char*)calloc(24, sizeof(char));
-                    UINT8 idlen = ulong2chr(ProcessId, ID);
-                    ProcessPerm* newperm = (ProcessPerm*)calloc(1, sizeof(ProcessPerm));
-                    newperm->leaf = 1;
-                    if (perm->leaf) {
-                        newperm->ptr = perm->ptr;
-                    }
-                    else {
-                        newperm->ptr = perm;
-                    }
-                    hashmap_put(ProcessInfos, ID, idlen, newperm);
-                    KdPrint(("Create Sub Process [%llu] %llu\n", ParentId, ProcessId));
+                processInfos *pinfo;
+                if (ihashmap_get(Processes, ParentId, (any_t*)&pinfo) == MAP_OK) {
+                    pinfo->referenceCount += 1;
+                    ihashmap_put(Processes, ProcessId, pinfo);
+                    KdPrint(("Create Sub Process [%llu] %llu -- %llu\n", ParentId, ProcessId, pinfo->uuid));
                 }
             }
-        }
-        else {
-            char PID[32] = { 0 };
-            UINT8 len = ulong2chr(ProcessId, PID);
-            ProcessPerm* perm = (ProcessPerm*)hashmap_get(ProcessInfos, PID, len);
-            if (perm != NULL) {
-                if (perm->leaf) {
-                    KdPrint(("Destroy Sub Process [%llu] %llu\n", ParentId, ProcessId));
+        } else { // on process killed
+            processInfos* pinfo = NULL;
+            if (ihashmap_get(Processes, ProcessId, (any_t*)&pinfo) == MAP_OK) {
+                pinfo->referenceCount -= 1;
+
+                KdPrint(("Kill Process %llu -- %llu\n", ProcessId, pinfo->uuid));
+                if (pinfo->referenceCount == 0) {
+                    ihashmap_remove(ProcessesInfos, pinfo->uuid, NULL);
+
+                    if (0 != hashmap_iterate_pairs(&pinfo->permissions, cleanupHashmap, NULL)) {
+                        KdPrint(("%s\n", "failed to deallocate hashmap entries\n"));
+                    }
+                    hashmap_destroy(&pinfo->permissions);
+
+                    UUIDRecycler_recycleUUID(uuidRecycler, pinfo->uuid);
+                    KdPrint(("Remove Reference %llu\n", pinfo->uuid));
+                    free(pinfo);
                 }
-                else {
-                    KdPrint(("Destroy Parent Process %llu\n", ProcessId));
-                }
+
+                ihashmap_remove(Processes, ProcessId, NULL);
             }
         }
     }
