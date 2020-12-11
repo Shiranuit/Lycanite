@@ -93,8 +93,7 @@ comMessageNotifyCallback(
 UINT8
 comSetLycanitePid(
     _In_ unsigned char* Input,
-    _In_ ULONG InputBufferSize,
-    _In_ UINT64* LPID
+    _In_ ULONG InputBufferSize
 );
 
 UINT8

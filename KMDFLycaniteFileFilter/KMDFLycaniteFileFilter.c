@@ -475,8 +475,7 @@ comDisconnectNotifyCallback(
 UINT8
 comSetLycanitePid(
     _In_ unsigned char* Input,
-    _In_ ULONG InputBufferSize,
-    _In_ UINT64* LPID
+    _In_ ULONG InputBufferSize
 ) {
     if (InputBufferSize != 9) {
         return INVALID_REQUEST_SIZE;
@@ -495,7 +494,7 @@ comSetLycanitePid(
 
     KdPrint(("Set Lycanite PID [%llu]\n", pid));
 
-    *LPID = pid;
+    LPID = pid;
     return STATUS_SUCCESS;
 }
 
