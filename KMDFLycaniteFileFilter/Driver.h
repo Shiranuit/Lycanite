@@ -39,7 +39,8 @@ enum LycaniteAction {
 
 enum comError {
     INVALID_REQUEST_SIZE = 0,
-    UNKNOWN_REQUEST = 1
+    UNKNOWN_REQUEST = 1,
+    BAD_ALLOC = 2
 };
 
 /* ======================================================

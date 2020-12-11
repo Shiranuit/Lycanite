@@ -533,7 +533,10 @@ comSetAuthorizationPid(
     len |= (((UINT16)Input[18]) & 0xFF) << 8L;
 
     char* Message = (char*)calloc(len, sizeof(char));
-    RtlCopyMemory(Message, (PCHAR)Input+19, len);
+    if (Message == NULL) {
+        return BAD_ALLOC;
+    }
+    RtlCopyMemory(Message, (PCHAR)Input + 19, len);
 
     KdPrint(("[%d] %s\n", len, Message));
 
@@ -565,6 +568,9 @@ comSetAuthorizationGlobal(
     len |= (((UINT16)Input[10]) & 0xFF) << 8L;
 
     char* Message = (char*)calloc(len, sizeof(char));
+    if (Message == NULL) {
+        return BAD_ALLOC;
+    }
     RtlCopyMemory(Message, (PCHAR)Input + 11, len);
 
     KdPrint(("[%d] %s\n", len, Message));
@@ -605,6 +611,9 @@ comDeleteAuthorizationPid(
     len |= (((UINT16)Input[10]) & 0xFF) << 8L;
 
     char* Message = (char*)calloc(len, sizeof(char));
+    if (Message == NULL) {
+        return BAD_ALLOC;
+    }
     RtlCopyMemory(Message, (PCHAR)Input + 11, len);
 
     KdPrint(("[%d] %s\n", len, Message));
@@ -627,6 +636,9 @@ comDeleteAuthorizationGlobal(
     len |= (((UINT16)Input[2]) & 0xFF) << 8L;
 
     char* Message = (char*)calloc(len, sizeof(char));
+    if (Message == NULL) {
+        return BAD_ALLOC;
+    }
     RtlCopyMemory(Message, (PCHAR)Input + 3, len);
 
     KdPrint(("[%d] %s\n", len, Message));
@@ -650,7 +662,7 @@ comMessageNotifyCallback(
     UNREFERENCED_PARAMETER(InputBufferSize);
     UNREFERENCED_PARAMETER(OutputBuffer);
     UNREFERENCED_PARAMETER(OutputBufferSize);
-    
+
     *ReturnOutputBufferLength = 0;
 
     UINT16 status = UNKNOWN_REQUEST;
@@ -660,30 +672,34 @@ comMessageNotifyCallback(
         unsigned char* Output = (unsigned char*)OutputBuffer;
 
         switch (Input[0]) {
-            case SET_LYCANITE_PID :
-                status = comSetLycanitePid(Input, InputBufferSize, &LPID);
-                break;
-            case SET_AUTHORIZATION_PID:
-                status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
-                break;
-            case SET_AUTHORIZATION_GLOBAL:
-                status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
-                break;
-            case GET_PROCESS_STATS:
-                status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
-                break;
-            case DELETE_AUTHORIZATION_PID:
-                status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
-                break;
-            case DELETE_AUTHORIZATION_GLOBAL:
-                status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
-                break;
+        case SET_LYCANITE_PID:
+            status = comSetLycanitePid(Input, InputBufferSize, &LPID);
+            break;
+        case SET_AUTHORIZATION_PID:
+            status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+            break;
+        case SET_AUTHORIZATION_GLOBAL:
+            status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+            break;
+        case GET_PROCESS_STATS:
+            status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+            break;
+        case DELETE_AUTHORIZATION_PID:
+            status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+            break;
+        case DELETE_AUTHORIZATION_GLOBAL:
+            status = comSetAuthorizationPid(Input, InputBufferSize, ProcessInfos);
+            break;
         }
+
         if (status == INVALID_REQUEST_SIZE) {
             DbgPrint(("request size invalid\n"));
         }
         else if (status == UNKNOWN_REQUEST) {
             DbgPrint(("request unknow\n"));
+        }
+        else if (status == BAD_ALLOC) {
+            DbgPrint(("bad allocation\n"));
         }
     }
 
