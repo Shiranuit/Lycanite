@@ -55,10 +55,10 @@ namespace App
 
             metroSetLabel1.Visible = false;
             metroSetTabControl1.Visible = true;
-            Demand_Autherization();
+            Demand_Autherization_Pop_Up();
         }
 
-        private void Demand_Autherization()
+        private void Demand_Autherization_Pop_Up()
         {
             const string message = "Do you want to give this app permission to access a file?";
             const string caption = "Form Closing";
@@ -68,11 +68,11 @@ namespace App
 
             if (result == DialogResult.Yes)
             {
-                // Si il donne la permission
+                // if he gives permission
             }
             else
             {
-                
+                // if he doesn't give permission
             }
         }
     }
