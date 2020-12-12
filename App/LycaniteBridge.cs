@@ -153,7 +153,6 @@ namespace Lycanite
         ~LycaniteBridge()
         {
             Disconnect();
-            thread.Abort();
             Marshal.FreeHGlobal(port);
         }
 
@@ -181,6 +180,7 @@ namespace Lycanite
             {
                 CloseHandle(*(IntPtr*)port.ToPointer());
                 connected = false;
+                thread.Abort();
             }
         }
 
