@@ -270,14 +270,18 @@ CODE ihashmap_get(map_t in, UINT64 key, any_t* arg) {
     for (i = 0; i < map->table_size; i++) {
 
         if (map->data[curr].key == key && map->data[curr].in_use == 1) {
-            *arg = (PINT32)(map->data[curr].data);
+            if (arg != NULL) {
+                *arg = (PINT32)(map->data[curr].data);
+            }
             return MAP_OK;
         }
 
         curr = (curr + 1) % map->table_size;
     }
 
-    *arg = NULL;
+    if (arg != NULL) {
+        *arg = NULL;
+    }
 
     /* Not found */
     return MAP_MISSING;
@@ -356,7 +360,9 @@ CODE ihashmap_remove(map_t in, UINT64 key, any_t* data_removed) {
     /* Linear probing, if necessary */
     for (i = 0; i < map->table_size; i++) {
         if (map->data[curr].key == key && map->data[curr].in_use == 1) {
-            *data_removed = map->data[curr].data;
+            if (data_removed != NULL) {
+                *data_removed = map->data[curr].data;
+            }
             /* Blank out the fields */
             map->data[curr].in_use = 0;
             map->data[curr].data = NULL;

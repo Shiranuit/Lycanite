@@ -9,23 +9,26 @@
 #include <wdm.h>
 #include <ntddk.h>
 
+#include "IKashmap.h"
+#include "UUIDRecycler.h"
+#include "Permissions.h"
+
 /* ======================================================
 *                       DEFINES & MACROS
 *  ======================================================*/
 
 #define PermFlag(x, y) ((x & y) != y)
 
-typedef struct processPerm_s {
-    UINT8 leaf;
-    union data {
-        UINT64 permissions;
-        struct processPerm_s* ptr;
-    };
-} ProcessPerm;
+typedef struct processInfos_s {
+    UINT16 referenceCount;
+    struct hashmap_s permissions;
+    UINT64 uuid;
+} processInfos;
 
 enum Permission {
-    LYCANITE_READ =  0b10,
-    LYCANITE_WRITE = 0b01
+    LYCANITE_WRITE  = 0b001,
+    LYCANITE_READ   = 0b010,
+    LYCANITE_DELETE = 0b100
 };
 
 enum LycaniteAction {
@@ -38,9 +41,15 @@ enum LycaniteAction {
 };
 
 enum comError {
-    INVALID_REQUEST_SIZE = 0,
-    UNKNOWN_REQUEST = 1,
-    BAD_ALLOC = 2
+    INVALID_REQUEST_SIZE = 1,
+    UNKNOWN_REQUEST = 2,
+    BAD_ALLOC = 3
+};
+
+enum UserCallback {
+    PROCESS_CREATE = 1,
+    PROCESS_DESTROY = 2,
+    PROCESS_REQPERM = 3,
 };
 
 /* ======================================================
