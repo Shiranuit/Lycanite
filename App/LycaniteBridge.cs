@@ -139,10 +139,6 @@ namespace Lycanite
                     Marshal.Copy((IntPtr)data.messageContent, buff, 0, sizeof(byte) * BUFFER_SIZE);
                     OnLycaniteEvent.Invoke(new LycaniteEvent(buff));
                 }
-                else
-                {
-
-                }
 
             }
             Marshal.FreeHGlobal(dataReceive);
