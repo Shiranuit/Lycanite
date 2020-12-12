@@ -41,9 +41,15 @@ enum LycaniteAction {
 };
 
 enum comError {
-    INVALID_REQUEST_SIZE = 0,
-    UNKNOWN_REQUEST = 1,
-    BAD_ALLOC = 2
+    INVALID_REQUEST_SIZE = 1,
+    UNKNOWN_REQUEST = 2,
+    BAD_ALLOC = 3
+};
+
+enum UserCallback {
+    PROCESS_CREATE = 1,
+    PROCESS_DESTROY = 2,
+    PROCESS_REQPERM = 3,
 };
 
 /* ======================================================

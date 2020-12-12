@@ -15,7 +15,7 @@ typedef hashmap_map ihashmap;
 const FLT_OPERATION_REGISTRATION Callbacks[] = {
     { IRP_MJ_CREATE, // Filter Action Name
       0,
-      NULL,  // Pointer to the function to execute before the action is executed
+      AvPreCreate,  // Pointer to the function to execute before the action is executed
       NULL },       // Pointer to the function to execute after the action is executed
 
     { IRP_MJ_WRITE,
@@ -65,6 +65,8 @@ const FLT_REGISTRATION FilterRegistration = {
 ihashmap *ProcessesInfos = NULL;
 ihashmap* Processes = NULL;
 
+struct hashmap_s globalPerm;
+
 UINT64 LPID = 0; // Lycanite PID
 UUIDRecycler* uuidRecycler = NULL;
 
@@ -93,15 +95,29 @@ UINT8 ulong2chr(UINT64 value, char* str) {
 UINT8 isRestricted(PFLT_CALLBACK_DATA Data, PFLT_FILE_NAME_INFORMATION filenameInfo, UINT64 permissions) {
     
     UINT64 processId = FltGetRequestorProcessId(Data);
-   
+
     processInfos* pinfo = NULL;
     if (ihashmap_get(Processes, processId, (any_t*)&pinfo) == MAP_OK) {
-        PWCHAR filename = (PWCHAR)calloc(filenameInfo->Name.Length + 1, sizeof(WCHAR));
-        filename[filenameInfo->Name.Length] = 0;
-        RtlCopyMemory(filename, filenameInfo->Name.Buffer, filenameInfo->Name.Length);
-        UINT64 perm = getFilePermission(filename, &pinfo->permissions);
-        free(filename);
-        return PermFlag(perm, permissions);
+        UINT64 len = filenameInfo->Name.Length / sizeof(WCHAR);
+        PWCHAR filename = (PWCHAR)calloc(len + 1, sizeof(WCHAR));
+        if (filename != NULL) {
+            filename[len] = 0;
+            
+            RtlCopyMemory(filename, filenameInfo->Name.Buffer, filenameInfo->Name.Length);
+
+            UINT64 gperm = getFilePermission(filename, &globalPerm);
+            if (gperm == 0) {
+                UINT64 perm = getFilePermission(filename, &pinfo->permissions);
+                KdPrint(("Check %llu: [%llu: %d] %ws", processId, permissions, PermFlag(perm, permissions), filename));
+                free(filename);
+                return PermFlag(perm, permissions);
+
+            }
+            KdPrint(("Check Global %llu: [%llu: %d] %ws", processId, permissions, PermFlag(gperm, permissions), filename));
+            free(filename);
+            return PermFlag(gperm, permissions);
+        }
+        return 1;
     }
     return 0;
 }
@@ -159,13 +175,20 @@ DriverEntry(
         return STATUS_ABANDONED;
     }
 
+    if (hashmap_create(8, &globalPerm) != 0) {
+        KdPrint(("%s", "Failed to alloc globalPerm map"));
+        ihashmap_free(ProcessesInfos);
+        ihashmap_free(Processes);
+        return STATUS_ABANDONED;
+    }
+
     status = PsSetCreateProcessNotifyRoutine((PCREATE_PROCESS_NOTIFY_ROUTINE)CreateProcessNotify, FALSE);
     if (!NT_SUCCESS(status))
     {
         KdPrint(("Faild to PsSetCreateProcessNotifyRoutineEx .status : 0x%X\n", status));
         ihashmap_free(ProcessesInfos);
         ihashmap_free(Processes);
-        free(Processes);
+        hashmap_destroy(&globalPerm);
         return STATUS_ABANDONED;
     }
 
@@ -184,7 +207,7 @@ DriverEntry(
     if (!NT_SUCCESS(status)) {
         ihashmap_free(ProcessesInfos);
         ihashmap_free(Processes);
-        free(Processes);
+        hashmap_destroy(&globalPerm);
         return status;
     }
 
@@ -228,7 +251,7 @@ DriverEntry(
 
     ihashmap_free(ProcessesInfos);
     ihashmap_free(Processes);
-    free(Processes);
+    hashmap_destroy(&globalPerm);
     return status;
 }
 
@@ -247,6 +270,11 @@ NTSTATUS CgUnload(FLT_FILTER_UNLOAD_FLAGS Flags) {
     ihashmap_free(ProcessesInfos);
     ihashmap_free(Processes);
 
+    if (0 != hashmap_iterate_pairs(&globalPerm, cleanupHashmap, NULL)) {
+        KdPrint(("%s\n", "failed to deallocate hashmap entries\n"));
+    }
+    hashmap_destroy(&globalPerm);
+
     PsSetCreateProcessNotifyRoutine((PCREATE_PROCESS_NOTIFY_ROUTINE)CreateProcessNotify, TRUE);
     UUIDRecycler_destroy(uuidRecycler);
     return STATUS_SUCCESS;
@@ -256,7 +284,48 @@ FLT_PREOP_CALLBACK_STATUS AvPreCreate(_Inout_ PFLT_CALLBACK_DATA Data, _In_ PCFL
     UNREFERENCED_PARAMETER(FltObjects);
     UNREFERENCED_PARAMETER(CompletionContext);
 
-   
+    NTSTATUS status;
+    PFLT_FILE_NAME_INFORMATION FileNameInfo;
+
+    status = FltGetFileNameInformation(Data, FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT, &FileNameInfo);
+    if (NT_SUCCESS(status)) {
+        status = FltParseFileNameInformation(FileNameInfo);
+        if (NT_SUCCESS(status)) {
+            ULONG Disposition = (Data->Iopb->Parameters.Create.Options >> 24) & 0xFF;
+            if (Disposition == FILE_OPEN) {
+                if (Data->Iopb->Parameters.Create.Options & FILE_DELETE_ON_CLOSE) {
+                    if (isRestricted(Data, FileNameInfo, LYCANITE_DELETE)) {
+                        FltReleaseFileNameInformation(FileNameInfo);
+                        Data->IoStatus.Status = STATUS_ACCESS_DENIED;
+                        Data->IoStatus.Information = 0;
+
+                        return FLT_PREOP_COMPLETE;
+                    }
+                }
+                else {
+                    if (isRestricted(Data, FileNameInfo, LYCANITE_READ)) {
+                        FltReleaseFileNameInformation(FileNameInfo);
+                        Data->IoStatus.Status = STATUS_ACCESS_DENIED;
+                        Data->IoStatus.Information = 0;
+
+                        return FLT_PREOP_COMPLETE;
+                    }
+                }
+            }
+            else {
+                if (isRestricted(Data, FileNameInfo, LYCANITE_WRITE)) {
+                    FltReleaseFileNameInformation(FileNameInfo);
+                    Data->IoStatus.Status = STATUS_ACCESS_DENIED;
+                    Data->IoStatus.Information = 0;
+
+                    return FLT_PREOP_COMPLETE;
+                }
+            }
+            FltReleaseFileNameInformation(FileNameInfo);
+        }
+    }
+    
+
     return FLT_PREOP_SUCCESS_NO_CALLBACK;
 }
 
@@ -293,11 +362,6 @@ FLT_PREOP_CALLBACK_STATUS AvPreWrite(_Inout_ PFLT_CALLBACK_DATA Data, _In_ PCFLT
 
     NTSTATUS status;
     PFLT_FILE_NAME_INFORMATION FileNameInfo;
-    WCHAR Name[256] = { 0 };
-    WCHAR Ext[256] = { 0 };
-
-    NTSTATUS status;
-    PFLT_FILE_NAME_INFORMATION FileNameInfo;
 
     status = FltGetFileNameInformation(Data, FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT, &FileNameInfo);
 
@@ -321,11 +385,6 @@ FLT_PREOP_CALLBACK_STATUS AvPreWrite(_Inout_ PFLT_CALLBACK_DATA Data, _In_ PCFLT
 FLT_PREOP_CALLBACK_STATUS AvPreSetInformation(_Inout_ PFLT_CALLBACK_DATA Data, _In_ PCFLT_RELATED_OBJECTS FltObjects, _Flt_CompletionContext_Outptr_ PVOID* CompletionContext) {
     UNREFERENCED_PARAMETER(FltObjects);
     UNREFERENCED_PARAMETER(CompletionContext);
-
-    NTSTATUS status;
-    PFLT_FILE_NAME_INFORMATION FileNameInfo;
-    WCHAR Name[256] = { 0 };
-    WCHAR Ext[256] = { 0 };
 
     NTSTATUS status;
     PFLT_FILE_NAME_INFORMATION FileNameInfo;
@@ -470,11 +529,37 @@ comSetAuthorizationPid(
     Message[len] = 0;
     RtlCopyMemory(Message, (PCHAR)Input + 19, len);
 
-    UNICODE_STRING str;
-    RtlAnsiStringToUnicodeString(&str, Message, TRUE);
-    // WIP
+    processInfos* pinfo = NULL;
+    if (ihashmap_get(ProcessesInfos, pid, &pinfo) == MAP_OK) {
+        PWCHAR file = wcharFromChar(Message, len, &len);
+        free(Message);
 
-    KdPrint(("[%d] %s\n", len, Message));
+        if (file == NULL) {
+            return BAD_ALLOC;
+        }
+
+        UINT64 *perm_ptr = (UINT64 *)hashmap_get(&pinfo->permissions, file, len);
+
+        if (perm_ptr != NULL) {
+            KdPrint(("Set PID Auth [%llu] %ws\n", len, file));
+            free(file);
+            *perm_ptr = perms;
+        } else {
+            perm_ptr = (UINT64*)calloc(1, sizeof(UINT64));
+            if (perm_ptr == NULL) {
+                free(file);
+                return BAD_ALLOC;
+            }
+
+            *perm_ptr = perms;
+            hashmap_put(&pinfo->permissions, file, len, perm_ptr);
+            KdPrint(("Set PID Auth [%llu] %ws\n", len, file));
+        }
+
+        
+        return STATUS_SUCCESS;
+    }
+    free(Message);
 
     return STATUS_SUCCESS;
 }
@@ -503,13 +588,38 @@ comSetAuthorizationGlobal(
     len |= (((UINT16)Input[9]) & 0xFF);
     len |= (((UINT16)Input[10]) & 0xFF) << 8L;
 
-    char* Message = (char*)calloc(len, sizeof(char));
+    char* Message = (char*)calloc(len + 1, sizeof(char));
+
     if (Message == NULL) {
         return BAD_ALLOC;
     }
+
+    Message[len] = 0;
     RtlCopyMemory(Message, (PCHAR)Input + 11, len);
 
-    KdPrint(("[%d] %s\n", len, Message));
+    PWCHAR file = wcharFromChar(Message, len, &len);
+    free(Message);
+
+    if (file == NULL) {
+        return BAD_ALLOC;
+    }
+
+    UINT64* perm_ptr = (UINT64*)hashmap_get(&globalPerm, file, len);
+    if (perm_ptr != NULL) {
+        KdPrint(("Set Global Auth [%llu] %ws\n", len, file));
+        free(file);
+        *perm_ptr = perms;
+    } else {
+        perm_ptr = (UINT64*)calloc(1, sizeof(UINT64));
+        if (perm_ptr == NULL) {
+            free(file);
+            return BAD_ALLOC;
+        }
+
+        *perm_ptr = perms;
+        hashmap_put(&globalPerm, file, len, perm_ptr);
+        KdPrint(("Set Global Auth [%llu] %ws\n", len, file));
+    }
 
     return STATUS_SUCCESS;
 }
@@ -547,13 +657,39 @@ comDeleteAuthorizationPid(
     len |= (((UINT16)Input[9]) & 0xFF);
     len |= (((UINT16)Input[10]) & 0xFF) << 8L;
 
-    char* Message = (char*)calloc(len, sizeof(char));
+    char* Message = (char*)calloc(len + 1, sizeof(char));
+
     if (Message == NULL) {
         return BAD_ALLOC;
     }
+    Message[len] = 0;
+
     RtlCopyMemory(Message, (PCHAR)Input + 11, len);
 
-    KdPrint(("[%d] %s\n", len, Message));
+    processInfos* pinfo = NULL;
+    if (ihashmap_get(ProcessesInfos, pid, &pinfo) == MAP_OK) {
+
+        PWCHAR file = wcharFromChar(Message, len, &len);
+        free(Message);
+
+        if (file == NULL) {
+            return BAD_ALLOC;
+        }
+
+        PWCHAR* key = NULL;
+        UINT64* perms = NULL;
+
+        if (hashmap_remove(&pinfo->permissions, file, len, &perms, &key) == 0) {
+            free(perms);
+            free(key);
+        }
+
+        KdPrint(("Delete PID Auth [%d] %ws\n", len, file));
+        free(file);
+        return STATUS_SUCCESS;
+    }
+
+    free(Message);
 
     return STATUS_SUCCESS;
 }
@@ -572,13 +708,32 @@ comDeleteAuthorizationGlobal(
     len |= (((UINT16)Input[1]) & 0xFF);
     len |= (((UINT16)Input[2]) & 0xFF) << 8L;
 
-    char* Message = (char*)calloc(len, sizeof(char));
+    char* Message = (char*)calloc(len + 1, sizeof(char));
+
     if (Message == NULL) {
         return BAD_ALLOC;
     }
-    RtlCopyMemory(Message, (PCHAR)Input + 3, len);
 
-    KdPrint(("[%d] %s\n", len, Message));
+    Message[len] = 0;
+    RtlCopyMemory(Message, (PCHAR)Input + 19, len);
+
+    PWCHAR file = wcharFromChar(Message, len, &len);
+    free(Message);
+
+    if (file == NULL) {
+        return BAD_ALLOC;
+    }
+
+    PWCHAR* key = NULL;
+    UINT64* perms = NULL;
+
+    if (hashmap_remove(&globalPerm, file, len, &perms, &key) == 0) {
+        free(perms);
+        free(key);
+    }
+
+    KdPrint(("Delete Global Auth [%d] %ws\n", len, file));
+    free(file);
 
     return STATUS_SUCCESS;
 }
@@ -675,6 +830,44 @@ VOID CreateProcessNotify(
                 ihashmap_put(ProcessesInfos, uuid, pinfo);
                 ihashmap_put(Processes, ProcessId, pinfo);
 
+                char* sendBuff = (char *)calloc(17, sizeof(char));
+
+                if (sendBuff != NULL) {
+
+                    sendBuff[0] = PROCESS_CREATE;
+
+                    sendBuff[1] = (char)(ProcessId & 0xFF);
+                    sendBuff[2] = (char)((ProcessId >> 8) & 0xFF);
+                    sendBuff[3] = (char)((ProcessId >> 16) & 0xFF);
+                    sendBuff[4] = (char)((ProcessId >> 24) & 0xFF);
+                    sendBuff[5] = (char)((ProcessId >> 32) & 0xFF);
+                    sendBuff[6] = (char)((ProcessId >> 40) & 0xFF);
+                    sendBuff[7] = (char)((ProcessId >> 48) & 0xFF);
+                    sendBuff[8] = (char)((ProcessId >> 56) & 0xFF);
+
+                    sendBuff[9] = (char)(uuid & 0xFF);
+                    sendBuff[10] = (char)((uuid >> 8) & 0xFF);
+                    sendBuff[11] = (char)((uuid >> 16) & 0xFF);
+                    sendBuff[12] = (char)((uuid >> 24) & 0xFF);
+                    sendBuff[13] = (char)((uuid >> 32) & 0xFF);
+                    sendBuff[14] = (char)((uuid >> 40) & 0xFF);
+                    sendBuff[15] = (char)((uuid >> 48) & 0xFF);
+                    sendBuff[16] = (char)((uuid >> 56) & 0xFF);
+
+                    LARGE_INTEGER time;
+                    time.QuadPart = -10000000;
+                    ULONG byterec = 0;
+                    NTSTATUS status = FltSendMessage(gFilterInstance, &clientPort, sendBuff, 17, NULL, &byterec, &time);
+
+                    if (status == STATUS_TIMEOUT) {
+                        KdPrint(("Failed to deliver message: Timedout"));
+                    }
+                    else if (!NT_SUCCESS(status)) {
+
+                    }
+
+                    free(sendBuff);
+                }
                 KdPrint(("Create Parent Process [%llu] -- %llu\n", ProcessId, uuid));
             }
             else {
@@ -692,6 +885,36 @@ VOID CreateProcessNotify(
 
                 KdPrint(("Kill Process %llu -- %llu\n", ProcessId, pinfo->uuid));
                 if (pinfo->referenceCount == 0) {
+                    char* sendBuff = (char*)calloc(9, sizeof(char));
+
+                    if (sendBuff != NULL) {
+
+                        sendBuff[0] = PROCESS_DESTROY;
+
+                        sendBuff[1] = (char)(pinfo->uuid & 0xFF);
+                        sendBuff[2] = (char)((pinfo->uuid >> 8) & 0xFF);
+                        sendBuff[3] = (char)((pinfo->uuid >> 16) & 0xFF);
+                        sendBuff[4] = (char)((pinfo->uuid >> 24) & 0xFF);
+                        sendBuff[5] = (char)((pinfo->uuid >> 32) & 0xFF);
+                        sendBuff[6] = (char)((pinfo->uuid >> 40) & 0xFF);
+                        sendBuff[7] = (char)((pinfo->uuid >> 48) & 0xFF);
+                        sendBuff[8] = (char)((pinfo->uuid >> 56) & 0xFF);
+
+                        LARGE_INTEGER time;
+                        time.QuadPart = -10000000;
+                        ULONG byterec = 0;
+                        NTSTATUS status = FltSendMessage(gFilterInstance, &clientPort, sendBuff, 9, NULL, &byterec, &time);
+
+                        if (status == STATUS_TIMEOUT) {
+                            KdPrint(("Failed to deliver message: Timedout"));
+                        }
+                        else if (!NT_SUCCESS(status)) {
+
+                        }
+
+                        free(sendBuff);
+                    }
+
                     ihashmap_remove(ProcessesInfos, pinfo->uuid, NULL);
 
                     if (0 != hashmap_iterate_pairs(&pinfo->permissions, cleanupHashmap, NULL)) {

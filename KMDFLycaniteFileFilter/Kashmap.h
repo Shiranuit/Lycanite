@@ -43,7 +43,7 @@
 
 /* We need to keep keys and values. */
 struct hashmap_element_s {
-    PCHAR key;
+    PWCHAR key;
     UINT32 key_len;
     INT in_use;
     PVOID data;
@@ -83,7 +83,7 @@ extern "C" {
     /// The key string slice is not copied when creating the hashmap entry, and thus
     /// must remain a valid pointer until the hashmap entry is removed or the
     /// hashmap is destroyed.
-    static INT8 hashmap_put(struct hashmap_s* CONST hashmap, CONST PCHAR key,
+    static INT8 hashmap_put(struct hashmap_s* CONST hashmap, CONST PWCHAR key,
         CONST UINT32 len, PVOID CONST value) HASHMAP_USED;
 
     /// @brief Get an element from the hashmap.
@@ -92,7 +92,7 @@ extern "C" {
     /// @param len The length of the string key.
     /// @return The previously set element, or NULL if none exists.
     static PVOID hashmap_get(CONST struct hashmap_s* CONST hashmap,
-        CONST PCHAR key,
+        CONST PWCHAR key,
         CONST UINT32 len) HASHMAP_USED;
 
     /// @brief Remove an element from the hashmap.
@@ -101,10 +101,10 @@ extern "C" {
     /// @param len The length of the string key.
     /// @return On success 0 is returned.
     static INT8 hashmap_remove(struct hashmap_s* CONST hashmap,
-        CONST PCHAR key,
+        CONST PWCHAR key,
         CONST UINT32 len,
         PVOID* data_removed,
-        PCHAR* key_removed) HASHMAP_USED;
+        PWCHAR* key_removed) HASHMAP_USED;
 
     /// @brief Iterate over all the elements in a hashmap.
     /// @param hashmap The hashmap to iterate over.
@@ -138,17 +138,17 @@ extern "C" {
     /// @param hashmap The hashmap to destroy.
     static void hashmap_destroy(struct hashmap_s* CONST hashmap) HASHMAP_USED;
 
-    static UINT32 hashmap_crc32_helper(CONST PCHAR s,
+    static UINT32 hashmap_crc32_helper(CONST PWCHAR s,
         CONST UINT32 len) HASHMAP_USED;
     static UINT32
         hashmap_hash_helper_int_helper(CONST struct hashmap_s* CONST m,
-            CONST PCHAR keystring,
+            CONST PWCHAR keystring,
             CONST UINT32 len) HASHMAP_USED;
     static INT8 hashmap_match_helper(CONST struct hashmap_element_s* CONST element,
-        CONST PCHAR key,
+        CONST PWCHAR key,
         CONST UINT32 len) HASHMAP_USED;
     static INT8 hashmap_hash_helper(CONST struct hashmap_s* CONST m,
-        CONST PCHAR key, CONST UINT32 len,
+        CONST PWCHAR key, CONST UINT32 len,
         UINT32* CONST out_index) HASHMAP_USED;
     static INT8 hashmap_rehash_iterator(PVOID CONST new_hash,
         struct hashmap_element_s* CONST e) HASHMAP_USED;
@@ -187,7 +187,7 @@ INT8 hashmap_create(CONST UINT32 initial_size,
     return 0;
 }
 
-INT8 hashmap_put(struct hashmap_s * m, PCHAR CONST key,
+INT8 hashmap_put(struct hashmap_s * m, PWCHAR CONST key,
     CONST UINT32 len, PVOID CONST value) {
     UINT32 index;
 
@@ -208,7 +208,7 @@ INT8 hashmap_put(struct hashmap_s * m, PCHAR CONST key,
     return 0;
 }
 
-PVOID hashmap_get(CONST struct hashmap_s* CONST m, CONST PCHAR key,
+PVOID hashmap_get(CONST struct hashmap_s* CONST m, CONST PWCHAR key,
     CONST UINT32 len) {
     UINT32 curr;
     UINT32 i;
@@ -231,8 +231,8 @@ PVOID hashmap_get(CONST struct hashmap_s* CONST m, CONST PCHAR key,
     return HASHMAP_NULL;
 }
 
-INT8 hashmap_remove(struct hashmap_s* CONST m, CONST PCHAR key,
-    CONST UINT32 len, PVOID* data_removed, PCHAR* key_removed) {
+INT8 hashmap_remove(struct hashmap_s* CONST m, CONST PWCHAR key,
+    CONST UINT32 len, PVOID* data_removed, PWCHAR* key_removed) {
     UINT32 i;
     UINT32 curr;
 
@@ -244,10 +244,14 @@ INT8 hashmap_remove(struct hashmap_s* CONST m, CONST PCHAR key,
         if (m->data[curr].in_use) {
             if (hashmap_match_helper(&m->data[curr], key, len)) {
                 /* Return the data removed */
-                *data_removed = m->data[curr].data;
+                if (data_removed != NULL) {
+                    *data_removed = m->data[curr].data;
+                }
 
                 /* Return the key removed */
-                *key_removed = m->data[curr].key;
+                if (key_removed != NULL) {
+                    *key_removed = m->data[curr].key;
+                }
 
                 /* Blank out the fields including in_use */
                 Kmemset(&m->data[curr], 0, sizeof(struct hashmap_element_s));
@@ -315,7 +319,7 @@ UINT32 hashmap_num_entries(CONST struct hashmap_s* CONST m) {
     return m->size;
 }
 
-UINT32 hashmap_crc32_helper(CONST PCHAR s, CONST UINT32 len) {
+UINT32 hashmap_crc32_helper(CONST PWCHAR s, CONST UINT32 len) {
     UINT32 i;
     UINT32 crc32val = 0;
 
@@ -391,9 +395,9 @@ UINT32 hashmap_crc32_helper(CONST PCHAR s, CONST UINT32 len) {
 }
 
 UINT32 hashmap_hash_helper_int_helper(CONST struct hashmap_s* CONST m,
-    CONST PCHAR keystring,
+    CONST PWCHAR keystring,
     CONST UINT32 len) {
-    UINT32 key = hashmap_crc32_helper(keystring, len);
+    UINT32 key = hashmap_crc32_helper(keystring, len * sizeof(WCHAR));
 
     /* Robert Jenkins' 32 bit Mix Function */
     key += (key << 12);
@@ -412,11 +416,11 @@ UINT32 hashmap_hash_helper_int_helper(CONST struct hashmap_s* CONST m,
 }
 
 INT8 hashmap_match_helper(CONST struct hashmap_element_s* CONST element,
-    CONST PCHAR key, CONST UINT32 len) {
+    CONST PWCHAR key, CONST UINT32 len) {
     return (element->key_len == len) && (0 == Kmemcmp(element->key, key, len));
 }
 
-INT8 hashmap_hash_helper(CONST struct hashmap_s* CONST m, CONST PCHAR key,
+INT8 hashmap_hash_helper(CONST struct hashmap_s* CONST m, CONST PWCHAR key,
     CONST UINT32 len, UINT32* CONST out_index) {
     UINT32 curr;
     UINT32 i;

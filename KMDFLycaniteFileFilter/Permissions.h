@@ -44,6 +44,7 @@ UINT64 getFilePermissionWithFree(CONST PWCHAR path, CONST struct hashmap_s* map)
 	else {
 		PWCHAR parent = NULL;
 		if ((parent = hasParentFolder(path, map)) != NULL) {
+			free((PVOID)path);
 			return getFilePermissionWithFree(parent, map);
 		}
 		else {
@@ -55,18 +56,19 @@ UINT64 getFilePermissionWithFree(CONST PWCHAR path, CONST struct hashmap_s* map)
 
 PWCHAR hasParentFolder(CONST PWCHAR path, CONST struct hashmap_s* map)
 {
-	SIZE_T memsize = my_strlen(path) + 1;
-	PWCHAR parent = (PWCHAR)calloc(memsize, sizeof(WCHAR));
+	SIZE_T len = my_strlen(path);
+	PWCHAR parent = (PWCHAR)calloc(len +1, sizeof(WCHAR));
 
-	Kmemcpy((PVOID)parent, (PVOID)path, memsize);
-	for (SIZE_T i = memsize - 2; i > 0; i--) {
-		if (((PWCHAR)parent)[i] == '\\') {
-			parent[i] = '\0';
-			if (hashmap_get(map, parent, my_strlen(parent)) != HASHMAP_NULL) {
+	if (parent != NULL) {
+		parent[len] = 0;
+		Kmemcpy((PVOID)parent, (PVOID)path, len * sizeof(WCHAR));
+		for (SIZE_T i = len; i > 0; i--) {
+			if (parent[i] == '\\') {
+				parent[i] = 0;
 				return parent;
 			}
 		}
+		free(parent);
 	}
-	free(parent);
 	return NULL;
 }
