@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-	static UINT32 my_strlen(CONST PCHAR str);
+	static UINT32 my_strlen(CONST PWCHAR str);
 
     // override calloc for kernel
     static PVOID calloc(SIZE_T elementCount, SIZE_T elementSize);
@@ -27,13 +27,14 @@ extern "C" {
 }
 #endif
 
-UINT32 my_strlen(CONST PCHAR str)
+UINT32 my_strlen(CONST PWCHAR str)
 {
 	UINT32 len = 0;
 
 	for (SIZE_T i = 0; str[i] != '\0'; i++) {
 		len += 1;
 	}
+
 	return len;
 }
 
@@ -82,4 +83,37 @@ PVOID Kmemset(PVOID pointer, INT8 value, SIZE_T count) {
         ((PCHAR)pointer)[i] = value;
     }
     return (pointer);
+}
+
+PWCHAR wcharFromChar(PCHAR* str, UINT64 strlen, UINT64 *outputLen) {
+
+    CANSI_STRING ansi_str;
+
+    ansi_str.Buffer = str;
+    ansi_str.Length = strlen * sizeof(char);
+    ansi_str.MaximumLength = strlen * sizeof(char);
+
+    UNICODE_STRING unicode_str;
+    NTSTATUS status = RtlAnsiStringToUnicodeString(&unicode_str, &ansi_str, TRUE);
+
+    if (NT_SUCCESS(status)) {
+        UINT64 len = unicode_str.Length / sizeof(WCHAR);
+
+        PWCHAR newstr = (PWCHAR)calloc(len + 1, sizeof(WCHAR));
+        if (newstr != NULL) {
+            newstr[len] = 0;
+            RtlCopyMemory(newstr, unicode_str.Buffer, unicode_str.Length);
+        }
+
+        if (outputLen != NULL) {
+            *outputLen = len;
+        }
+
+        RtlFreeUnicodeString(&unicode_str);
+
+        return newstr;
+    }
+
+    KdPrint(("Failed to convert AnsiString to UnicodeString"));
+    return NULL;
 }
