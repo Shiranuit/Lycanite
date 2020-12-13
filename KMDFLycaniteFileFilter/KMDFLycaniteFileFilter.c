@@ -457,6 +457,8 @@ comDisconnectNotifyCallback(
         KdPrint(("Com Disconnect\n"));
         FltCloseClientPort(gFilterInstance, &clientPort);
     }
+    clientPort = NULL;
+    LPID = 0;
 }
 
 UINT8

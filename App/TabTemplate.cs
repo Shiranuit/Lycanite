@@ -81,7 +81,7 @@ namespace App
 
             if (convertedPath == null)
                 return;
-            if (!lycaniteBridge.DeletePIDFilePermissions(this.UUID, convertedPath))
+            if (!this.lycaniteBridge.DeletePIDFilePermissions(this.UUID, convertedPath))
                 return;
 
             this.fileListAuthorize.Remove(filePath);
@@ -198,16 +198,7 @@ namespace App
                     }
                 }
             }
-            foreach (var fileDict in this.fileListAuthorize) {
-                Dictionary<String, ELycanitePerm> fileInfo = this.fileListAuthorize[fileDict.Key];
 
-                String convertedPath = DevicePathMapper.ToDevicePath(fileDict.Key);
-
-                if (convertedPath == null)
-                    continue;
-                if (!lycaniteBridge.SetPIDFilePermissions(this.UUID, convertedPath, fileInfo["read"] | fileInfo["write"] | fileInfo["delete"]))
-                    MessageBox.Show("Error: Permission can't be assigned to the file {0}", Path.GetFileName(fileDict.Key));
-            }
         }
 
         private Thread graphThread;
@@ -248,33 +239,50 @@ namespace App
 
             if (current.Text == "Network")
             {
-                this.graphThread = new Thread(new ThreadStart(this.GetPerformanceCounters));
+               /* this.graphThread = new Thread(new ThreadStart(this.GetPerformanceCounters));
                 this.graphThread.IsBackground = true;
-                this.graphThread.Start();
+                this.graphThread.Start();*/
             }
         }
 
         private void ReadCheckbox_CheckedChanged(Object sender) {
             MetroSet_UI.Controls.MetroSetCheckBox checkbox = (MetroSet_UI.Controls.MetroSetCheckBox)sender;
 
-            if (listView1.SelectedItems.Count <= 0)
+            if (this.listView1.SelectedItems.Count <= 0)
                 return;
             String fileName = this.listView1.SelectedItems[0].Tag.ToString();
             Dictionary<String, ELycanitePerm> dict = this.fileListAuthorize[fileName];
 
             dict["read"] = checkbox.Checked ? ELycanitePerm.LYCANITE_READ : ELycanitePerm.LYCANITE_NONE;
+
+
+            String convertedPath = DevicePathMapper.ToDevicePath(fileName);
+
+            if (convertedPath == null)
+                return;
+
+            if (!this.lycaniteBridge.SetPIDFilePermissions(this.UUID, convertedPath, dict["read"] | dict["write"] | dict["delete"]))
+                MessageBox.Show("Error: Permission can't be assigned to the file {0}", Path.GetFileName(fileName));
         }
 
         private void WriteCheckbox_CheckedChanged(Object sender) {
             MetroSet_UI.Controls.MetroSetCheckBox checkbox = (MetroSet_UI.Controls.MetroSetCheckBox)sender;
 
-            if (listView1.SelectedItems.Count <= 0)
+            if (this.listView1.SelectedItems.Count <= 0)
                 return;
 
             String fileName = this.listView1.SelectedItems[0].Tag.ToString();
             Dictionary<String, ELycanitePerm> dict = this.fileListAuthorize[fileName];
 
             dict["write"] = checkbox.Checked ? ELycanitePerm.LYCANITE_WRITE : ELycanitePerm.LYCANITE_NONE;
+
+            String convertedPath = DevicePathMapper.ToDevicePath(fileName);
+
+            if (convertedPath == null)
+                return;
+
+            if (!this.lycaniteBridge.SetPIDFilePermissions(this.UUID, convertedPath, dict["read"] | dict["write"] | dict["delete"]))
+                MessageBox.Show("Error: Permission can't be assigned to the file {0}", Path.GetFileName(fileName));
         }
     }
 }
