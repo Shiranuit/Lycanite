@@ -42,8 +42,9 @@ namespace App
             this.performanceChart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.metroSetSetTabPage3 = new MetroSet_UI.Child.MetroSetSetTabPage();
             this.metroSetSetTabPage4 = new MetroSet_UI.Child.MetroSetSetTabPage();
+            this.writeCheckbox = new MetroSet_UI.Controls.MetroSetCheckBox();
+            this.readCheckbox = new MetroSet_UI.Controls.MetroSetCheckBox();
             this.ButtonFile = new MetroSet_UI.Controls.MetroSetButton();
-            this.ButtonDirectory = new MetroSet_UI.Controls.MetroSetButton();
             this.metroSetPanel1 = new MetroSet_UI.Controls.MetroSetPanel();
             this.listView1 = new System.Windows.Forms.ListView();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
@@ -75,7 +76,7 @@ namespace App
             this.metroSetTabControl1.ItemSize = new System.Drawing.Size(100, 38);
             this.metroSetTabControl1.Location = new System.Drawing.Point(0, 0);
             this.metroSetTabControl1.Name = "metroSetTabControl1";
-            this.metroSetTabControl1.SelectedIndex = 1;
+            this.metroSetTabControl1.SelectedIndex = 3;
             this.metroSetTabControl1.SelectedTextColor = System.Drawing.Color.White;
             this.metroSetTabControl1.Size = new System.Drawing.Size(766, 320);
             this.metroSetTabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
@@ -87,7 +88,7 @@ namespace App
             this.metroSetTabControl1.ThemeName = "MetroDark";
             this.metroSetTabControl1.UnselectedTextColor = System.Drawing.Color.Gray;
             this.metroSetTabControl1.UseAnimation = false;
-            this.metroSetTabControl1.SelectedIndexChanged += new System.EventHandler(this.metroSetTabControl1_SelectedIndexChanged);
+            this.metroSetTabControl1.SelectedIndexChanged += new System.EventHandler(this.MetroSetTabControl1_SelectedIndexChanged);
             // 
             // metroSetSetTabPage1
             // 
@@ -209,8 +210,9 @@ namespace App
             // metroSetSetTabPage4
             // 
             this.metroSetSetTabPage4.BaseColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.metroSetSetTabPage4.Controls.Add(this.writeCheckbox);
+            this.metroSetSetTabPage4.Controls.Add(this.readCheckbox);
             this.metroSetSetTabPage4.Controls.Add(this.ButtonFile);
-            this.metroSetSetTabPage4.Controls.Add(this.ButtonDirectory);
             this.metroSetSetTabPage4.Controls.Add(this.metroSetPanel1);
             this.metroSetSetTabPage4.Controls.Add(this.listView1);
             this.metroSetSetTabPage4.Controls.Add(this.metroSetLabel2);
@@ -230,6 +232,56 @@ namespace App
             this.metroSetSetTabPage4.ThemeAuthor = "Narwin";
             this.metroSetSetTabPage4.ThemeName = "MetroLite";
             this.metroSetSetTabPage4.ToolTipText = null;
+            // 
+            // writeCheckbox
+            // 
+            this.writeCheckbox.BackColor = System.Drawing.Color.Transparent;
+            this.writeCheckbox.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.writeCheckbox.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(155)))), ((int)(((byte)(155)))));
+            this.writeCheckbox.Checked = false;
+            this.writeCheckbox.CheckSignColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
+            this.writeCheckbox.CheckState = MetroSet_UI.Enums.CheckState.Unchecked;
+            this.writeCheckbox.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.writeCheckbox.DisabledBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(85)))), ((int)(((byte)(85)))), ((int)(((byte)(85)))));
+            this.writeCheckbox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.writeCheckbox.IsDerivedStyle = true;
+            this.writeCheckbox.Location = new System.Drawing.Point(539, 118);
+            this.writeCheckbox.Name = "writeCheckbox";
+            this.writeCheckbox.SignStyle = MetroSet_UI.Enums.SignStyle.Sign;
+            this.writeCheckbox.Size = new System.Drawing.Size(172, 16);
+            this.writeCheckbox.Style = MetroSet_UI.Enums.Style.Dark;
+            this.writeCheckbox.StyleManager = null;
+            this.writeCheckbox.TabIndex = 10;
+            this.writeCheckbox.Text = "Write Permission";
+            this.writeCheckbox.ThemeAuthor = "Narwin";
+            this.writeCheckbox.ThemeName = "MetroDark";
+            this.writeCheckbox.Visible = false;
+            this.writeCheckbox.CheckedChanged += new MetroSet_UI.Controls.MetroSetCheckBox.CheckedChangedEventHandler(this.WriteCheckbox_CheckedChanged);
+            // 
+            // readCheckbox
+            // 
+            this.readCheckbox.BackColor = System.Drawing.Color.Transparent;
+            this.readCheckbox.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.readCheckbox.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(155)))), ((int)(((byte)(155)))));
+            this.readCheckbox.Checked = false;
+            this.readCheckbox.CheckSignColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
+            this.readCheckbox.CheckState = MetroSet_UI.Enums.CheckState.Unchecked;
+            this.readCheckbox.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.readCheckbox.DisabledBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(85)))), ((int)(((byte)(85)))), ((int)(((byte)(85)))));
+            this.readCheckbox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.readCheckbox.IsDerivedStyle = true;
+            this.readCheckbox.Location = new System.Drawing.Point(539, 72);
+            this.readCheckbox.Name = "readCheckbox";
+            this.readCheckbox.SignStyle = MetroSet_UI.Enums.SignStyle.Sign;
+            this.readCheckbox.Size = new System.Drawing.Size(181, 16);
+            this.readCheckbox.Style = MetroSet_UI.Enums.Style.Dark;
+            this.readCheckbox.StyleManager = null;
+            this.readCheckbox.TabIndex = 9;
+            this.readCheckbox.Text = "Read Permission";
+            this.readCheckbox.ThemeAuthor = "Narwin";
+            this.readCheckbox.ThemeName = "MetroDark";
+            this.readCheckbox.Visible = false;
+            this.readCheckbox.CheckedChanged += new MetroSet_UI.Controls.MetroSetCheckBox.CheckedChangedEventHandler(this.ReadCheckbox_CheckedChanged);
             // 
             // ButtonFile
             // 
@@ -253,37 +305,10 @@ namespace App
             this.ButtonFile.Style = MetroSet_UI.Enums.Style.Light;
             this.ButtonFile.StyleManager = null;
             this.ButtonFile.TabIndex = 8;
-            this.ButtonFile.Text = "Add Simple File";
+            this.ButtonFile.Text = "Add File";
             this.ButtonFile.ThemeAuthor = "Narwin";
             this.ButtonFile.ThemeName = "MetroLite";
-            this.ButtonFile.Click += new System.EventHandler(this.buttonFile_Click);
-            // 
-            // ButtonDirectory
-            // 
-            this.ButtonDirectory.DisabledBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
-            this.ButtonDirectory.DisabledBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
-            this.ButtonDirectory.DisabledForeColor = System.Drawing.Color.Gray;
-            this.ButtonDirectory.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.ButtonDirectory.HoverBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(207)))), ((int)(((byte)(255)))));
-            this.ButtonDirectory.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(207)))), ((int)(((byte)(255)))));
-            this.ButtonDirectory.HoverTextColor = System.Drawing.Color.White;
-            this.ButtonDirectory.IsDerivedStyle = true;
-            this.ButtonDirectory.Location = new System.Drawing.Point(548, 75);
-            this.ButtonDirectory.Name = "ButtonDirectory";
-            this.ButtonDirectory.NormalBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
-            this.ButtonDirectory.NormalColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
-            this.ButtonDirectory.NormalTextColor = System.Drawing.Color.White;
-            this.ButtonDirectory.PressBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(147)))), ((int)(((byte)(195)))));
-            this.ButtonDirectory.PressColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(147)))), ((int)(((byte)(195)))));
-            this.ButtonDirectory.PressTextColor = System.Drawing.Color.White;
-            this.ButtonDirectory.Size = new System.Drawing.Size(140, 40);
-            this.ButtonDirectory.Style = MetroSet_UI.Enums.Style.Light;
-            this.ButtonDirectory.StyleManager = null;
-            this.ButtonDirectory.TabIndex = 7;
-            this.ButtonDirectory.Text = "Add Directory";
-            this.ButtonDirectory.ThemeAuthor = "Narwin";
-            this.ButtonDirectory.ThemeName = "MetroLite";
-            this.ButtonDirectory.Click += new System.EventHandler(this.buttonDirectory_Click);
+            this.ButtonFile.Click += new System.EventHandler(this.ButtonFile_Click);
             // 
             // metroSetPanel1
             // 
@@ -313,7 +338,7 @@ namespace App
             this.listView1.TabIndex = 5;
             this.listView1.UseCompatibleStateImageBehavior = false;
             this.listView1.View = System.Windows.Forms.View.List;
-            this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
+            this.listView1.SelectedIndexChanged += new System.EventHandler(this.ListView1_SelectedIndexChanged);
             // 
             // imageList1
             // 
@@ -360,7 +385,7 @@ namespace App
             this.metroSetSwitch1.ThemeAuthor = "Narwin";
             this.metroSetSwitch1.ThemeName = "MetroLite";
             this.metroSetSwitch1.UnCheckColor = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(155)))), ((int)(((byte)(155)))));
-            this.metroSetSwitch1.SwitchedChanged += new MetroSet_UI.Controls.MetroSetSwitch.SwitchedChangedEventHandler(this.metroSetSwitch1_SwitchedChanged);
+            this.metroSetSwitch1.SwitchedChanged += new MetroSet_UI.Controls.MetroSetSwitch.SwitchedChangedEventHandler(this.MetroSetSwitch1_SwitchedChanged);
             // 
             // pictureBox1
             // 
@@ -372,12 +397,12 @@ namespace App
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox1.TabIndex = 2;
             this.pictureBox1.TabStop = false;
-            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
-            this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseDown);
-            this.pictureBox1.MouseEnter += new System.EventHandler(this.pictureBox1_MouseEnter);
-            this.pictureBox1.MouseLeave += new System.EventHandler(this.pictureBox1_MouseLeave);
-            this.pictureBox1.MouseHover += new System.EventHandler(this.pictureBox1_MouseHover);
-            this.pictureBox1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseUp);
+            this.pictureBox1.Click += new System.EventHandler(this.PictureBox1_Click);
+            this.pictureBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PictureBox1_MouseDown);
+            this.pictureBox1.MouseEnter += new System.EventHandler(this.PictureBox1_MouseEnter);
+            this.pictureBox1.MouseLeave += new System.EventHandler(this.PictureBox1_MouseLeave);
+            this.pictureBox1.MouseHover += new System.EventHandler(this.PictureBox1_MouseHover);
+            this.pictureBox1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PictureBox1_MouseUp);
             // 
             // metroSetSetTabPage5
             // 
@@ -431,8 +456,9 @@ namespace App
         private MetroSet_UI.Controls.MetroSetSwitch metroSetSwitch1;
         private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.ImageList imageList1;
-        private MetroSet_UI.Controls.MetroSetButton ButtonDirectory;
         private MetroSet_UI.Controls.MetroSetPanel metroSetPanel1;
         private MetroSet_UI.Controls.MetroSetButton ButtonFile;
+        private MetroSet_UI.Controls.MetroSetCheckBox writeCheckbox;
+        private MetroSet_UI.Controls.MetroSetCheckBox readCheckbox;
     }
 }

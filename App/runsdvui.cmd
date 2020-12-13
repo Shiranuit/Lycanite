@@ -1,0 +1,2 @@
+cd /d "C:\Users\yoanw\Desktop\Lycanite\Lycanite\App" &msbuild "App.csproj" /t:sdvViewer /p:configuration="Debug" /p:platform="Any CPU" /p:SolutionDir="C:\Users\yoanw\Desktop\Lycanite\Lycanite\App" 
+exit %errorlevel% 
