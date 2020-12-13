@@ -131,6 +131,7 @@ INT8 cleanupHashmap(PVOID const context, struct hashmap_element_s * const e) {
 }
 
 INT cleanIHashmap(any_t item, any_t data) {
+    UNREFERENCED_PARAMETER(item);
     processInfos* pinfo = (processInfos*)data;
     if (0 != hashmap_iterate_pairs(&pinfo->permissions, cleanupHashmap, NULL)) {
         KdPrint(("%s\n", "failed to deallocate hashmap entries\n"));
@@ -496,7 +497,7 @@ comSetAuthorizationPid(
         return INVALID_REQUEST_SIZE;
     }
 
-    UINT16 len = 0;
+    UINT64 len = 0;
     UINT64 pid = 0;
     UINT64 perms = 0;
 
@@ -540,7 +541,7 @@ comSetAuthorizationPid(
             return BAD_ALLOC;
         }
 
-        UINT64 *perm_ptr = (UINT64 *)hashmap_get(&pinfo->permissions, file, len);
+        UINT64 *perm_ptr = (UINT64 *)hashmap_get(&pinfo->permissions, file, (UINT32)len);
 
         if (perm_ptr != NULL) {
             KdPrint(("Set PID Auth [%llu] %ws\n", len, file));
@@ -554,7 +555,7 @@ comSetAuthorizationPid(
             }
 
             *perm_ptr = perms;
-            hashmap_put(&pinfo->permissions, file, len, perm_ptr);
+            hashmap_put(&pinfo->permissions, file, (UINT32)len, perm_ptr);
             KdPrint(("Set PID Auth [%llu] %ws\n", len, file));
         }
 
@@ -575,7 +576,7 @@ comSetAuthorizationGlobal(
         return INVALID_REQUEST_SIZE;
     }
 
-    UINT16 len = 0;
+    UINT64 len = 0;
     UINT64 perms = 0;
 
     perms |= (((UINT64)Input[1]) & 0xFF);
@@ -606,7 +607,7 @@ comSetAuthorizationGlobal(
         return BAD_ALLOC;
     }
 
-    UINT64* perm_ptr = (UINT64*)hashmap_get(&globalPerm, file, len);
+    UINT64* perm_ptr = (UINT64*)hashmap_get(&globalPerm, file, (UINT32)len);
     if (perm_ptr != NULL) {
         KdPrint(("Set Global Auth [%llu] %ws\n", len, file));
         free(file);
@@ -619,20 +620,11 @@ comSetAuthorizationGlobal(
         }
 
         *perm_ptr = perms;
-        hashmap_put(&globalPerm, file, len, perm_ptr);
+        hashmap_put(&globalPerm, file, (UINT32)len, perm_ptr);
         KdPrint(("Set Global Auth [%llu] %ws\n", len, file));
     }
 
     return STATUS_SUCCESS;
-}
-
-UINT8
-comGetProcessStats(
-    _Out_ unsigned char* Output,
-    _In_ UINT64 OutputBufferSize,
-    _Out_ PULONG ReturnOutputBufferLength
-) {
-    //TODO : fill Output with data
 }
 
 UINT8
@@ -644,7 +636,7 @@ comDeleteAuthorizationPid(
         return INVALID_REQUEST_SIZE;
     }
 
-    UINT16 len = 0;
+    UINT64 len = 0;
     UINT64 pid = 0;
 
     pid |= (((UINT64)Input[1]) & 0xFF);
@@ -678,10 +670,10 @@ comDeleteAuthorizationPid(
             return BAD_ALLOC;
         }
 
-        PWCHAR* key = NULL;
+        PWCHAR key = NULL;
         UINT64* perms = NULL;
 
-        if (hashmap_remove(&pinfo->permissions, file, len, &perms, &key) == 0) {
+        if (hashmap_remove(&pinfo->permissions, file, (UINT32)len, &perms, &key) == 0) {
             free(perms);
             free(key);
         }
@@ -705,7 +697,7 @@ comDeleteAuthorizationGlobal(
         return INVALID_REQUEST_SIZE;
     }
 
-    UINT16 len = 0;
+    UINT64 len = 0;
 
     len |= (((UINT16)Input[1]) & 0xFF);
     len |= (((UINT16)Input[2]) & 0xFF) << 8L;
@@ -726,10 +718,10 @@ comDeleteAuthorizationGlobal(
         return BAD_ALLOC;
     }
 
-    PWCHAR* key = NULL;
+    PWCHAR key = NULL;
     UINT64* perms = NULL;
 
-    if (hashmap_remove(&globalPerm, file, len, &perms, &key) == 0) {
+    if (hashmap_remove(&globalPerm, file, (UINT32)len, &perms, &key) == 0) {
         free(perms);
         free(key);
     }
@@ -763,7 +755,6 @@ comMessageNotifyCallback(
 
     if (InputBuffer != NULL && InputBufferSize > 0) {
         unsigned char* Input = (unsigned char*)InputBuffer;
-        unsigned char* Output = (unsigned char*)OutputBuffer;
 
         switch (Input[0]) {
         case SET_LYCANITE_PID:
@@ -774,9 +765,6 @@ comMessageNotifyCallback(
             break;
         case SET_AUTHORIZATION_GLOBAL:
             status = comSetAuthorizationGlobal(Input, InputBufferSize);
-            break;
-        case GET_PROCESS_STATS:
-            status = comGetProcessStats(Output, OutputBufferSize, ReturnOutputBufferLength);
             break;
         case DELETE_AUTHORIZATION_PID:
             status = comDeleteAuthorizationPid(Input, InputBufferSize);

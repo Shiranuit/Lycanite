@@ -9,7 +9,7 @@ extern "C" {
 	static UINT64 getFilePermission(CONST PWCHAR path, CONST struct hashmap_s* map);
 	static UINT64 getFilePermissionWithFree(CONST PWCHAR path, CONST struct hashmap_s* map);
 
-	static PWCHAR hasParentFolder(CONST PWCHAR path, CONST struct hashmap_s* map);
+	static PWCHAR hasParentFolder(CONST PWCHAR path);
 
 #if defined(__cplusplus)
 }
@@ -24,7 +24,7 @@ UINT64 getFilePermission(CONST PWCHAR path, CONST struct hashmap_s* map)
 	}
 	else {
 		PWCHAR parent = NULL;
-		if ((parent = hasParentFolder(path, map)) != NULL) {
+		if ((parent = hasParentFolder(path)) != NULL) {
 			return getFilePermissionWithFree(parent, map);
 		}
 		else {
@@ -43,7 +43,7 @@ UINT64 getFilePermissionWithFree(CONST PWCHAR path, CONST struct hashmap_s* map)
 	}
 	else {
 		PWCHAR parent = NULL;
-		if ((parent = hasParentFolder(path, map)) != NULL) {
+		if ((parent = hasParentFolder(path)) != NULL) {
 			free((PVOID)path);
 			return getFilePermissionWithFree(parent, map);
 		}
@@ -54,7 +54,7 @@ UINT64 getFilePermissionWithFree(CONST PWCHAR path, CONST struct hashmap_s* map)
 	}
 }
 
-PWCHAR hasParentFolder(CONST PWCHAR path, CONST struct hashmap_s* map)
+PWCHAR hasParentFolder(CONST PWCHAR path)
 {
 	SIZE_T len = my_strlen(path);
 	PWCHAR parent = (PWCHAR)calloc(len +1, sizeof(WCHAR));
