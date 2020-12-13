@@ -49,7 +49,7 @@ namespace Lycanite
         LYCANITE_DELETE = 0b_0000_0100,
     }
 
-    unsafe class LycaniteBridge
+    public unsafe class LycaniteBridge
     {
 
         #region Fltlib DLL import

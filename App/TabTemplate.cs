@@ -14,16 +14,18 @@ using MetroSet_UI.Interfaces;
 using System.Diagnostics;
 using System.Diagnostics;
 using System.Threading;
+using Lycanite;
 
 namespace App
 {
-    public partial class TabTemplate : UserControl, IMetroSetControl
-    {
-        private Dictionary<String, String> _fileListAuthorize = new Dictionary<String, String>();
-        private String _appPath = "";
+    public partial class TabTemplate : UserControl, IMetroSetControl {
+        private Dictionary<String, Dictionary<String, LycanitePerm>> fileListAuthorize = new Dictionary<String, Dictionary<String, LycanitePerm>>();
+        private String appPath = "";
+        private LycaniteBridge lycaniteBridge;
+        private ulong pid = new ulong();
         public TabTemplate()
         {
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
         public Style Style { get; set; }
@@ -36,120 +38,125 @@ namespace App
         {
             container.Add(this);
 
-            InitializeComponent();
+            this.InitializeComponent();
         }
 
-        public void addPathToList(String filename)
+        public void AddPathToList(String filename)
         {
-            listView1.ForeColor = Color.White;
+            this.listView1.ForeColor = Color.White;
 
-            listView1.View = View.Details;
-            listView1.HeaderStyle = ColumnHeaderStyle.None;
+            this.listView1.View = View.Details;
+            this.listView1.HeaderStyle = ColumnHeaderStyle.None;
             ColumnHeader colHeader = new ColumnHeader();
-            colHeader.Width = listView1.ClientSize.Width - SystemInformation.VerticalScrollBarWidth;
-            listView1.Columns.Add(colHeader);
+            colHeader.Width = this.listView1.ClientSize.Width - SystemInformation.VerticalScrollBarWidth;
+            this.listView1.Columns.Add(colHeader);
 
             ListViewItem tmp_item = new ListViewItem(Path.GetFileName(filename));
-            if (Directory.Exists(filename))
-                tmp_item.ImageIndex = 0;
-            else
-                tmp_item.ImageIndex = 1;
-            listView1.Items.Add(tmp_item);
+            tmp_item.ImageIndex = Directory.Exists(filename) ? 0 : 1;
+            tmp_item.Tag = filename;
+            this.listView1.Items.Add(tmp_item);
         }
 
-        public void addPath(String path)
+        public void AddPath(String path)
         {
-            _appPath = path;
+            this.appPath = path;
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
+        public void SetPid(ulong pid) {
+            this.pid = pid;
+        }
+
+        private void PictureBox1_Click(object sender, EventArgs e)
         {
-            if (_fileListAuthorize.Count() == 0 || listView1.Items.Count == 0 || listView1.SelectedItems.Count == 0)
+            if (this.fileListAuthorize.Count() == 0 || this.listView1.Items.Count == 0 || this.listView1.SelectedItems.Count == 0)
                 return;
+            String filePath = this.listView1.SelectedItems[0].Tag.ToString();
+            this.fileListAuthorize.Remove(filePath);
 
-            _fileListAuthorize.Remove(listView1.SelectedItems[0].Text);
+            lycaniteBridge.deletePIDFilePermissions(this.pid, filePath);
 
-            listView1.Items.Remove(listView1.SelectedItems[0]);
+            this.listView1.Items.Remove(this.listView1.SelectedItems[0]);
         }
 
-        private void pictureBox1_MouseEnter(object sender, EventArgs e)
+        private void PictureBox1_MouseEnter(object sender, EventArgs e)
         {
             PictureBox boxImg = (PictureBox)sender;
 
             boxImg.BackColor = Color.FromArgb(100, 100, 100);
         }
 
-        private void pictureBox1_MouseLeave(object sender, EventArgs e)
+        private void PictureBox1_MouseLeave(object sender, EventArgs e)
         {
             PictureBox boxImg = (PictureBox)sender;
 
             boxImg.BackColor = Color.FromArgb(50, 50, 50);
         }
 
-        private void pictureBox1_MouseDown(object sender, MouseEventArgs e)
+        private void PictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             PictureBox boxImg = (PictureBox)sender;
 
             boxImg.BackColor = Color.Cyan;
         }
 
-        private void pictureBox1_MouseHover(object sender, EventArgs e)
+        private void PictureBox1_MouseHover(object sender, EventArgs e)
         {
             PictureBox boxImg = (PictureBox)sender;
 
             boxImg.BackColor = Color.FromArgb(100, 100, 100);
         }
 
-        private void pictureBox1_MouseUp(object sender, MouseEventArgs e)
+        private void PictureBox1_MouseUp(object sender, MouseEventArgs e)
         {
             PictureBox boxImg = (PictureBox)sender;
 
             boxImg.BackColor = Color.FromArgb(100, 100, 100);
         }
 
-        private void metroSetSwitch1_SwitchedChanged(object sender)
+        private void MetroSetSwitch1_SwitchedChanged(object sender)
         {
             MetroSet_UI.Controls.MetroSetSwitch switch_obj = (MetroSet_UI.Controls.MetroSetSwitch)sender;
 
-            if (switch_obj.CheckState == MetroSet_UI.Enums.CheckState.Checked)
-            {
-                metroSetLabel2.ForeColor = Color.FromArgb(210, 210, 210);
-            } else
-            {
-                metroSetLabel2.ForeColor = Color.FromArgb(170, 170, 170);
-            }
+            this.metroSetLabel2.ForeColor = switch_obj.CheckState == MetroSet_UI.Enums.CheckState.Checked ? Color.FromArgb(210, 210, 210) : Color.FromArgb(170, 170, 170);
         }
 
-        private String[] getAllFileAndDirFromPath(String path)
+        public void SetBridge(LycaniteBridge lycaniteBridge)
         {
-            String[] allFiles = Directory.GetFiles(path);
-            String[] allDir = Directory.GetDirectories(path);
-            List<String> allFileAndDir = new List<String>();
-
-            foreach (string filepath in allDir)
-            {
-                String file_tmp = Path.GetFileName(filepath);
-                allFileAndDir.Add(file_tmp);
-            }
-            foreach (string filepath in allFiles)
-            {
-                String file_tmp = Path.GetFileName(filepath);
-                allFileAndDir.Add(file_tmp);
-            }
-
-            return allFileAndDir.ToArray();
+            this.lycaniteBridge = lycaniteBridge;
         }
 
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
+        private void ListView1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (this.listView1.SelectedItems.Count <= 0) {
+                this.readCheckbox.Visible = false;
+                this.writeCheckbox.Visible = false;
+            } else {
+                Console.WriteLine(this.listView1.SelectedItems[0].Tag.ToString());
+                this.readCheckbox.Visible = true;
+                this.writeCheckbox.Visible = true;
 
+                
+
+                Dictionary<String, LycanitePerm> fileinfo = this.fileListAuthorize[this.listView1.SelectedItems[0].Tag.ToString()];
+
+                this.readCheckbox.Checked = fileinfo["read"] == LycanitePerm.LYCANITE_READ;
+                this.writeCheckbox.Checked = fileinfo["write"] == LycanitePerm.LYCANITE_WRITE;
+            }
         }
 
-        private void buttonFile_Click(object sender, EventArgs e)
+        private Dictionary<string, LycanitePerm> NewPerms() {
+            return new Dictionary<string, LycanitePerm> { 
+                { "read", LycanitePerm.LYCANITE_NONE }, 
+                { "write", LycanitePerm.LYCANITE_NONE }, 
+                { "delete", LycanitePerm.LYCANITE_NONE } 
+            };
+        }
+
+        private void ButtonFile_Click(object sender, EventArgs e)
         {
             System.Windows.Forms.OpenFileDialog fileDialog = new System.Windows.Forms.OpenFileDialog();
             fileDialog.ValidateNames = false;
-            fileDialog.InitialDirectory = _appPath;
+            fileDialog.InitialDirectory = this.appPath;
             fileDialog.Multiselect = true;
             fileDialog.CheckPathExists = true;
             fileDialog.CheckFileExists = false;
@@ -159,46 +166,50 @@ namespace App
             {
                 if (File.Exists(fileDialog.FileName))
                 {
-                    if (_fileListAuthorize.ContainsKey(Path.GetFileName(fileDialog.FileName)))
+                    if (this.fileListAuthorize.ContainsKey(fileDialog.FileName))
                     {
                         return;
                     } else
                     {
-                        _fileListAuthorize.Add(Path.GetFileName(fileDialog.FileName), fileDialog.FileName);
-                        addPathToList(fileDialog.FileName);
+                        this.fileListAuthorize.Add(fileDialog.FileName, this.NewPerms());
+                        this.AddPathToList(fileDialog.FileName);
                     }
                 }
                 else if (Directory.Exists(Path.GetDirectoryName(fileDialog.FileName)))
                 {
                     fileDialog.FileName = Path.GetDirectoryName(fileDialog.FileName);
-                    if (_fileListAuthorize.ContainsKey(Path.GetFileName(fileDialog.FileName)))
+                    if (this.fileListAuthorize.ContainsKey(fileDialog.FileName))
                     {
                         return;
                     } else
                     {
-                        addPathToList(fileDialog.FileName);
-                        _fileListAuthorize.Add(Path.GetFileName(fileDialog.FileName), fileDialog.FileName);
+                        this.AddPathToList(fileDialog.FileName);
+                        this.fileListAuthorize.Add(fileDialog.FileName, this.NewPerms());
                     }
                 }
+            }
+            foreach (var fileDict in this.fileListAuthorize) {
+                Dictionary<String, LycanitePerm> fileInfo = this.fileListAuthorize[fileDict.Key];
+                lycaniteBridge.setPIDFilePermissions(this.pid, fileDict.Key, fileInfo["read"] | fileInfo["write"] | fileInfo["delete"]);
             }
         }
 
         private Thread graphThread;
         private double[] networkUsageArray = new double[60];
 
-        private void getPerformanceCounters()
+        private void GetPerformanceCounters()
         {
-            var data = new PerformanceCounter("Processor Information", "% Processor Time", "_Total");
+            PerformanceCounter data = new PerformanceCounter("Processor Information", "% Processor Time", "_Total");
 
             while (true)
             {
-                networkUsageArray[networkUsageArray.Length - 1] = Math.Round(data.NextValue(), 0);
+                this.networkUsageArray[this.networkUsageArray.Length - 1] = Math.Round(data.NextValue(), 0);
 
-                Array.Copy(networkUsageArray, 1, networkUsageArray, 0, networkUsageArray.Length - 1);
+                Array.Copy(this.networkUsageArray, 1, this.networkUsageArray, 0, this.networkUsageArray.Length - 1);
 
-                if (performanceChart.IsHandleCreated)
+                if (this.performanceChart.IsHandleCreated)
                 {
-                    Invoke((MethodInvoker)delegate { UpdateGraph(); });
+                    this.Invoke((MethodInvoker)delegate { this.UpdateGraph(); });
                 }
 
                 Thread.Sleep(1000);
@@ -207,24 +218,47 @@ namespace App
 
         private void UpdateGraph()
         {
-            performanceChart.Series["Network"].Points.Clear();
+            this.performanceChart.Series["Network"].Points.Clear();
 
-            for (int i = 0; i < networkUsageArray.Length - 1; ++i)
+            for (int i = 0; i < this.networkUsageArray.Length - 1; ++i)
             {
-                performanceChart.Series["Network"].Points.AddY(networkUsageArray[i]);
+                this.performanceChart.Series["Network"].Points.AddY(this.networkUsageArray[i]);
             }
         }
 
-        private void metroSetTabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        private void MetroSetTabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
             TabPage current = (sender as TabControl).SelectedTab;
 
             if (current.Text == "Network")
             {
-                graphThread = new Thread(new ThreadStart(getPerformanceCounters));
-                graphThread.IsBackground = true;
-                graphThread.Start();
+                this.graphThread = new Thread(new ThreadStart(this.GetPerformanceCounters));
+                this.graphThread.IsBackground = true;
+                this.graphThread.Start();
             }
+        }
+
+        private void ReadCheckbox_CheckedChanged(Object sender) {
+            MetroSet_UI.Controls.MetroSetCheckBox checkbox = (MetroSet_UI.Controls.MetroSetCheckBox)sender;
+
+            if (listView1.SelectedItems.Count <= 0)
+                return;
+            String fileName = this.listView1.SelectedItems[0].Tag.ToString();
+            Dictionary<String, LycanitePerm> dict = this.fileListAuthorize[fileName];
+
+            dict["read"] = checkbox.Checked ? LycanitePerm.LYCANITE_READ : LycanitePerm.LYCANITE_NONE;
+        }
+
+        private void WriteCheckbox_CheckedChanged(Object sender) {
+            MetroSet_UI.Controls.MetroSetCheckBox checkbox = (MetroSet_UI.Controls.MetroSetCheckBox)sender;
+
+            if (listView1.SelectedItems.Count <= 0)
+                return;
+
+            String fileName = this.listView1.SelectedItems[0].Tag.ToString();
+            Dictionary<String, LycanitePerm> dict = this.fileListAuthorize[fileName];
+
+            dict["write"] = checkbox.Checked ? LycanitePerm.LYCANITE_WRITE : LycanitePerm.LYCANITE_NONE;
         }
     }
 }

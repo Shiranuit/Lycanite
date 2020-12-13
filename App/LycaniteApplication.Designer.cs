@@ -103,7 +103,7 @@ namespace App
             this.openExecButton.Text = "Open";
             this.openExecButton.ThemeAuthor = "Narwin";
             this.openExecButton.ThemeName = "MetroLite";
-            this.openExecButton.Click += new System.EventHandler(this.openExecButton_Click);
+            this.openExecButton.Click += new System.EventHandler(this.OpenExecButton_Click);
             // 
             // metroSetTabControl1
             // 
@@ -129,7 +129,7 @@ namespace App
             this.metroSetTabControl1.UnselectedTextColor = System.Drawing.Color.Gray;
             this.metroSetTabControl1.UseAnimation = false;
             this.metroSetTabControl1.Visible = false;
-            this.metroSetTabControl1.SelectedIndexChanged += new System.EventHandler(this.metroSetTabControl1_SelectedIndexChanged);
+            this.metroSetTabControl1.SelectedIndexChanged += new System.EventHandler(this.MetroSetTabControl1_SelectedIndexChanged);
             // 
             // LycaniteApplication
             // 
