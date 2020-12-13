@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace Lycanite
 {
-    public enum LycaniteEventType : byte
+    public enum ELycaniteEventType : byte
     {
         UNKOWN = 0,
         PROCESS_CREATE = 1,
@@ -17,31 +17,31 @@ namespace Lycanite
     {
         internal LycaniteEvent(byte[] buffer)
         {
-            if (buffer[0] == (byte)LycaniteEventType.PROCESS_CREATE)
+            if (buffer[0] == (byte)ELycaniteEventType.PROCESS_CREATE)
             {
-                eventType = LycaniteEventType.PROCESS_CREATE;
-                ProcessID = BitConverter.ToUInt64(buffer, 1);
-                UUID = BitConverter.ToUInt64(buffer, 9);
+                this.eventType = ELycaniteEventType.PROCESS_CREATE;
+                this.ProcessID = BitConverter.ToUInt64(buffer, 1);
+                this.UUID = BitConverter.ToUInt64(buffer, 9);
             }
-            else if (buffer[0] == (byte)LycaniteEventType.PROCESS_DESTROY)
+            else if (buffer[0] == (byte)ELycaniteEventType.PROCESS_DESTROY)
             {
-                eventType = LycaniteEventType.PROCESS_DESTROY;
-                UUID = BitConverter.ToUInt64(buffer, 1); ;
+                this.eventType = ELycaniteEventType.PROCESS_DESTROY;
+                this.UUID = BitConverter.ToUInt64(buffer, 1); ;
             }
-            else if (buffer[0] == (byte)LycaniteEventType.PROCESS_DESTROY)
+            else if (buffer[0] == (byte)ELycaniteEventType.PROCESS_DESTROY)
             {
-                eventType = LycaniteEventType.PROCESS_REQPERM;
+                this.eventType = ELycaniteEventType.PROCESS_REQPERM;
             }
         }
 
-        public LycaniteEventType eventType { get; } = LycaniteEventType.UNKOWN;
+        public ELycaniteEventType eventType { get; } = ELycaniteEventType.UNKOWN;
         public UInt64 UUID { get; } = 0;
         public UInt64 ProcessID { get; } = 0;
 
     }
 
     [Flags]
-    public enum LycanitePerm : UInt64
+    public enum ELycanitePerm : UInt64
     {
         LYCANITE_NONE = 0b_0000_0000,
         LYCANITE_WRITE = 0b_0000_0001,
@@ -78,15 +78,15 @@ namespace Lycanite
         );
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct FILTER_MESSAGE_HEADER
+        public struct SFILTER_MESSAGE_HEADER
         {
             public uint replyLength;
             public ulong messageId;
         }
 
-        public struct DATA_RECEIVE
+        public struct SDATA_RECEIVE
         {
-            public FILTER_MESSAGE_HEADER messageHeader;
+            public SFILTER_MESSAGE_HEADER messageHeader;
             public fixed byte messageContent[BUFFER_SIZE];
         }
 
@@ -105,7 +105,7 @@ namespace Lycanite
 
         #endregion
 
-        private enum LycaniteAction
+        private enum ELycaniteAction
         {
             SET_LYCANITE_PID = 0,
             SET_AUTHORIZATION_PID = 1,
@@ -125,8 +125,8 @@ namespace Lycanite
 
         private void MessageReader()
         {
-            Console.WriteLine(sizeof(DATA_RECEIVE));
-            IntPtr dataReceive = Marshal.AllocHGlobal(sizeof(DATA_RECEIVE));
+            Console.WriteLine(sizeof(SDATA_RECEIVE));
+            IntPtr dataReceive = Marshal.AllocHGlobal(sizeof(SDATA_RECEIVE));
             while (connected)
             {
 
@@ -134,7 +134,7 @@ namespace Lycanite
 
                 if (status == 0)
                 {
-                    DATA_RECEIVE data = *(DATA_RECEIVE*)dataReceive.ToPointer();
+                    SDATA_RECEIVE data = *(SDATA_RECEIVE*)dataReceive.ToPointer();
                     byte[] buff = new byte[BUFFER_SIZE];
                     Marshal.Copy((IntPtr)data.messageContent, buff, 0, sizeof(byte) * BUFFER_SIZE);
                     OnLycaniteEvent.Invoke(new LycaniteEvent(buff));
@@ -147,12 +147,12 @@ namespace Lycanite
         public LycaniteBridge()
         {
             port = Marshal.AllocHGlobal(sizeof(IntPtr));
-            thread = new Thread(new ThreadStart(MessageReader));
+            thread = new Thread(new ThreadStart(this.MessageReader));
         }
 
         ~LycaniteBridge()
         {
-            Disconnect();
+            this.Disconnect();
             Marshal.FreeHGlobal(port);
         }
 
@@ -184,7 +184,7 @@ namespace Lycanite
             }
         }
 
-        private bool sendStream(MemoryStream stream)
+        private bool SendStream(MemoryStream stream)
         {
             byte[] bytes = stream.ToArray();
 
@@ -202,89 +202,89 @@ namespace Lycanite
 
         public bool SetLycanitePID(UInt64 pid)
         {
-            if (IsConnected())
+            if (this.IsConnected())
             {
 
                 MemoryStream stream = new MemoryStream();
                 using (BinaryWriter writer = new BinaryWriter(stream))
                 {
-                    writer.Write((byte)LycaniteAction.SET_LYCANITE_PID);
+                    writer.Write((byte)ELycaniteAction.SET_LYCANITE_PID);
                     writer.Write(pid);
                 }
 
-                return sendStream(stream);
+                return this.SendStream(stream);
             }
             return false;
         }
 
-        public bool setPIDFilePermissions(UInt64 pid, string file, LycanitePerm permissions)
+        public bool SetPIDFilePermissions(UInt64 pid, string file, ELycanitePerm permissions)
         {
-            if (IsConnected())
+            if (this.IsConnected())
             {
                 MemoryStream stream = new MemoryStream();
                 using (BinaryWriter writer = new BinaryWriter(stream))
                 {
-                    writer.Write((byte)LycaniteAction.SET_AUTHORIZATION_PID);
+                    writer.Write((byte)ELycaniteAction.SET_AUTHORIZATION_PID);
                     writer.Write(pid);
                     writer.Write((UInt64)permissions);
                     writer.Write((UInt16)file.Length);
                     writer.Write(file.ToCharArray());
                 }
 
-                return sendStream(stream);
+                return this.SendStream(stream);
             }
             return false;
         }
 
-        public bool setGlobalFilePermissions(string file, LycanitePerm permissions)
+        public bool SetGlobalFilePermissions(string file, ELycanitePerm permissions)
         {
-            if (IsConnected())
+            if (this.IsConnected())
             {
                 MemoryStream stream = new MemoryStream();
                 using (BinaryWriter writer = new BinaryWriter(stream))
                 {
-                    writer.Write((byte)LycaniteAction.SET_AUTHORIZATION_GLOBAL);
+                    writer.Write((byte)ELycaniteAction.SET_AUTHORIZATION_GLOBAL);
                     writer.Write((UInt64)permissions);
                     writer.Write((UInt16)file.Length);
                     writer.Write(file.ToCharArray());
                 }
 
-                return sendStream(stream);
+                return this.SendStream(stream);
             }
             return false;
         }
 
-        public bool deletePIDFilePermissions(UInt64 pid, string file)
+        public bool DeletePIDFilePermissions(UInt64 pid, string file)
         {
-            if (IsConnected())
+            if (this.IsConnected())
             {
                 MemoryStream stream = new MemoryStream();
                 using (BinaryWriter writer = new BinaryWriter(stream))
                 {
-                    writer.Write((byte)LycaniteAction.DELETE_AUTHORIATION_PID);
+                    writer.Write((byte)ELycaniteAction.DELETE_AUTHORIATION_PID);
                     writer.Write(pid);
                     writer.Write((UInt16)file.Length);
                     writer.Write(file.ToCharArray());
                 }
 
-                return sendStream(stream);
+                return this.SendStream(stream);
             }
             return false;
         }
 
-        public bool deleteGlobalFilePermissions(string file)
+        public bool DeleteGlobalFilePermissions(string file)
         {
-            if (IsConnected())
+            if (this.IsConnected())
             {
                 MemoryStream stream = new MemoryStream();
                 using (BinaryWriter writer = new BinaryWriter(stream))
                 {
-                    writer.Write((byte)LycaniteAction.DELETE_AUTHORIZATION_GLOBAL);
+                    writer.Write((byte)ELycaniteAction.DELETE_AUTHORIZATION_GLOBAL);
                     writer.Write((UInt16)file.Length);
                     writer.Write(file.ToCharArray());
                 }
 
-                return sendStream(stream);
+                return this.SendStream(stream);
             }
             return false;
         }

@@ -18,8 +18,9 @@ namespace App
 
     public partial class LycaniteApplication : MetroSetForm
     {
-        private Dictionary<int, Process> _processes = new Dictionary<int, Process>();
+        private Dictionary<ulong, String> processes = new Dictionary<ulong, String>();
         private LycaniteBridge lycaniteBridge = new LycaniteBridge();
+        private Dictionary<ulong, TabPage> tabPages = new Dictionary<ulong, TabPage>();
 
         public LycaniteApplication()
         {
@@ -29,9 +30,34 @@ namespace App
         private void Form1_Load(object sender, EventArgs e)
         {
             this.metroSetTabControl1.Padding = new Point(20, 4);
-            /*if (!this.lycaniteBridge.Connect()) {
+            if (!this.lycaniteBridge.Connect()) {
                 this.BeginInvoke(new MethodInvoker(this.Close));
-            }*/
+            } else {
+                this.lycaniteBridge.OnLycaniteEvent += this.ProcessLycanite;
+            }
+        }
+
+        private void ProcessLycanite(LycaniteEvent e) {
+            switch (e.eventType) {
+                case ELycaniteEventType.PROCESS_CREATE:
+                    this.CreateTab(e.UUID, e.ProcessID);
+                    break;
+                case ELycaniteEventType.PROCESS_DESTROY:
+                    this.CloseTab(e.UUID);
+                    break;
+                case ELycaniteEventType.PROCESS_REQPERM:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void CloseTab(ulong UUID) {
+            TabPage page = this.tabPages[UUID];
+            this.tabPages.Remove(UUID);
+            if (page == null)
+                return;
+            this.metroSetTabControl1.TabPages.Remove(this.tabPages[UUID]);
         }
 
         private void Form1_DragEnter(object sender, DragEventArgs e)
@@ -39,72 +65,49 @@ namespace App
             e.Effect = DragDropEffects.All;
         }
 
-        // Do this when you start your application
-        
-        private void CloseTab(Process process)
-        {
-            foreach (TabPage page in this.metroSetTabControl1.TabPages)
-            {
-                if (page.Tag.ToString().CompareTo(this._processes[process.Id].Id.ToString()) == 0)
-                {
-                    this.metroSetTabControl1.TabPages.Remove(page);
-                }
-            }
-        }
-
-        public void ProcessIsClosed(object sender, EventArgs e)
-        {
-            if (this.InvokeRequired)
-                this.Invoke(new NotifyProcessClose(this.CloseTab), (Process)sender);
-            else
-                this.CloseTab((Process)sender);
-        }
-
-        private void CreateProcessAndTab(String fileName)
-        {
+        private void CreateTab(ulong UUID, ulong PID) {
             TabTemplate newTab = new TabTemplate();
-            String name = Path.GetFileName(fileName);
-            int id = 0;
 
+            String path = this.processes[PID];
+            if (path == null)
+                return;
+            this.processes.Remove(PID);
+
+            String name = Path.GetFileName(path);
             newTab.SetBridge(this.lycaniteBridge);
 
-            ProcessStartInfo startInfo = new ProcessStartInfo(fileName);
-            try
-            {
-                Process proc_tmp = Process.Start(startInfo);
-                if (proc_tmp == null)
-                {
-                    return;
-                }
-                this._processes.Add(proc_tmp.Id, proc_tmp);
-
-                this._processes[proc_tmp.Id].EnableRaisingEvents = true;
-                this._processes[proc_tmp.Id].Exited += this.ProcessIsClosed;
-                id = proc_tmp.Id;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return;
-            }
-
-            newTab.AddPath(fileName);
+            newTab.AddPath(path);
 
             this.metroSetLabel1.Visible = false;
             this.metroSetTabControl1.Visible = true;
             this.openExecButton.Location = new Point(700, 40);
             this.openExecButton.Size = new Size(80, 30);
 
-            // Create tab only when receive event with id from driver
             TabPage tab = new TabPage();
             tab.Controls.Add(newTab);
             newTab.Dock = DockStyle.Fill;
             tab.Text = name;
-            if (id != 0) {
-                tab.Tag = id;
-                newTab.SetPid((ulong)id);
-            }
+            newTab.SetUUID(UUID);
             this.metroSetTabControl1.Controls.Add(tab);
+
+            this.tabPages.Add(UUID, tab);
+        }
+
+        private void CreateProcess(String fileName)
+        {
+
+            ProcessStartInfo startInfo = new ProcessStartInfo(fileName);
+            try {
+                Process proc_tmp = Process.Start(startInfo);
+                if (proc_tmp == null) {
+                    return;
+                }
+
+                this.processes.Add((ulong)proc_tmp.Id, fileName);
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                return;
+            }
         }
 
         private void Form1_DragDrop(object sender, DragEventArgs e)
@@ -115,7 +118,7 @@ namespace App
             {
                 if (File.Exists(file))
                 {
-                    this.CreateProcessAndTab(file);
+                    this.CreateProcess(file);
                 }
             }
         }
@@ -126,7 +129,7 @@ namespace App
 
             if (fileDialog.ShowDialog() == DialogResult.OK)
             {
-                this.CreateProcessAndTab(fileDialog.FileName);
+                this.CreateProcess(fileDialog.FileName);
             }
         }
 

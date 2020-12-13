@@ -19,10 +19,10 @@ using Lycanite;
 namespace App
 {
     public partial class TabTemplate : UserControl, IMetroSetControl {
-        private Dictionary<String, Dictionary<String, LycanitePerm>> fileListAuthorize = new Dictionary<String, Dictionary<String, LycanitePerm>>();
+        private Dictionary<String, Dictionary<String, ELycanitePerm>> fileListAuthorize = new Dictionary<String, Dictionary<String, ELycanitePerm>>();
         private String appPath = "";
         private LycaniteBridge lycaniteBridge;
-        private ulong pid = new ulong();
+        private ulong UUID = new ulong();
         public TabTemplate()
         {
             this.InitializeComponent();
@@ -57,24 +57,34 @@ namespace App
             this.listView1.Items.Add(tmp_item);
         }
 
+        public ulong GetUUID() {
+            return this.UUID;
+        }
+
         public void AddPath(String path)
         {
             this.appPath = path;
         }
 
-        public void SetPid(ulong pid) {
-            this.pid = pid;
+        public void SetUUID(ulong UUID) {
+            this.UUID = UUID;
         }
 
         private void PictureBox1_Click(object sender, EventArgs e)
         {
             if (this.fileListAuthorize.Count() == 0 || this.listView1.Items.Count == 0 || this.listView1.SelectedItems.Count == 0)
                 return;
+
             String filePath = this.listView1.SelectedItems[0].Tag.ToString();
+
+            String convertedPath = DevicePathMapper.ToDevicePath(filePath);
+
+            if (convertedPath == null)
+                return;
+            if (!lycaniteBridge.DeletePIDFilePermissions(this.UUID, convertedPath))
+                return;
+
             this.fileListAuthorize.Remove(filePath);
-
-            lycaniteBridge.deletePIDFilePermissions(this.pid, filePath);
-
             this.listView1.Items.Remove(this.listView1.SelectedItems[0]);
         }
 
@@ -137,18 +147,18 @@ namespace App
 
                 
 
-                Dictionary<String, LycanitePerm> fileinfo = this.fileListAuthorize[this.listView1.SelectedItems[0].Tag.ToString()];
+                Dictionary<String, ELycanitePerm> fileinfo = this.fileListAuthorize[this.listView1.SelectedItems[0].Tag.ToString()];
 
-                this.readCheckbox.Checked = fileinfo["read"] == LycanitePerm.LYCANITE_READ;
-                this.writeCheckbox.Checked = fileinfo["write"] == LycanitePerm.LYCANITE_WRITE;
+                this.readCheckbox.Checked = fileinfo["read"] == ELycanitePerm.LYCANITE_READ;
+                this.writeCheckbox.Checked = fileinfo["write"] == ELycanitePerm.LYCANITE_WRITE;
             }
         }
 
-        private Dictionary<string, LycanitePerm> NewPerms() {
-            return new Dictionary<string, LycanitePerm> { 
-                { "read", LycanitePerm.LYCANITE_NONE }, 
-                { "write", LycanitePerm.LYCANITE_NONE }, 
-                { "delete", LycanitePerm.LYCANITE_NONE } 
+        private Dictionary<string, ELycanitePerm> NewPerms() {
+            return new Dictionary<string, ELycanitePerm> { 
+                { "read", ELycanitePerm.LYCANITE_NONE }, 
+                { "write", ELycanitePerm.LYCANITE_NONE }, 
+                { "delete", ELycanitePerm.LYCANITE_NONE } 
             };
         }
 
@@ -189,8 +199,14 @@ namespace App
                 }
             }
             foreach (var fileDict in this.fileListAuthorize) {
-                Dictionary<String, LycanitePerm> fileInfo = this.fileListAuthorize[fileDict.Key];
-                lycaniteBridge.setPIDFilePermissions(this.pid, fileDict.Key, fileInfo["read"] | fileInfo["write"] | fileInfo["delete"]);
+                Dictionary<String, ELycanitePerm> fileInfo = this.fileListAuthorize[fileDict.Key];
+
+                String convertedPath = DevicePathMapper.ToDevicePath(fileDict.Key);
+
+                if (convertedPath == null)
+                    continue;
+                if (!lycaniteBridge.SetPIDFilePermissions(this.UUID, convertedPath, fileInfo["read"] | fileInfo["write"] | fileInfo["delete"]))
+                    MessageBox.Show("Error: Permission can't be assigned to the file {0}", Path.GetFileName(fileDict.Key));
             }
         }
 
@@ -244,9 +260,9 @@ namespace App
             if (listView1.SelectedItems.Count <= 0)
                 return;
             String fileName = this.listView1.SelectedItems[0].Tag.ToString();
-            Dictionary<String, LycanitePerm> dict = this.fileListAuthorize[fileName];
+            Dictionary<String, ELycanitePerm> dict = this.fileListAuthorize[fileName];
 
-            dict["read"] = checkbox.Checked ? LycanitePerm.LYCANITE_READ : LycanitePerm.LYCANITE_NONE;
+            dict["read"] = checkbox.Checked ? ELycanitePerm.LYCANITE_READ : ELycanitePerm.LYCANITE_NONE;
         }
 
         private void WriteCheckbox_CheckedChanged(Object sender) {
@@ -256,9 +272,9 @@ namespace App
                 return;
 
             String fileName = this.listView1.SelectedItems[0].Tag.ToString();
-            Dictionary<String, LycanitePerm> dict = this.fileListAuthorize[fileName];
+            Dictionary<String, ELycanitePerm> dict = this.fileListAuthorize[fileName];
 
-            dict["write"] = checkbox.Checked ? LycanitePerm.LYCANITE_WRITE : LycanitePerm.LYCANITE_NONE;
+            dict["write"] = checkbox.Checked ? ELycanitePerm.LYCANITE_WRITE : ELycanitePerm.LYCANITE_NONE;
         }
     }
 }

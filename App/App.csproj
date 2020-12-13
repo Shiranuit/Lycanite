@@ -69,6 +69,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DevicePathMapper.cs" />
     <Compile Include="LycaniteApplication.cs">
       <SubType>Form</SubType>
     </Compile>
