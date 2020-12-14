@@ -38,13 +38,14 @@ namespace App
         private void Form1_Load(object sender, EventArgs e)
         {
             this.metroSetTabControl1.Padding = new Point(20, 4);
-  /*          if (!this.lycaniteBridge.Connect()) {
+            if (!this.lycaniteBridge.Connect()) {
+                MessageBox.Show("Could not connect to LycaniteDriver");
                 this.BeginInvoke(new MethodInvoker(this.Close));
             } else {
                 int processId = Process.GetCurrentProcess().Id;
                 this.lycaniteBridge.SetLycanitePID((ulong)processId);
                 this.lycaniteBridge.OnLycaniteEvent += this.ProcessLycanite;
-            }*/
+            }
             this.globalForm = new GlobalPathForm(this);
             this.globalForm.SetBridge(this.lycaniteBridge);
             this.globalForm.Location = new Point(this.Location.X + this.Size.Width, this.Location.Y);
