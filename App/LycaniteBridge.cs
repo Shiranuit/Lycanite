@@ -125,12 +125,11 @@ namespace Lycanite
 
         private void MessageReader()
         {
-            Console.WriteLine(sizeof(SDATA_RECEIVE));
             IntPtr dataReceive = Marshal.AllocHGlobal(sizeof(SDATA_RECEIVE));
-            while (connected)
+            while (this.connected)
             {
 
-                int status = FilterGetMessage(*(IntPtr*)port.ToPointer(), dataReceive, sizeof(byte) * BUFFER_SIZE, IntPtr.Zero);
+                int status = FilterGetMessage(*(IntPtr*)this.port.ToPointer(), dataReceive, sizeof(byte) * BUFFER_SIZE, IntPtr.Zero);
 
                 if (status == 0)
                 {
@@ -146,41 +145,41 @@ namespace Lycanite
 
         public LycaniteBridge()
         {
-            port = Marshal.AllocHGlobal(sizeof(IntPtr));
-            thread = new Thread(new ThreadStart(this.MessageReader));
+            this.port = Marshal.AllocHGlobal(sizeof(IntPtr));
+            this.thread = new Thread(new ThreadStart(this.MessageReader));
         }
 
         ~LycaniteBridge()
         {
             this.Disconnect();
-            Marshal.FreeHGlobal(port);
+            Marshal.FreeHGlobal(this.port);
         }
 
         public bool Connect()
         {
-            if (!connected)
+            if (!this.connected)
             {
-                connected = FilterConnectCommunicationPort("\\LycaniteFF", 0, IntPtr.Zero, 0, IntPtr.Zero, port) == 0;
-                if (connected)
+                this.connected = FilterConnectCommunicationPort("\\LycaniteFF", 0, IntPtr.Zero, 0, IntPtr.Zero, this.port) == 0;
+                if (this.connected)
                 {
-                    thread.Start();
+                    this.thread.Start();
                 }
             }
-            return connected;
+            return this.connected;
         }
 
         public bool IsConnected()
         {
-            return connected;
+            return this.connected;
         }
 
         public void Disconnect()
         {
-            if (connected)
+            if (this.connected)
             {
-                CloseHandle(*(IntPtr*)port.ToPointer());
-                connected = false;
-                thread.Abort();
+                CloseHandle(*(IntPtr*)this.port.ToPointer());
+                this.connected = false;
+                this.thread.Abort();
             }
         }
 
@@ -193,7 +192,7 @@ namespace Lycanite
             IntPtr byterec = Marshal.AllocHGlobal(sizeof(uint));
             Marshal.Copy(bytes, 0, sendPtr, size);
 
-            bool status = FilterSendMessage(*(IntPtr*)port.ToPointer(), sendPtr, (uint)size, IntPtr.Zero, 0, byterec) == 0;
+            bool status = FilterSendMessage(*(IntPtr*)this.port.ToPointer(), sendPtr, (uint)size, IntPtr.Zero, 0, byterec) == 0;
             Marshal.FreeHGlobal(sendPtr);
             Marshal.FreeHGlobal(byterec);
 

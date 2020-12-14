@@ -148,10 +148,13 @@ namespace App
             this.Text = "Lycanite";
             this.TextColor = System.Drawing.Color.White;
             this.ThemeName = "MetroDark";
+            this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.LycaniteApplication_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.LocationChanged += new System.EventHandler(this.LycaniteApplication_LocationChanged);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.Form1_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.Form1_DragEnter);
+            this.Enter += new System.EventHandler(this.LycaniteApplication_Enter);
             this.ResumeLayout(false);
 
         }

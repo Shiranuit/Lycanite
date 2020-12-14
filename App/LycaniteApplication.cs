@@ -23,8 +23,12 @@ namespace App
         private LycaniteBridge lycaniteBridge = new LycaniteBridge();
         private Dictionary<ulong, TabPage> tabPages = new Dictionary<ulong, TabPage>();
         private static Semaphore semaphore = new Semaphore(0, 1);
-        private static String WindowsPath = "C:\\Windows";
+        private GlobalPathForm globalForm;
 
+        protected override void OnLoad(EventArgs e) {
+            base.UseSlideAnimation = false;
+            base.OnLoad(e);
+        }
 
         public LycaniteApplication()
         {
@@ -35,23 +39,25 @@ namespace App
         {
             this.metroSetTabControl1.Padding = new Point(20, 4);
             if (!this.lycaniteBridge.Connect()) {
+                MessageBox.Show("Could not connect to LycaniteDriver");
                 this.BeginInvoke(new MethodInvoker(this.Close));
             } else {
                 int processId = Process.GetCurrentProcess().Id;
                 this.lycaniteBridge.SetLycanitePID((ulong)processId);
                 this.lycaniteBridge.OnLycaniteEvent += this.ProcessLycanite;
-
-                string path = DevicePathMapper.ToDevicePath(WindowsPath);
-                if (path != null) {
-                    this.lycaniteBridge.SetGlobalFilePermissions(path, ELycanitePerm.LYCANITE_READ);
-                }
             }
+            this.globalForm = new GlobalPathForm(this);
+            this.globalForm.SetBridge(this.lycaniteBridge);
+            this.globalForm.Location = new Point(this.Location.X + this.Size.Width, this.Location.Y);
+            this.BeginInvoke(new MethodInvoker(this.globalForm.Show));
+            this.AllowResize = false;
         }
 
         private void ProcessLycanite(LycaniteEvent e) {
             switch (e.eventType) {
                 case ELycaniteEventType.PROCESS_CREATE:
                     this.BeginInvoke((MethodInvoker)delegate () {
+                        this.CloseTab(e.UUID);
                         this.processes[e.ProcessID] = e.UUID;
                     });
                     break;
@@ -72,8 +78,6 @@ namespace App
             TabPage page = null;
             if (this.tabPages.TryGetValue(UUID, out page)) {
                 this.tabPages.Remove(UUID);
-                if (page == null)
-                    return;
                 this.metroSetTabControl1.TabPages.Remove(page);
             }
         }
@@ -83,7 +87,7 @@ namespace App
             e.Effect = DragDropEffects.All;
         }
 
-        private void CreateTab(ulong UUID, ulong PID, String path) {
+        private void CreateTab(ulong UUID, String path) {
                 TabTemplate newTab = new TabTemplate();
 
                 String name = Path.GetFileName(path);
@@ -101,9 +105,9 @@ namespace App
                 newTab.Dock = DockStyle.Fill;
                 tab.Text = name;
                 newTab.SetUUID(UUID);
-                this.metroSetTabControl1.Controls.Add(tab);
+                this.metroSetTabControl1.TabPages.Add(tab);
 
-                this.tabPages.Add(UUID, tab);
+                this.tabPages[UUID] = tab;
         }
 
         private void CreateProcess(String fileName)
@@ -116,7 +120,7 @@ namespace App
                 }
                 ulong UUID;
                 if (this.processes.TryGetValue((ulong)proc_tmp.Id, out UUID)) {
-                    this.CreateTab(UUID, (ulong)proc_tmp.Id, fileName);
+                    this.CreateTab(UUID, fileName);
                     this.processes.Remove((ulong)proc_tmp.Id);
                 }
             } catch (Exception ex) {
@@ -146,6 +150,9 @@ namespace App
             {
                 this.CreateProcess(fileDialog.FileName);
             }
+
+            this.openExecButton.Location = new Point(680, 40);
+            this.openExecButton.Size = new Size(100, 30);
         }
 
         private void MetroSetTabControl1_SelectedIndexChanged(object sender, EventArgs e)
@@ -161,6 +168,16 @@ namespace App
 
         private void LycaniteApplication_FormClosing(Object sender, FormClosingEventArgs e) {
             this.lycaniteBridge.Disconnect();
+        }
+
+        private void LycaniteApplication_LocationChanged(Object sender, EventArgs e) {
+            MetroSetForm Lycanite = (MetroSetForm)sender;
+            if (Lycanite.Location != null && this.globalForm != null)
+                this.globalForm.Location = new Point(Lycanite.Location.X + Lycanite.Size.Width, Lycanite.Location.Y);
+        }
+
+        private void LycaniteApplication_Enter(Object sender, EventArgs e) {
+            
         }
     }
 }
