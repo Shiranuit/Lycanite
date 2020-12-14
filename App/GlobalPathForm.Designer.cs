@@ -176,8 +176,7 @@ namespace App {
             // 
             // GlobalPathForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.ClientSize = new System.Drawing.Size(454, 450);
             this.Controls.Add(this.writePermissionBox);
@@ -186,11 +185,14 @@ namespace App {
             this.Controls.Add(this.removeGlobalPath);
             this.Controls.Add(this.addNewGlobalPath);
             this.Name = "GlobalPathForm";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.SmallLineColor1 = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.SmallLineColor2 = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.Style = MetroSet_UI.Enums.Style.Custom;
             this.TextColor = System.Drawing.Color.White;
             this.ThemeName = "MetroDark";
+            this.TopMost = true;
             this.Load += new System.EventHandler(this.GlobalPathForm_Load);
             this.ResumeLayout(false);
 

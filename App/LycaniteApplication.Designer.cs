@@ -33,7 +33,6 @@ namespace App
             this.metroSetControlBox1 = new MetroSet_UI.Controls.MetroSetControlBox();
             this.metroSetLabel1 = new MetroSet_UI.Controls.MetroSetLabel();
             this.openExecButton = new MetroSet_UI.Controls.MetroSetButton();
-            this.globalPathButton = new MetroSet_UI.Controls.MetroSetButton();
             this.metroSetTabControl1 = new MetroSet_UI.Controls.TabController();
             this.SuspendLayout();
             // 
@@ -106,32 +105,6 @@ namespace App
             this.openExecButton.ThemeName = "MetroLite";
             this.openExecButton.Click += new System.EventHandler(this.OpenExecButton_Click);
             // 
-            // globalPathButton
-            // 
-            this.globalPathButton.DisabledBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
-            this.globalPathButton.DisabledBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(120)))), ((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
-            this.globalPathButton.DisabledForeColor = System.Drawing.Color.Gray;
-            this.globalPathButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.globalPathButton.HoverBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(207)))), ((int)(((byte)(255)))));
-            this.globalPathButton.HoverColor = System.Drawing.Color.FromArgb(((int)(((byte)(95)))), ((int)(((byte)(207)))), ((int)(((byte)(255)))));
-            this.globalPathButton.HoverTextColor = System.Drawing.Color.White;
-            this.globalPathButton.IsDerivedStyle = true;
-            this.globalPathButton.Location = new System.Drawing.Point(579, 39);
-            this.globalPathButton.Name = "globalPathButton";
-            this.globalPathButton.NormalBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
-            this.globalPathButton.NormalColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(177)))), ((int)(((byte)(225)))));
-            this.globalPathButton.NormalTextColor = System.Drawing.Color.White;
-            this.globalPathButton.PressBorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(147)))), ((int)(((byte)(195)))));
-            this.globalPathButton.PressColor = System.Drawing.Color.FromArgb(((int)(((byte)(35)))), ((int)(((byte)(147)))), ((int)(((byte)(195)))));
-            this.globalPathButton.PressTextColor = System.Drawing.Color.White;
-            this.globalPathButton.Size = new System.Drawing.Size(117, 37);
-            this.globalPathButton.Style = MetroSet_UI.Enums.Style.Light;
-            this.globalPathButton.StyleManager = null;
-            this.globalPathButton.TabIndex = 12;
-            this.globalPathButton.Text = "Add Global File";
-            this.globalPathButton.ThemeAuthor = "Narwin";
-            this.globalPathButton.ThemeName = "MetroLite";
-            // 
             // metroSetTabControl1
             // 
             this.metroSetTabControl1.AnimateEasingType = MetroSet_UI.Enums.EasingType.CubeOut;
@@ -165,7 +138,6 @@ namespace App
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.globalPathButton);
             this.Controls.Add(this.openExecButton);
             this.Controls.Add(this.metroSetLabel1);
             this.Controls.Add(this.metroSetControlBox1);
@@ -176,11 +148,13 @@ namespace App
             this.Text = "Lycanite";
             this.TextColor = System.Drawing.Color.White;
             this.ThemeName = "MetroDark";
+            this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.LycaniteApplication_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.LocationChanged += new System.EventHandler(this.LycaniteApplication_LocationChanged);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.Form1_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.Form1_DragEnter);
+            this.Enter += new System.EventHandler(this.LycaniteApplication_Enter);
             this.ResumeLayout(false);
 
         }
@@ -191,7 +165,6 @@ namespace App
         private MetroSet_UI.Controls.MetroSetControlBox metroSetControlBox1;
         private MetroSet_UI.Controls.MetroSetLabel metroSetLabel1;
         private MetroSet_UI.Controls.MetroSetButton openExecButton;
-        private MetroSet_UI.Controls.MetroSetButton globalPathButton;
     }
 }
 

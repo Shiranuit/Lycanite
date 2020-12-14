@@ -44,21 +44,21 @@ namespace App {
             this.globalPathBox.ForeColor = Color.White;
 
             if (path != null) {
-                this.globalPathBox.AddItem(path);
-                pathListAuthorize.Add(path, windowsPerm);
+                this.globalPathBox.AddItem(WindowsPath);
+                this.pathListAuthorize.Add(WindowsPath, windowsPerm);
                 this.lycaniteBridge.SetGlobalFilePermissions(path, ELycanitePerm.LYCANITE_READ);
             }
-            this.Location = new Point(lycanite.Location.X + lycanite.Size.Width, lycanite.Location.Y);
+            this.Location = new Point(this.lycanite.Location.X + this.lycanite.Size.Width, this.lycanite.Location.Y);
         }
 
         public void SetBridge(LycaniteBridge bridge) {
-            lycaniteBridge = bridge;
+            this.lycaniteBridge = bridge;
         }
 
         private void ReadPermissionBox_CheckedChanged(Object sender) {
             MetroSet_UI.Controls.MetroSetCheckBox checkbox = (MetroSet_UI.Controls.MetroSetCheckBox)sender;
 
-            if (globalPathBox.SelectedText == null)
+            if (this.globalPathBox.SelectedText == null)
                 return;
             String fileName = this.globalPathBox.SelectedText;
             Dictionary<String, ELycanitePerm> dict = this.pathListAuthorize[fileName];
@@ -78,7 +78,7 @@ namespace App {
         private void WritePermissionBox_CheckedChanged(Object sender) {
             MetroSet_UI.Controls.MetroSetCheckBox checkbox = (MetroSet_UI.Controls.MetroSetCheckBox)sender;
 
-            if (globalPathBox.SelectedText == null)
+            if (this.globalPathBox.SelectedText == null)
                 return;
             String fileName = this.globalPathBox.SelectedText;
             Dictionary<String, ELycanitePerm> dict = this.pathListAuthorize[fileName];
@@ -132,7 +132,7 @@ namespace App {
         }
 
         private void RemoveGlobalPath_Click(Object sender, EventArgs e) {            
-            if (globalPathBox.SelectedText == null)
+            if (this.globalPathBox.SelectedText == null)
                 return;
 
             String fileName = this.globalPathBox.SelectedText;
@@ -150,7 +150,7 @@ namespace App {
         }
 
         private void GlobalPathBox_SelectedValueChanged(Object sender) {
-            if (globalPathBox.SelectedText == null) {
+            if (this.globalPathBox.SelectedText == null) {
                 this.readPermissionBox.Visible = false;
                 this.writePermissionBox.Visible = false;
             } else {
