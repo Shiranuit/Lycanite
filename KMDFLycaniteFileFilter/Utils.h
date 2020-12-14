@@ -85,7 +85,7 @@ PVOID Kmemset(PVOID pointer, INT8 value, SIZE_T count) {
     return (pointer);
 }
 
-PWCHAR wcharFromChar(PCHAR* str, UINT64 strlen, UINT64 *outputLen) {
+PWCHAR wcharFromChar(PCHAR str, UINT64 strlen, UINT64 *outputLen) {
 
     CANSI_STRING ansi_str;
 
