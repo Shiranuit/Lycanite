@@ -70,6 +70,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DevicePathMapper.cs" />
+    <Compile Include="GlobalPathForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GlobalPathForm.Designer.cs">
+      <DependentUpon>GlobalPathForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="LycaniteApplication.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,6 +99,9 @@
     <Compile Include="TabTemplate.Designer.cs">
       <DependentUpon>TabTemplate.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="GlobalPathForm.resx">
+      <DependentUpon>GlobalPathForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="LycaniteApplication.resx">
       <DependentUpon>LycaniteApplication.cs</DependentUpon>
     </EmbeddedResource>
