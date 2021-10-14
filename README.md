@@ -1,1 +1,3 @@
 # Lycanite
+
+Lycanite is a contenerization solution that helps preventing the execution of malicious Application by Revoking their right to read / write to files, access Network etc...
